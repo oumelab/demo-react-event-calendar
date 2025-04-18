@@ -68,7 +68,7 @@ export default function EventDetail() {
         {/* <Link to={`/events/${event.id}/apply`} className="block"> */}
           <button
             onClick={() => navigate(`/events/${event.id}/apply`)}
-            className={`${isFull ? "opacity-50 hover:opacity-50" : "hover:opacity-80"} py-4 w-full bg-sky-600 text-white rounded-xl`}
+            className={`${isFull ? "text-zinc-900 bg-zinc-300" : "text-white bg-sky-600 hover:opacity-80"} py-4 w-full rounded-xl cursor-pointer`}
             disabled={isFull}
           >
             {isFull ? "満員" : "申し込む"}

@@ -54,11 +54,12 @@ return (
               <input
                 type="email"
                 id="email"
+                placeholder="your@email.com"
                 required
                 autoComplete="email"
                 className="border border-gray-300 rounded-xl p-2 w-full"
               />
-              <button className="py-4 w-1/3 bg-sky-600 hover:opacity-80 text-white rounded-xl">
+              <button className="py-4 w-1/3 bg-sky-600 hover:opacity-80 text-white rounded-xl cursor-pointer">
                 申し込みを確定する
               </button>
             </div>

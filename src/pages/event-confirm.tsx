@@ -1,19 +1,21 @@
-import { useParams, Link } from "react-router";
+import {useParams, Link} from "react-router";
 import Card from "../components/card";
-import { EVENTS as events } from "../constants";
+import {EVENTS as events} from "../constants";
 
 export default function EventConfirm() {
-  const { id } = useParams();
+  const {id} = useParams();
   const event = events.find((e) => e.id === id);
 
   if (!event) {
     return (
-      <>
-        <p>URLのイベントが見つかりません</p>
+      <div className="w-fit mx-auto py-24 space-y-8 text-center">
+        <h3 className="text-lg font-bold text-red-600">
+          URLのイベントが見つかりません
+        </h3>
         <Link to="/" className="underline">
-          イベント一覧に戻る
+          イベント一覧に戻る
         </Link>
-      </>
+      </div>
     );
   }
 
