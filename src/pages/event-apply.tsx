@@ -9,14 +9,26 @@ export default function EventApply() {
 
   if (!event) {
     return (
-      <>
-        <p>URLのイベントが見つかりません</p>
+      <div className="w-fit mx-auto py-24 space-y-8 text-center">
+        <h3 className="text-lg font-bold text-red-600">URLのイベントが見つかりません</h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
         </Link>
-      </>
+      </div>
     );
 }
+
+if (event.capacity && event.attendees >= event.capacity) {
+  return (
+    <div className="w-fit mx-auto py-24 space-y-8 text-center">
+      <h3 className="text-lg font-bold text-red-600">このイベントはすでに定員に達しています。</h3>
+      <Link to="/" className="underline">
+        イベント一覧に戻る
+      </Link>
+    </div>
+  );
+}
+
 const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   // ここでイベント申し込み処理を行う
