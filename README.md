@@ -1,7 +1,7 @@
 ## Reactハンズオン！ 「SPA編」の学習リポジトリ
 ### 使用技術
 - React
-- Reactt Router
+- React Router
 - TypeScript
 - Tailwind CSS
 - Vite
