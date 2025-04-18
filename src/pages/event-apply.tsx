@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router";
 import Card from "../components/card";
 import { EVENTS as events } from "../constants";
 
@@ -43,6 +43,7 @@ return (
                 type="email"
                 id="email"
                 required
+                autoComplete="email"
                 className="border border-gray-300 rounded-xl p-2 w-full"
               />
               <button className="py-4 w-1/3 bg-sky-600 hover:opacity-80 text-white rounded-xl">

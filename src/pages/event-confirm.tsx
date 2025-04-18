@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router";
 import Card from "../components/card";
 import { EVENTS as events } from "../constants";
 

@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
 import {CalendarDays, MapPin, Users} from "lucide-react";
 import {type Event, EVENTS as events} from "../constants";
 import Card from "../components/card";

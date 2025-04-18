@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router";
 import { EVENTS as events } from "../constants";
 import REACT_EVENT from "../assets/react-event.jpg";
 import { CalendarDays, MapPin, Users } from "lucide-react";
