@@ -19,6 +19,17 @@ export default function EventConfirm() {
     );
   }
 
+  if (event.capacity && event.attendees >= event.capacity) {
+    return (
+      <div className="w-fit mx-auto py-24 space-y-8 text-center">
+        <h3 className="text-lg font-bold text-red-600">このイベントはすでに定員に達しています。</h3>
+        <Link to="/" className="underline">
+          イベント一覧に戻る
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
