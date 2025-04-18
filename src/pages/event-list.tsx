@@ -4,6 +4,8 @@ import {type Event, EVENTS as events} from "../constants";
 import Card from "../components/card";
 
 export default function EventList() {
+
+
   return (
     <section className="space-y-6 max-w-3xl mx-auto">
       {events.map((event: Event) => (
@@ -29,7 +31,7 @@ export default function EventList() {
               </div>
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-2 text-purple-500" />
-                <span>
+                <span className={event?.capacity && (event.attendees >= event.capacity)  ? "text-red-500" : ""}>
                   {event.attendees}
                   {event.capacity && `/${event.capacity}`}
                   人参加予定

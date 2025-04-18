@@ -1,11 +1,25 @@
-import { useParams, Link } from "react-router";
-import { EVENTS as events } from "../constants";
-import REACT_EVENT from "../assets/react-event.jpg";
 import { CalendarDays, MapPin, Users } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router";
+import DEFAULT_IMAGE from "/default.png";
 import Card from "../components/card";
+import { EVENTS as events } from "../constants";
+import { useEffect, useState } from "react";
 export default function EventDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const event = events.find((e) => e.id === id);
+  const [isFull, setIsFull] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!event) {
+      return;
+    }
+
+    if (event.capacity === event.attendees) {
+      setIsFull(true);
+    }
+
+  }, [event]);
 
   if (!event) {
     return (
@@ -22,9 +36,9 @@ export default function EventDetail() {
       <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.title}</h2>
       <p className="whitespace-pre-wrap">{event.description}</p>
       <img
-        src={REACT_EVENT}
+        src={event.imageUrl || DEFAULT_IMAGE}
         alt={event.title}
-        className="rounded-t-lg w-[660px] h-[440px]"
+        className="rounded-lg w-[660px] h-[440px]"
       />
     </Card>
     <div className="">
@@ -43,7 +57,7 @@ export default function EventDetail() {
           </div>
           <div className="flex items-center">
             <Users className="w-4 h-4 mr-2 text-purple-500" />
-            <span>
+            <span className={isFull ? "text-red-500" : ""}>
               {event.attendees}
               {event.capacity && `/${event.capacity}`}
               人参加予定
@@ -51,14 +65,15 @@ export default function EventDetail() {
           </div>
         </div>
 
-        <Link to={`/events/${event.id}/apply`} className="block">
+        {/* <Link to={`/events/${event.id}/apply`} className="block"> */}
           <button
-            // onClick={() => navigate(`/events/${event.id}/apply`)}
-            className="py-4 w-full bg-sky-600 hover:opacity-80 text-white rounded-xl"
+            onClick={() => navigate(`/events/${event.id}/apply`)}
+            className={`${isFull ? "opacity-50 hover:opacity-50" : "hover:opacity-80"} py-4 w-full bg-sky-600 text-white rounded-xl`}
+            disabled={isFull}
           >
-            申し込む
+            {isFull ? "満員" : "申し込む"}
           </button>
-        </Link>
+        {/* </Link> */}
       </Card>
     </div>
   </div>

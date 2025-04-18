@@ -26,7 +26,9 @@ export const EVENTS: Event[] = [
     date: "2024年11月21日19:00",
     location: "オンライン",
     description: "UI/UXデザインのテクニックを学ぶ",
+    imageUrl: "/uiux-design.jpg",
     attendees: 15,
+
   },
   {
     id: "3",
@@ -34,6 +36,7 @@ export const EVENTS: Event[] = [
     date: "2024年11月28日16:00",
     location: "オンライン",
     description: "Reactの基礎から応用まで学ぶ",
+    imageUrl: "/react-event.jpg",
     attendees: 5,
     capacity: 5,
   },

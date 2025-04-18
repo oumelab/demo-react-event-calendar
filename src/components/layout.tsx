@@ -1,5 +1,5 @@
 import { CalendarDays } from "lucide-react";
-import { Outlet } from "react-router";
+import { Outlet, Link } from "react-router";
 
 const TWITTER_URL = "#";
 const GITHUB_URL = "#";
@@ -14,9 +14,11 @@ export default function Layout() {
             <span className="inline-flex items-center justify-center bg-black h-20 w-20 rounded-full">
               <CalendarDays size={40} className="text-sky-300" />
             </span>
+            <Link to="/events" className="block">
             <h1 className="text-5xl font-bold mb-4 text-gray-800">
               React イベントカレンダー
             </h1>
+            </Link>
           </div>
           <p className="text-base text-gray-700">
             定期的に開催されるイベントをチェックして、学習と交流を加速させましょう。
@@ -39,7 +41,7 @@ export default function Layout() {
             <a className="text-sky-500" href={GITHUB_URL}>
               @{HANDLE_NAME}
             </a>{" "}
-            &copy; 2024
+            &copy; 2025
           </p>
         </footer>
       </div>
