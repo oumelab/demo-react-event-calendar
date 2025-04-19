@@ -50,16 +50,16 @@ return (
             <label className="block mb-2" htmlFor="email">
               参加者のメールアドレス：
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <input
                 type="email"
                 id="email"
                 placeholder="your@email.com"
                 required
                 autoComplete="email"
-                className="border border-gray-300 rounded-xl p-2 w-full"
+                className="border border-gray-300 rounded-xl py-3 md:py-2 px-3 w-full"
               />
-              <button className="py-4 w-1/3 bg-sky-600 hover:opacity-80 text-white rounded-xl cursor-pointer">
+              <button className="py-3 md:py-4 md:w-1/3 bg-sky-600 hover:opacity-80 text-white rounded-xl cursor-pointer">
                 申し込みを確定する
               </button>
             </div>

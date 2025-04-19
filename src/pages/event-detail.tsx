@@ -34,15 +34,17 @@ export default function EventDetail() {
   }
 
   return (
-    <div className="flex gap-8 max-w-5xl mx-auto">
+    <div className="flex flex-col-reverse md:flex-row gap-8 max-w-5xl mx-auto">
       <Card>
         <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.title}</h2>
         <p className="whitespace-pre-wrap">{event.description}</p>
+        <div className="rounded-lg w-full h-auto aspect-[4/3] overflow-hidden">
         <img
           src={event.imageUrl || DEFAULT_IMAGE}
           alt={event.title}
-          className="rounded-lg w-[660px] h-[440px]"
+          className="object-cover w-full h-full"
         />
+        </div>
       </Card>
       <div className="">
         <Card>
