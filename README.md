@@ -13,7 +13,7 @@
 - Vite
 - Tailwind CSS
 - React Router
-- Cloudflare Pages (deploy)
+- Cloudflare Pages (deployment)
 
 ### デモ
 [View Demo site](https://demo-react-event-calendar.pages.dev/)
