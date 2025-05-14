@@ -1,5 +1,5 @@
-// DB接続ユーティリティ
-import { createClient } from '@libsql/client';
+// DB接続ユーティリティ(Web向けクライアントのみを使用)
+import { createClient } from '@libsql/client/web';
 
 export function getDbClient(env) {
   // 本番環境（Cloudflare Pages）
@@ -10,8 +10,8 @@ export function getDbClient(env) {
     });
   }
   
-  // 開発環境（ローカルSQLite）- 相対パスに注意
+  // ローカル開発環境 - Turso CLIで起動したHTTPサーバーを使用
   return createClient({
-    url: 'file: db/local_dev.db'
+    url: 'http://localhost:8080'
   });
 }
