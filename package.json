@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@libsql/client": "^0.15.5",
     "@tailwindcss/vite": "^4.1.4",
     "lucide-react": "^0.492.0",
     "react": "^19.0.0",
