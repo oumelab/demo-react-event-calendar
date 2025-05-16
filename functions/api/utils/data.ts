@@ -6,13 +6,19 @@ export function transformEventRow(row: unknown): Event {
   }
   
   const rowObj = row as Record<string, unknown>;
+
+  // リテラルの文字列"\n"を実際の改行文字に置換
+  const description = typeof rowObj?.description === 'string'
+    ? rowObj.description.replace(/\\n/g, '\n')
+    : '';
   
   return {
     id: String(rowObj.id ?? ''),
     title: String(rowObj.title ?? ''),
     date: String(rowObj.date ?? ''),
     location: String(rowObj.location ?? ''),
-    description: rowObj.description ? String(rowObj.description) : '',
+    // description: rowObj.description ? String(rowObj.description) : '',
+    description,
     image_url: rowObj.image_url ? String(rowObj.image_url) : undefined,
     capacity: rowObj.capacity != null ? Number(rowObj.capacity) : undefined,
     created_at: rowObj.created_at != null ? Number(rowObj.created_at) : undefined

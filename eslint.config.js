@@ -5,6 +5,14 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import pluginQuery from '@tanstack/eslint-plugin-query'
 
+// Tanstack Queryプラグインのルールを直接展開するのではなく、明示的に設定
+const queryRules = {};
+if (pluginQuery.configs['flat/recommended']?.rules) {
+  Object.entries(pluginQuery.configs['flat/recommended'].rules).forEach(([key, value]) => {
+    queryRules[key] = value;
+  });
+}
+
 export default tseslint.config(
   { ignores: ['dist'] },
   {
@@ -25,7 +33,9 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      ...pluginQuery.configs['flat/recommended'],
+      // ...pluginQuery.configs['flat/recommended'],
+      // 明示的に展開したルールを使用
+      ...queryRules,
     },
   },
 )

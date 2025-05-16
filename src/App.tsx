@@ -5,9 +5,20 @@ import EventDetail from "./pages/event-detail";
 import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
 import NotFound from "./pages/not-found";
+// Tanstack Queryのデバッグツール
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  // return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />{" "}
+      {/* 開発環境のみでデバッグツールを表示 */}
+      {process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </>
+  );
 }
 
 const router = createBrowserRouter([
@@ -16,7 +27,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: () => Navigate({ to: "/events" }),
+        Component: () => Navigate({to: "/events"}),
       },
       {
         path: "events",
@@ -37,7 +48,7 @@ const router = createBrowserRouter([
       {
         path: "*",
         Component: NotFound,
-      }
+      },
     ],
   },
 ]);

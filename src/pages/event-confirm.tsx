@@ -1,16 +1,34 @@
+import {useQuery} from "@tanstack/react-query";
 import {useParams, Link} from "react-router";
 import Card from "../components/card";
-import {EVENTS as events} from "../constants";
+import {getEventById} from "@/lib/api";
 
 export default function EventConfirm() {
   const {id} = useParams();
-  const event = events.find((e) => e.id === id);
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["event", id],
+    queryFn: () => getEventById(id as string),
+    enabled: !!id,
+  });
 
-  if (!event) {
+  // ローディング状態
+  if (isLoading) {
+    return <div className="text-center py-10">イベント情報を読み込み中...</div>;
+  }
+
+  if (error) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
         <h3 className="text-lg font-bold text-red-600">
-          URLのイベントが見つかりません
+          {error instanceof Error && error.message === "Event not found"
+            ? "URLのイベントが見つかりません"
+            : `エラーが発生しました: ${
+                error instanceof Error ? error.message : String(error)
+              }`}
         </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
@@ -19,10 +37,12 @@ export default function EventConfirm() {
     );
   }
 
-  if (event.capacity && event.attendees >= event.capacity) {
+  if (event?.capacity && event.attendees >= event.capacity) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
-        <h3 className="text-lg font-bold text-red-600">このイベントはすでに定員に達しています。</h3>
+        <h3 className="text-lg font-bold text-red-600">
+          このイベントはすでに定員に達しています。
+        </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
         </Link>
@@ -38,15 +58,17 @@ export default function EventConfirm() {
         </h2>
 
         <p>当日は、下記の時間に余裕を持ってご参加ください！</p>
-        <ul className="list-disc list-inside">
-          <li>イベント名：{event.title}</li>
-          <li>開催日時：{event.date}</li>
-          <li>開催場所：{event.location}</li>
-          <li>
-            参加状況：{event.attendees}
-            {event.capacity && `/${event.capacity}`}
-          </li>
-        </ul>
+        {event && (
+          <ul className="list-disc list-inside">
+            <li>イベント名：{event.title}</li>
+            <li>開催日時：{event.date}</li>
+            <li>開催場所：{event.location}</li>
+            <li>
+              参加状況：{event.attendees}
+              {event.capacity && `/${event.capacity}`}
+            </li>
+          </ul>
+        )}
 
         <Link to="/" className="block">
           <button className="py-4 px-8 bg-sky-600 hover:opacity-80 text-white rounded-xl">
