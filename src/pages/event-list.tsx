@@ -37,7 +37,7 @@ export default function EventList() {
               <div className="font-bold text-2xl leading-none tracking-tight">
                 {event.title}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400" style={{whiteSpace: "pre-wrap"}}>
+              <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-pre-wrap">
                 {event.description}
               </div>
             </div>
