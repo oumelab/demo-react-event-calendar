@@ -1,4 +1,4 @@
-import { Event } from '../types';
+import type { Event } from '@shared/types';
 export function transformEventRow(row: unknown): Event {
   // 型ガードで安全に変換
   if (typeof row !== 'object' || row === null) {

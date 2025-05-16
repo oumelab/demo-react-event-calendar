@@ -1,4 +1,5 @@
-// データの型定義
+// フロントとバックエンドで共有する型定義
+
 export interface Event {
   id: string;
   title: string;

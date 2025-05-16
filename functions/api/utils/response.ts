@@ -1,5 +1,5 @@
 // レスポンスヘルパー関数
-export function jsonResponse(data, status = 200) {
+export function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -8,6 +8,6 @@ export function jsonResponse(data, status = 200) {
   });
 }
 
-export function errorResponse(message, status = 500) {
+export function errorResponse(message: string, status = 500) {
   return jsonResponse({ error: message }, status);
 }

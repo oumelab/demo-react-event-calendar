@@ -1,9 +1,10 @@
-// functions/api/events/[id].ts の修正版
+// 単体イベント情報+参加者数を取得
 import { getDbClient } from '../utils/db';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { transformEventRow } from '../utils/data';
+import { RequestContext } from '@shared/cloudflare-types';
 
-export async function onRequest(context) {
+export async function onRequest(context: RequestContext) {
   try {
     // URLからイベントIDを取得
     const url = new URL(context.request.url);

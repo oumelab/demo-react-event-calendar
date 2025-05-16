@@ -1,9 +1,11 @@
-// functions/api/events.ts
+// イベント情報一覧+各参加者数を取得
+
 import { getDbClient } from './utils/db';
 import { jsonResponse, errorResponse } from './utils/response';
 import { transformEventRow } from './utils/data';
+import type { RequestContext } from '@shared/cloudflare-types';
 
-export async function onRequest(context) {
+export async function onRequest(context: RequestContext) {
   try {
     const client = getDbClient(context.env);
     
