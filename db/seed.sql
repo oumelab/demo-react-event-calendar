@@ -1,3 +1,8 @@
+BEGIN TRANSACTION;
+
+DELETE FROM events;
+DELETE FROM attendees;
+
 INSERT INTO events (id, title, date, location, description, image_url, capacity) 
 VALUES 
 ('1', 'CommunityConf 2024', '2025年7月14日17:00', '東京', 'コミュニティの活動を祝う年次カンファレンス。
@@ -5,7 +10,6 @@ VALUES
 ('2', 'UI/UXデザインワークショップ', '2025年7月21日19:00', 'オンライン', 'UI/UXデザインのテクニックを学ぶ', '/uiux-design.jpg', NULL),
 ('3', 'Reactハンズオンセミナー', '2025年7月28日16:00', 'オンライン', 'Reactの基礎から応用まで学ぶ', '/react-event.jpg', 5);
 
-# 初期のイベント参加者データを挿入
 -- イベント参加者データの挿入
 INSERT INTO attendees (id, event_id, email) 
 VALUES 
@@ -56,3 +60,5 @@ VALUES
 ('c3', '3', 'react3@example.com'),
 ('c4', '3', 'react4@example.com'),
 ('c5', '3', 'react5@example.com');
+
+COMMIT;
