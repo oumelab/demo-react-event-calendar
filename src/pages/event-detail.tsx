@@ -1,30 +1,39 @@
-import {CalendarDays, MapPin, Users} from "lucide-react";
+import {useQuery} from "@tanstack/react-query";
 import {Link, useParams, useNavigate} from "react-router";
-import DEFAULT_IMAGE from "/default.png";
 import Card from "../components/card";
-import {EVENTS as events} from "../constants";
-import {useEffect, useState} from "react";
+import {CalendarDays, MapPin, Users} from "lucide-react";
+import DEFAULT_IMAGE from "/default.png";
+import {getEventById} from "@/lib/api";
+
 export default function EventDetail() {
   const {id} = useParams();
   const navigate = useNavigate();
-  const event = events.find((e) => e.id === id);
-  const [isFull, setIsFull] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!event) {
-      return;
-    }
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["event", id],
+    queryFn: () => getEventById(id as string),
+    enabled: !!id,
+  });
 
-    if (event.capacity === event.attendees) {
-      setIsFull(true);
-    }
-  }, [event]);
 
-  if (!event) {
+  // ローディング
+  if (isLoading) {
+    return <div className="text-center py-10">イベント情報を読み込み中...</div>;
+  }
+
+  if (error) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
         <h3 className="text-lg font-bold text-red-600">
-          URLのイベントが見つかりません
+          {error instanceof Error && error.message === "Event not found"
+            ? "URLのイベントが見つかりません"
+            : `エラーが発生しました: ${
+                error instanceof Error ? error.message : String(error)
+              }`}
         </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
@@ -33,21 +42,40 @@ export default function EventDetail() {
     );
   }
 
+  // 安全にdescriptionにアクセス
+  const description = event?.description || '';
+
+  // 満員状態の確認
+  // const isFull = event?.capacity && event.attendees >= event.capacity; => button disabled={isFull}でエラーになる
+  // event?.capacity は number | undefined 型を返す
+  // 論理演算子 (&&) の結果は、型システム上は必ずしも boolean 型とは限らない
+  // TypeScriptでは、論理演算子の結果は最後に評価された値の型になる可能性がある
+  // 下記もしくは const isFull = event?.capacity && event.attendees >= event.capacity ? true : false;
+  const isFull = Boolean(event?.capacity && event.attendees >= event.capacity);
+
   return (
     <div className="flex flex-col-reverse md:flex-row gap-8 max-w-5xl mx-auto">
       <Card>
-        <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.title}</h2>
-        <p className="whitespace-pre-wrap">{event.description}</p>
-        <div className="rounded-lg w-full h-auto aspect-[4/3] overflow-hidden">
-        <img
-          src={event.imageUrl || DEFAULT_IMAGE}
-          alt={event.title}
-          className="object-cover w-full h-full"
-        />
-        </div>
+        {event && (
+          <>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {event.title}
+            </h2>
+            <p className="whitespace-pre-wrap">{description}</p>
+            <div className="rounded-lg w-full h-auto aspect-[4/3] overflow-hidden">
+              <img
+                src={event.image_url || DEFAULT_IMAGE}
+                alt={event.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </>
+        )}
       </Card>
       <div className="">
         <Card>
+          {event &&
+          <>
           <h2 className="text-2xl font-bold mb-4 text-gray-800">
             イベントの詳細
           </h2>
@@ -70,7 +98,6 @@ export default function EventDetail() {
             </div>
           </div>
 
-          {/* <Link to={`/events/${event.id}/apply`} className="block"> */}
           <button
             onClick={() => navigate(`/events/${event.id}/apply`)}
             className={`${
@@ -82,7 +109,8 @@ export default function EventDetail() {
           >
             {isFull ? "満員" : "申し込む"}
           </button>
-          {/* </Link> */}
+          </>
+            }
         </Card>
       </div>
     </div>

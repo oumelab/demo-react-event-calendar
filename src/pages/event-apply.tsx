@@ -1,42 +1,64 @@
-import { useParams, useNavigate, Link } from "react-router";
+import {useQuery} from "@tanstack/react-query";
+import {useParams, useNavigate, Link} from "react-router";
 import Card from "../components/card";
-import { EVENTS as events } from "../constants";
+import {getEventById} from "@/lib/api";
 
 export default function EventApply() {
-  const { id } = useParams();
+  const {id} = useParams();
   const navigate = useNavigate();
-  const event = events.find((e) => e.id === id);
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["event", id],
+    queryFn: () => getEventById(id as string),
+    enabled: !!id,
+  });
 
-  if (!event) {
+  // ローディング状態
+  if (isLoading) {
+    return <div className="text-center py-10">イベント情報を読み込み中...</div>;
+  }
+
+  if (error) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
-        <h3 className="text-lg font-bold text-red-600">URLのイベントが見つかりません</h3>
+        <h3 className="text-lg font-bold text-red-600">
+          {error instanceof Error && error.message === "Event not found"
+            ? "URLのイベントが見つかりません"
+            : `エラーが発生しました: ${
+                error instanceof Error ? error.message : String(error)
+              }`}
+        </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
         </Link>
       </div>
     );
-}
+  }
 
-if (event.capacity && event.attendees >= event.capacity) {
+  if (event?.capacity && event.attendees >= event.capacity) {
+    return (
+      <div className="w-fit mx-auto py-24 space-y-8 text-center">
+        <h3 className="text-lg font-bold text-red-600">
+          このイベントはすでに定員に達しています。
+        </h3>
+        <Link to="/" className="underline">
+          イベント一覧に戻る
+        </Link>
+      </div>
+    );
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // ここでイベント申し込み処理を行う
+    alert("（テスト）確認メールを送信しました!");
+    navigate(`/events/${event?.id}/confirm`);
+  };
   return (
-    <div className="w-fit mx-auto py-24 space-y-8 text-center">
-      <h3 className="text-lg font-bold text-red-600">このイベントはすでに定員に達しています。</h3>
-      <Link to="/" className="underline">
-        イベント一覧に戻る
-      </Link>
-    </div>
-  );
-}
-
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  // ここでイベント申し込み処理を行う
-  alert("（テスト）確認メールを送信しました!");
-  navigate(`/events/${event?.id}/confirm`);
-};
-return (
-  <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <Card>
         <Link to="/">
           <p className="text-sky-700 underline text-lg">イベント一覧</p>
@@ -71,8 +93,9 @@ return (
 
         <hr />
         <h2 className="text-2xl font-bold mb-4 text-gray-800">👀 確認事項</h2>
+        {event && (
         <ul className="list-disc list-inside">
-          <li>イベント名：{event.title}</li>
+          <li>イベント名：{event.title}</li>
           <li>開催日時：{event.date}</li>
           <li>開催場所：{event.location}</li>
           <li>
@@ -80,7 +103,8 @@ return (
             {event.capacity && `/${event.capacity}`}
           </li>
         </ul>
+        )}
       </Card>
     </div>
-);
-};
+  );
+}

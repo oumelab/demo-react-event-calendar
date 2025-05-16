@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# DB
+*.db
+*.db-journal
+
+# locall env
+*.dev.vars
