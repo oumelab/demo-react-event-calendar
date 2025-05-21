@@ -23,15 +23,18 @@ React Router によるクライアントサイドルーティングを実践し�
 - [x] 参加者が満員の場合、参加できないようにする
 - [x] イベントと参加者情報をデータベースに保存（GETのみ実装）[#1](https://github.com/oumelab/demo-react-event-calendar/issues/1)
 - [x] フロントエンドとバックエンドで型定義を共有
+
+### 今後の実装予定
 - [ ] ユーザー認証機能の実装 [#3](https://github.com/oumelab/demo-react-event-calendar/issues/3)
 - [ ] イベント情報管理のCRUD機能の実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
 - [ ] イベント申し込み機能の実装 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [ ] イベント参加者管理機能の実装 [#6](https://github.com/oumelab/demo-react-event-calendar/issues/6)
+- [ ] UI/UXの最適化とリファクタリング [#7](https://github.com/oumelab/demo-react-event-calendar/issues/7)
 
 ### 使用技術
 - フロントエンド: Vite, React, React Router, Tailwind CSS, TanStack Query
 - バックエンド: Cloudflare Pages Functions
-- データベース: Turso
+- データベース: Turso (Local: SQLite)
 - デプロイ: Cloudflare Pages
 
 ### デモ
