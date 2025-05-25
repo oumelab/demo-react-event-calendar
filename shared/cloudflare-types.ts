@@ -5,7 +5,7 @@ export interface Env {
   TURSO_DB_AUTH_TOKEN?: string;
   
   // 認証関連（新規追加）
-  AUTH_SECRET?: string;
+  BETTER_AUTH_SECRET?: string;
   
   // 環境設定（既存）
   ENVIRONMENT?: string;
