@@ -124,7 +124,7 @@ export interface ApiResponse<T = unknown> {
 export type EventListResponse = ApiResponse<EventWithAttendees[]>;
 export type EventDetailResponse = ApiResponse<EventWithAttendees>;
 export type RegistrationResponse = ApiResponse<Attendee>;
-export type UserListResponse = ApiResponse<User[]>;
+// export type UserListResponse = ApiResponse<User[]>;
 
 // ========== 型ガード関数 ==========
 // null チェックを先に行い、その後に型安全にプロパティをチェック
