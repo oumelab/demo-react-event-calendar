@@ -1,7 +1,9 @@
+// functions/api/utils/db.ts
 // DB接続ユーティリティ(Web向けクライアントのみを使用)
 import { createClient } from '@libsql/client/web';
 import { LibsqlDialect } from "@libsql/kysely-libsql";
 import { betterAuth } from "better-auth";
+import { createId } from "@paralleldrive/cuid2";
 import type { Env } from '@shared/cloudflare-types';
 
 // 既存のイベントAPI用クライアント
@@ -28,9 +30,13 @@ export function getLibsqlDialect(env: Env) {
   });
 }
 
-// Better Auth インスタンス生成（Runtime用）
+// Better Auth インスタンス生成（Runtime用）- デフォルトクッキー使用版
 export function createAuthForRuntime(env: Env) {
   const dialect = getLibsqlDialect(env);
+  
+  // 環境判定：ローカル開発環境かどうか
+  const isLocalDevelopment = env.ENVIRONMENT === 'development' || 
+                            !env.TURSO_DB_URL?.includes('.turso.io');
   
   return betterAuth({
     database: {
@@ -46,7 +52,26 @@ export function createAuthForRuntime(env: Env) {
     },
     
     session: {
-      expiresIn: 60 * 60 * 24 * 7,
+      expiresIn: 604800, // 7日（秒）
+      updateAge: 86400,  // 1日（秒）
+      cookieCache: {
+        enabled: true,    // セッションクッキーキャッシュを有効
+        maxAge: 300       // 5分
+      },
+      storeSessionInDatabase: true, // データベースにセッション保存
+    },
+    
+    // 環境に応じた設定（クッキー設定は削除してデフォルト使用）
+    advanced: {
+      crossSubDomainCookies: {
+        enabled: false, // 単一ドメイン用
+      },
+      useSecureCookies: !isLocalDevelopment, // 本番環境では自動的にtrue
+      disableCSRFCheck: false,
+      // cookies 設定を削除してBetter Authのデフォルトを使用
+      database: {
+        generateId: () => createId(), // CUID2でID生成
+      },
     },
   });
 }
