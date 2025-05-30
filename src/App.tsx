@@ -4,6 +4,9 @@ import EventList from "./pages/event-list";
 import EventDetail from "./pages/event-detail";
 import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
@@ -39,11 +42,27 @@ const router = createBrowserRouter([
       },
       {
         path: "events/:id/apply",
-        Component: EventApply,
+        Component: () => (
+          <ProtectedRoute>
+            <EventApply />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "events/:id/confirm",
-        Component: EventConfirm,
+        Component: () => (
+          <ProtectedRoute>
+            <EventConfirm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "login",
+        Component: LoginPage,
+      },
+      {
+        path: "register",
+        Component: RegisterPage,
       },
       {
         path: "*",

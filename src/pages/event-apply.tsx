@@ -58,7 +58,7 @@ export default function EventApply() {
     navigate(`/events/${event?.id}/confirm`);
   };
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto">
       <Card>
         <Link to="/">
           <p className="text-sky-700 underline text-lg">イベント一覧</p>

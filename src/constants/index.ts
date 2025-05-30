@@ -1,3 +1,9 @@
+export const UserInfo = {
+  TWITTER_URL:"#",
+  GITHUB_URL: "#",
+  HANDLE_NAME: "your-handle",
+}
+
 export interface Event {
   id: string;
   title: string;
