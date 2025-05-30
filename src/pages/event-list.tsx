@@ -4,6 +4,7 @@ import { EventWithAttendees } from "@shared/types";
 import Card from "../components/card";
 import {useQuery} from "@tanstack/react-query";
 import {getEvents} from "@/lib/api";
+import Hero from "@/components/hero";
 
 export default function EventList() {
   const {
@@ -29,7 +30,8 @@ export default function EventList() {
   }
 
   return (
-    <section className="space-y-6 max-w-3xl mx-auto">
+    <>
+      <Hero />
       {events?.map((event: EventWithAttendees) => (
         <Card key={event.id} hoverShadow>
           <Link to={`/events/${event.id}`} className="space-y-12">
@@ -69,6 +71,6 @@ export default function EventList() {
           </Link>
         </Card>
       ))}
-    </section>
+    </>
   );
 }

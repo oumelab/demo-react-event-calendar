@@ -1,23 +1,26 @@
-import { Outlet } from "react-router";
+import {Outlet} from "react-router";
 import Header from "./header";
 import Footer from "./footer";
+import {UserInfo} from "@/constants";
 
-const TWITTER_URL = "#";
-const GITHUB_URL = "#";
-const HANDLE_NAME = "your-handle";
 export default function Layout() {
   return (
     <>
-      <div className="container mx-auto py-16 space-y-8 min-h-screen px-4 md:px-0">
+      <div className="container mx-auto pb-16 space-y-8 min-h-screen px-4 md:px-0">
         {/* Header */}
-        <Header twitterUrl={TWITTER_URL} />
+        <Header />
 
-        {/* Page Content */}
-        <Outlet />
+        <section className="space-y-6 max-w-4xl mx-auto">
+          {/* Page Content */}
+          <Outlet />
+        </section>
 
         {/* Footer */}
-        <Footer githubUrl={GITHUB_URL} handleName={HANDLE_NAME} />
+        <Footer
+          githubUrl={UserInfo.GITHUB_URL}
+          handleName={UserInfo.HANDLE_NAME}
+        />
       </div>
     </>
   );
-};
+}
