@@ -4,6 +4,8 @@ import EventList from "./pages/event-list";
 import EventDetail from "./pages/event-detail";
 import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
@@ -44,6 +46,14 @@ const router = createBrowserRouter([
       {
         path: "events/:id/confirm",
         Component: EventConfirm,
+      },
+      {
+        path: "login",
+        Component: LoginPage,
+      },
+      {
+        path: "register",
+        Component: RegisterPage,
       },
       {
         path: "*",
