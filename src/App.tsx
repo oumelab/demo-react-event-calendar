@@ -4,12 +4,11 @@ import EventList from "./pages/event-list";
 import EventDetail from "./pages/event-detail";
 import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import AuthPage from "./pages/AuthPage";
 
 export default function App() {
   // return <RouterProvider router={router} />;
@@ -58,11 +57,11 @@ const router = createBrowserRouter([
       },
       {
         path: "login",
-        Component: LoginPage,
+        Component: AuthPage,
       },
       {
         path: "register",
-        Component: RegisterPage,
+        Component: AuthPage,
       },
       {
         path: "*",
