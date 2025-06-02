@@ -1,11 +1,10 @@
 import type { AuthContextType, LoginCredentials, RegisterCredentials, Session, User } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { getSession, queryKeys, signIn, signOut, signUp } from '../lib/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Context をエクスポート
 export { AuthContext };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -13,16 +12,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
-  // セッション確認クエリ
+  // セッション確認クエリ（キャッシュ設定を改善）
   const {
     data: sessionData,
     isLoading,
   } = useQuery({
     queryKey: queryKeys.session,
     queryFn: getSession,
-    retry: false, // 認証エラーの場合はリトライしない
+    retry: false,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    // 🆕 追加: キャッシュ設定の改善
+    staleTime: 30 * 60 * 1000,    // 30分
+    gcTime: 60 * 60 * 1000,       // 1時間
   });
 
   // セッションデータが更新されたら状態を同期
@@ -36,73 +38,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [sessionData]);
 
-  // ログインミューテーション
+  // ログインミューテーション（キャッシュ更新方法を改善）
   const loginMutation = useMutation({
     mutationFn: signIn,
     onSuccess: (data) => {
       if (data.success && data.authenticated && data.user) {
         setUser(data.user);
         setSession(data.session || null);
-        // セッションクエリを無効化して再フェッチ
-        queryClient.invalidateQueries({ queryKey: queryKeys.session });
+        // 🆕 改善: invalidateQueries の代わりに setQueryData を使用
+        queryClient.setQueryData(queryKeys.session, data);
       } else {
         throw new Error(data.error || 'ログインに失敗しました');
       }
     },
   });
 
-  // 新規登録ミューテーション
+  // 新規登録ミューテーション（同様に改善）
   const registerMutation = useMutation({
     mutationFn: signUp,
     onSuccess: (data) => {
       if (data.success && data.authenticated && data.user) {
         setUser(data.user);
         setSession(data.session || null);
-        // セッションクエリを無効化して再フェッチ
-        queryClient.invalidateQueries({ queryKey: queryKeys.session });
+        // 🆕 改善: invalidateQueries の代わりに setQueryData を使用
+        queryClient.setQueryData(queryKeys.session, data);
       } else {
         throw new Error(data.error || 'アカウント作成に失敗しました');
       }
     },
   });
 
-  // ログアウトミューテーション
+  // ログアウトミューテーション（変更なし）
   const logoutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: () => {
       setUser(null);
       setSession(null);
-      // 全てのクエリキャッシュをクリア
       queryClient.clear();
     },
     onError: () => {
-      // エラーが発生してもログアウト状態にする
       setUser(null);
       setSession(null);
       queryClient.clear();
     },
   });
 
-  const isAuthenticated = Boolean(user && sessionData?.authenticated);
+  // 🆕 改善: isAuthenticated の計算をuseMemoで最適化
+  const isAuthenticated = useMemo(() => {
+    return Boolean(user && sessionData?.authenticated);
+  }, [user, sessionData?.authenticated]);
 
-  // ラップされた関数
-  const login = async (credentials: LoginCredentials) => {
+  // 🆕 改善: 関数をuseCallbackでメモ化（パフォーマンス向上）
+  const login = useCallback(async (credentials: LoginCredentials) => {
     return loginMutation.mutateAsync(credentials);
-  };
+  }, [loginMutation]);
 
-  const register = async (credentials: RegisterCredentials) => {
+  const register = useCallback(async (credentials: RegisterCredentials) => {
     return registerMutation.mutateAsync(credentials);
-  };
+  }, [registerMutation]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     return logoutMutation.mutateAsync();
-  };
+  }, [logoutMutation]);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.session });
-  };
+  }, [queryClient]);
 
-  const value: AuthContextType = {
+  // 🆕 改善: value オブジェクトもuseMemoで最適化
+  const value = useMemo<AuthContextType>(() => ({
     user,
     session,
     isAuthenticated,
@@ -111,7 +115,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     refreshUser,
-  };
+  }), [
+    user,
+    session,
+    isAuthenticated,
+    isLoading,
+    loginMutation.isPending,
+    registerMutation.isPending,
+    login,
+    register,
+    logout,
+    refreshUser,
+  ]);
 
   return (
     <AuthContext.Provider value={value}>
@@ -119,5 +134,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-// useAuth フックを別ファイルに分離するため、ここでは削除

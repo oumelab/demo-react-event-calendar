@@ -172,6 +172,8 @@ export default function AuthPage() {
               {linkDescription}{' '}
               <Link
                 to={linkPath}
+                //location.state を次のページに引き継ぐ
+                state={location.state}
                 className="text-sky-600 hover:text-sky-700 font-medium"
               >
                 {linkText}
