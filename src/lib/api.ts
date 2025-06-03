@@ -27,7 +27,7 @@ const fetchWithCredentials = async (url: string, options: RequestInit = {}) => {
   return response;
 };
 
-// ========== イベント関連API（既存） ==========
+// ========== イベント関連API ==========
 
 // イベント一覧の情報+参加者数を取得
 export async function getEvents(): Promise<EventWithAttendees[]> {
@@ -41,7 +41,7 @@ export async function getEventById(id: string): Promise<EventWithAttendees> {
   return response.json();
 }
 
-// ========== 認証関連API（新規） ==========
+// ========== 認証関連API ==========
 
 // ログイン
 export async function signIn(credentials: LoginCredentials): Promise<AuthResponse> {

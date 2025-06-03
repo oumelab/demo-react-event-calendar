@@ -35,20 +35,6 @@ export async function onRequest(context: RequestContext) {
       };
     });
     
-    //  // 参加者数をマッピング - TypeScript の Mapを使用
-    // const attendeesMap = new Map<string, number>();
-    // for (const row of attendeesResult.rows) {
-    //   attendeesMap.set(String(row.event_id), Number(row.count));
-    // }
-    
-    // // イベントデータと参加者数を結合 - TypeScript の Mapを使用
-    // const events = eventsResult.rows.map(event => {
-    //   return {
-    //     ...event,
-    //     attendees: attendeesMap.get(String(event.id)) || 0
-    //   };
-    // });
-    
     return jsonResponse(events);
   } catch (error) {
     console.error('Error fetching events:', error);

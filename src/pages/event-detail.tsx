@@ -48,11 +48,6 @@ export default function EventDetail() {
   const description = event?.description || "";
 
   // 満員状態の確認
-  // const isFull = event?.capacity && event.attendees >= event.capacity; => button disabled={isFull}でエラーになる
-  // event?.capacity は number | undefined 型を返す
-  // 論理演算子 (&&) の結果は、型システム上は必ずしも boolean 型とは限らない
-  // TypeScriptでは、論理演算子の結果は最後に評価された値の型になる可能性がある
-  // 下記もしくは const isFull = event?.capacity && event.attendees >= event.capacity ? true : false;
   const isFull = Boolean(event?.capacity && event.attendees >= event.capacity);
 
   // 申し込みボタンの表示制御
@@ -149,17 +144,7 @@ export default function EventDetail() {
               </div>
 
               {renderActionButton()}
-              {/* <button
-            onClick={() => navigate(`/events/${event.id}/apply`)}
-            className={`${
-              isFull
-                ? "text-zinc-900 bg-zinc-300 cursor-not-allowed"
-                : "text-white bg-sky-600 hover:opacity-80 cursor-pointer"
-            } py-4 w-full rounded-xl`}
-            disabled={isFull}
-          >
-            {isFull ? "満員" : "申し込む"}
-          </button> */}
+              
             </>
           )}
         </Card>
