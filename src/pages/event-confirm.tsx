@@ -1,10 +1,25 @@
+import { useEffect } from "react";
 import {useQuery} from "@tanstack/react-query";
-import {useParams, Link} from "react-router";
+import {useParams, Link, useLocation, useNavigate} from "react-router";
 import Card from "../components/card";
 import {getEventById} from "@/lib/api";
 
 export default function EventConfirm() {
   const {id} = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // 🆕 申し込み完了状態のチェック(不正アクセス防止)
+  useEffect(() => {
+    // location.state に申し込み完了フラグがない場合は不正アクセス
+    const isValidAccess = location.state?.fromApplication === true;
+    
+    if (!isValidAccess) {
+      // 不正アクセスの場合はイベント詳細ページにリダイレクト
+      navigate(`/events/${id}`, { replace: true });
+    }
+  }, [id, location.state, navigate]);
+
   const {
     data: event,
     isLoading,

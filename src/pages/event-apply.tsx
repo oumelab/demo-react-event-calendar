@@ -55,7 +55,12 @@ export default function EventApply() {
     e.preventDefault();
     // ここでイベント申し込み処理を行う
     alert("（テスト）確認メールを送信しました!");
-    navigate(`/events/${event?.id}/confirm`);
+
+    // 🆕 申し込み完了フラグを付けて完了ページに遷移(不正アクセス防止)
+    navigate(`/events/${event?.id}/confirm`, {
+      state: {fromApplication: true}, // 正当な申し込み経由であることを示すフラグ
+      replace: true,
+    });
   };
   return (
     <div className="mx-auto">
@@ -94,15 +99,15 @@ export default function EventApply() {
         <hr />
         <h2 className="text-2xl font-bold mb-4 text-gray-800">👀 確認事項</h2>
         {event && (
-        <ul className="list-disc list-inside">
-          <li>イベント名：{event.title}</li>
-          <li>開催日時：{event.date}</li>
-          <li>開催場所：{event.location}</li>
-          <li>
-            参加状況：{event.attendees}
-            {event.capacity && `/${event.capacity}`}
-          </li>
-        </ul>
+          <ul className="list-disc list-inside">
+            <li>イベント名：{event.title}</li>
+            <li>開催日時：{event.date}</li>
+            <li>開催場所：{event.location}</li>
+            <li>
+              参加状況：{event.attendees}
+              {event.capacity && `/${event.capacity}`}
+            </li>
+          </ul>
         )}
       </Card>
     </div>
