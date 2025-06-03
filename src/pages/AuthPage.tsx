@@ -27,14 +27,21 @@ export default function AuthPage() {
   });
   const [error, setError] = useState<string>("");
 
-   // 🆕 認証済みユーザーのリダイレクト
+  // 🔧 修正：ProtectedRouteから来た場合と直接アクセスを区別
   useEffect(() => {
     if (isAuthenticated) {
-      // 認証済みの場合はイベント一覧にリダイレクト
-      // 将来的にマイページが完成したら /profile に変更予定
-      navigate('/events', { replace: true });
+      // ProtectedRouteからのリダイレクトかどうかを確認
+      const hasRedirectTarget = location.state?.from?.pathname;
+
+      if (hasRedirectTarget) {
+        // ProtectedRouteから来た場合：元のページに戻る
+        redirectAfterAuth();
+      } else {
+        // 直接ログインページにアクセスした場合：イベント一覧へ
+        navigate("/events", {replace: true});
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.state, redirectAfterAuth]);
 
   // 動的なテキスト
   const title = isLogin ? "ログイン" : "新規登録";
@@ -74,8 +81,6 @@ export default function AuthPage() {
         };
         await register(registerCredentials);
       }
-
-      redirectAfterAuth(); // 改善されたリダイレクト
     } catch (err) {
       setError(
         err instanceof Error
