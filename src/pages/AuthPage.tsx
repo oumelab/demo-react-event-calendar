@@ -1,5 +1,5 @@
-import {useState} from "react";
-import {Link, useLocation} from "react-router";
+import {useEffect, useState} from "react";
+import {Link, useLocation, useNavigate} from "react-router";
 import {useAuth} from "@/hooks/useAuth";
 import {useAuthRedirect} from "@/hooks/useAuthRedirect";
 import Card from "../components/card";
@@ -13,7 +13,8 @@ interface AuthFormData {
 
 export default function AuthPage() {
   const location = useLocation();
-  const {login, register, isLoading} = useAuth();
+  const navigate = useNavigate();
+  const {login, register, isLoading, isAuthenticated} = useAuth();
   const {redirectAfterAuth} = useAuthRedirect();
 
   const isLogin = location.pathname === "/login";
@@ -25,6 +26,15 @@ export default function AuthPage() {
     name: "",
   });
   const [error, setError] = useState<string>("");
+
+   // 🆕 認証済みユーザーのリダイレクト
+  useEffect(() => {
+    if (isAuthenticated) {
+      // 認証済みの場合はイベント一覧にリダイレクト
+      // 将来的にマイページが完成したら /profile に変更予定
+      navigate('/events', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // 動的なテキスト
   const title = isLogin ? "ログイン" : "新規登録";
@@ -84,6 +94,11 @@ export default function AuthPage() {
       [name]: value,
     }));
   };
+
+  // 🆕 ローディング中または認証済みの場合は何も表示しない
+  if (isLoading || isAuthenticated) {
+    return <div className="text-center py-10">読み込み中...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto py-8">
