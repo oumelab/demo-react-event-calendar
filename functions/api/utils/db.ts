@@ -55,8 +55,9 @@ export function createAuthForRuntime(env: Env) {
       expiresIn: 604800, // 7日（秒）
       updateAge: 86400,  // 1日（秒）
       cookieCache: {
-        enabled: true,    // セッションクッキーキャッシュを有効
-        maxAge: 300       // 5分
+        enabled: false, // Cookieサイズ警告解決
+        // enabled: true,    // セッションクッキーキャッシュを有効
+        // maxAge: 300       // 5分
       },
       storeSessionInDatabase: true, // データベースにセッション保存
     },
