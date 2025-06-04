@@ -6,7 +6,7 @@ import {UserInfo} from "@/constants";
 export default function Layout() {
   return (
     <>
-      <div className="container mx-auto pb-16 space-y-8 min-h-screen px-4 md:px-0">
+      <div className="container mx-auto pb-16 space-y-8 min-h-screen px-4">
         {/* Header */}
         <Header />
 
