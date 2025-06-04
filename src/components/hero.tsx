@@ -1,22 +1,18 @@
-import { CalendarDays } from "lucide-react";
-import { Link } from "react-router";
 import { UserInfo } from "@/constants";
+import { Link } from "react-router";
 
 export default function Hero() {
   return (
     <div className="space-y-6 py-12">
-      <div className="flex sm:items-center md:items-baseline gap-6 justify-center w-fit mx-auto">
-        <span className="grid place-content-center bg-black size-20 rounded-full">
-          <CalendarDays size={40} className="text-sky-300" />
-        </span>
-        <Link to="/events" className="block flex-1">
-          <h1 className="text-left md:text-center text-4xl md:text-5xl font-bold mb-4 text-gray-800 leading-snug">
-            React イベントカレンダー
+      <div className="w-fit mx-auto mb-8">
+        <Link to="/events">
+          <h1 className="text-center text-4xl md:text-5xl font-bold text-gray-800 leading-snug">
+            React イベント<span className="inline-block">カレンダー</span>
           </h1>
         </Link>
       </div>
 
-      <p className="text-left md:text-center text-base text-gray-700">
+      <p className="text-left md:text-center text-base leading-loose text-gray-700">
         定期的に開催されるイベントをチェックして、学習と交流を加速させましょう。
         <br />
         最新情報を受け取りたい場合は、ぜひフォローしてください。
