@@ -56,8 +56,9 @@ export function createAuthForRuntime(env: Env) {
       updateAge: 86400,  // 1日（秒）
       cookieCache: {
         enabled: true,    // セッションクッキーキャッシュを有効
-        maxAge: 300       // 5分
+        maxAge: 300       // 5分（セッション情報更新）
       },
+      // freshAge: 60 * 60 * 24, // デフォルトで1日
       storeSessionInDatabase: true, // データベースにセッション保存
     },
     
@@ -68,7 +69,6 @@ export function createAuthForRuntime(env: Env) {
       },
       useSecureCookies: !isLocalDevelopment, // 本番環境では自動的にtrue
       disableCSRFCheck: false,
-      // cookies 設定を削除してBetter Authのデフォルトを使用
       database: {
         generateId: () => createId(), // CUID2でID生成
       },
