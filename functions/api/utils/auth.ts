@@ -1,4 +1,6 @@
 // functions/api/utils/auth.ts
+import { createAuthForRuntime } from './db';
+import type { Env } from '../../../shared/cloudflare-types';
 import type { User, Session, Attendee, AttendeeWithUser } from '../../../shared/types';
 
 // User型への変換（既存のtransformEventRowパターンを踏襲）
@@ -199,4 +201,29 @@ export function validatePassword(password: string): {
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+// getCurrentUser関数（新規追加）
+export async function getCurrentUser(request: Request, env: Env): Promise<User | null> {
+  try {
+    // 実際のRuntime用Better Authインスタンスを使用
+    const auth = createAuthForRuntime(env);
+    
+    // Better Authのセッション検証を使用
+    const sessionResult = await auth.api.getSession({
+      headers: request.headers,
+      asResponse: false, // オブジェクトとして取得
+    });
+
+    if (!sessionResult || !sessionResult.user) {
+      return null;
+    }
+
+    // Better Authの結果を安全にUser型に変換
+    return extractUserFromAuthResult({ user: sessionResult.user });
+    
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
 }

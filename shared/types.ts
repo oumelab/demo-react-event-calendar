@@ -10,14 +10,14 @@ export interface Event {
   image_url?: string;
   capacity?: number;
   created_at?: number;
-  creator_id?: string; // 認証実装後に追加
+  creator_id?: string | null; // イベント管理用に追加、null も許可
 }
 
 export interface EventWithAttendees extends Event {
   attendees: number;
 }
 
-// 認証関連の型定義（新規追加）
+// 認証関連の型定義
 export interface User {
   id: string;
   email: string;
@@ -57,7 +57,7 @@ export interface RegisterCredentials {
   name: string;
 }
 
-// AuthContextType の定義（追加）
+// AuthContextType の定義
 export interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -79,9 +79,44 @@ export interface Attendee {
   event_id: string;
   email: string;
   created_at: number;
-  user_id?: string; // 認証実装後に追加
+  user_id?: string; // オプショナルで Issue #5 に備える
 }
 
 export interface AttendeeWithUser extends Attendee {
   user?: User;
+}
+
+// イベント管理API用の型定義
+export interface CreateEventRequest {
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  image_url?: string;
+  capacity?: number;
+}
+
+// UpdateEventRequestは明示的に個別フィールドを定義
+export interface UpdateEventRequest {
+  title?: string;
+  date?: string;
+  location?: string;
+  description?: string;
+  image_url?: string;
+  capacity?: number;
+}
+
+// EventWithCreatorは既存のEventWithAttendeesを拡張
+export interface EventWithCreator extends EventWithAttendees {
+  creator_name?: string;
+  creator_email?: string;
+}
+
+// API操作結果の型
+export interface EventOperationResponse {
+  success: boolean;
+  message: string;
+  eventId?: string;
+  event?: Event;
+  error?: string;
 }
