@@ -21,6 +21,7 @@ export function transformEventRow(row: unknown): Event {
     description,
     image_url: rowObj.image_url ? String(rowObj.image_url) : undefined,
     capacity: rowObj.capacity != null ? Number(rowObj.capacity) : undefined,
+    creator_id: rowObj.creator_id ? String(rowObj.creator_id) : null, //  creator_id の処理、undefined → null に変更
     created_at: rowObj.created_at != null ? Number(rowObj.created_at) : undefined
   };
 }
