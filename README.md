@@ -24,9 +24,9 @@ React Router によるクライアントサイドルーティングを実践し�
 - [x] イベントと参加者情報をデータベースに保存（GETのみ実装）[#1](https://github.com/oumelab/demo-react-event-calendar/issues/1)
 - [x] フロントエンドとバックエンドで型定義を共有
 - [x] ユーザー認証機能の実装 [#3](https://github.com/oumelab/demo-react-event-calendar/issues/3)
+- [x] イベント情報管理のCRUD機能APIの実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
 
 ### 今後の実装予定
-- [ ] イベント情報管理のCRUD機能の実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
 - [ ] イベント申し込み機能の実装 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [ ] イベント参加者管理機能の実装 [#6](https://github.com/oumelab/demo-react-event-calendar/issues/6)
 - [ ] UI/UXの最適化とリファクタリング [#7](https://github.com/oumelab/demo-react-event-calendar/issues/7)
