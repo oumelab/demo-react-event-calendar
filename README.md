@@ -27,8 +27,11 @@ React Router によるクライアントサイドルーティングを実践し�
 - [x] イベント情報管理のCRUD機能APIの実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
 
 ### 今後の実装予定
+- [ ] React Hook Form + Zod 導入 [#16](https://github.com/oumelab/demo-react-event-calendar/issues/16)
+- [ ] イベント管理フォーム実装 [#17](https://github.com/oumelab/demo-react-event-calendar/issues/17)
 - [ ] イベント申し込み機能の実装 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [ ] イベント参加者管理機能の実装 [#6](https://github.com/oumelab/demo-react-event-calendar/issues/6)
+- [ ] 画像アップロード機能実装 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 - [ ] UI/UXの最適化とリファクタリング [#7](https://github.com/oumelab/demo-react-event-calendar/issues/7)
 
 ### 使用技術
