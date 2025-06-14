@@ -29,3 +29,9 @@ dist-ssr
 
 # locall env
 *.dev.vars
+
+# Wrangler 関連の一時ファイル
+.wrangler/
+wrangler.toml
+functions/.wrangler/
+functions/**/.wrangler/
