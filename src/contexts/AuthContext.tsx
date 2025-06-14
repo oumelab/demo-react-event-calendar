@@ -2,6 +2,7 @@ import type { AuthContextType, LoginCredentials, RegisterCredentials, Session, U
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { createContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { getSession, queryKeys, signIn, signOut, signUp } from '../lib/api';
+import { toast } from 'sonner';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -75,11 +76,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       queryClient.clear();
+      toast.success('ログアウトしました');
     },
     onError: () => {
       setUser(null);
       setSession(null);
       queryClient.clear();
+      toast.error('ログアウトに失敗しました');
     },
   });
 
