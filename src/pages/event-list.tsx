@@ -1,10 +1,9 @@
-import {Link} from "react-router";
-import {CalendarDays, MapPin, Users} from "lucide-react";
+import { getEvents } from "@/lib/api";
 import { EventWithAttendees } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarDays, MapPin, Users } from "lucide-react";
+import { Link } from "react-router";
 import Card from "../components/card";
-import {useQuery} from "@tanstack/react-query";
-import {getEvents} from "@/lib/api";
-import Hero from "@/components/hero";
 
 export default function EventList() {
   const {
@@ -31,7 +30,7 @@ export default function EventList() {
 
   return (
     <>
-      <Hero />
+      <h2 id="new-events" className="scroll-mt-6 text-lg font-medium">新着イベント</h2>
       {events?.map((event: EventWithAttendees) => (
         <Card key={event.id} hoverShadow>
           <Link to={`/events/${event.id}`} className="space-y-12">
