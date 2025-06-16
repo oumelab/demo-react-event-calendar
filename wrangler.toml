@@ -1,5 +1,0 @@
-# Cloudflare Pages configuration
-name = "demo-react-event-calendar"
-
-# Note: Pages Functions do not support Cron Triggers
-# Alternative solution will be implemented
