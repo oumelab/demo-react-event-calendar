@@ -1,6 +1,5 @@
 # Cloudflare Pages configuration
 name = "demo-react-event-calendar"
-pages_build_output_dir = "./dist"
 
 # Cron Triggers for cold start prevention
 # Every minute warmup
