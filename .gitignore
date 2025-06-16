@@ -32,6 +32,5 @@ dist-ssr
 
 # Wrangler 関連の一時ファイル
 .wrangler/
-wrangler.toml
 functions/.wrangler/
 functions/**/.wrangler/
