@@ -1,6 +1,5 @@
 # Cloudflare Pages configuration
 name = "demo-react-event-calendar"
-pages_build_output_dir = "./dist"
 
 # Note: Pages Functions do not support Cron Triggers
 # Alternative solution will be implemented
