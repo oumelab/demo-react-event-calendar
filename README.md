@@ -25,9 +25,9 @@ React Router によるクライアントサイドルーティングを実践し�
 - [x] フロントエンドとバックエンドで型定義を共有
 - [x] ユーザー認証機能の実装 [#3](https://github.com/oumelab/demo-react-event-calendar/issues/3)
 - [x] イベント情報管理のCRUD機能APIの実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
+- [x] React Hook Form + Zod 導入 [#16](https://github.com/oumelab/demo-react-event-calendar/issues/16)
 
 ### 今後の実装予定
-- [ ] React Hook Form + Zod 導入 [#16](https://github.com/oumelab/demo-react-event-calendar/issues/16)
 - [ ] イベント管理フォーム実装 [#17](https://github.com/oumelab/demo-react-event-calendar/issues/17)
 - [ ] イベント申し込み機能の実装 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [ ] イベント参加者管理機能の実装 [#6](https://github.com/oumelab/demo-react-event-calendar/issues/6)
@@ -35,9 +35,9 @@ React Router によるクライアントサイドルーティングを実践し�
 - [ ] UI/UXの最適化とリファクタリング [#7](https://github.com/oumelab/demo-react-event-calendar/issues/7)
 
 ### 使用技術
-- フロントエンド: Vite, React, React Router, Tailwind CSS, TanStack Query
+- フロントエンド: Vite, React, React Router, Tailwind CSS, shadcn/ui, TanStack Query
 - バックエンド: Cloudflare Pages Functions
-- データベース: Turso (Local: SQLite)
+- データベース: Turso
 - 認証： Better Auth
 - デプロイ: Cloudflare Pages
 
