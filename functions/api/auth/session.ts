@@ -55,10 +55,21 @@ export async function onRequest(context: RequestContext) {
       });
     }
 
-    // Better Auth が失敗した場合のフォールバック（直接DB確認）
+    // Better Auth が失敗した場合の環境別処理
+    const isProduction = context.env.ENVIRONMENT !== "development";
+
+    if (isProduction) {
+      conditionalLog(
+        context.env,
+        "⚡ Production: Skipping fallback DB check for performance"
+      );
+      return unauthenticatedResponse("認証されていません");
+    }
+
+    // 既存のフォールバック処理（開発環境のみ実行）
     conditionalLog(
       context.env,
-      "⚠️ Better Auth session not found, falling back to direct DB check"
+      "⚠️ Development: Falling back to direct DB check"
     );
 
     const cookieHeader = context.request.headers.get("Cookie");
