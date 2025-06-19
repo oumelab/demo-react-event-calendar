@@ -37,6 +37,14 @@ export function createAuthForRuntime(env: Env) {
   // 環境判定：ローカル開発環境かどうか
   const isLocalDevelopment = env.ENVIRONMENT === 'development' || 
                             !env.TURSO_DB_URL?.includes('.turso.io');
+
+  // ✅ デバッグ用ログ追加
+  console.log('🔍 Environment debug:', {
+    ENVIRONMENT: env.ENVIRONMENT,
+    hasTursoUrl: !!env.TURSO_DB_URL,
+    includesTurso: env.TURSO_DB_URL?.includes('.turso.io'),
+    isLocalDevelopment,
+  });
   
   return betterAuth({
     database: {
@@ -55,7 +63,7 @@ export function createAuthForRuntime(env: Env) {
       expiresIn: 604800, // 7日（秒）
       updateAge: 86400,  // 1日（秒）
       cookieCache: {
-        enabled: true,    // セッションクッキーキャッシュを有効
+        enabled: false, // すべての環境で無効
         maxAge: 300       // 5分（セッション情報更新）
       },
       // freshAge: 60 * 60 * 24, // デフォルトで1日

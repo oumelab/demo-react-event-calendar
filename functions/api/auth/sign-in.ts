@@ -6,6 +6,7 @@ import {APIError} from "better-auth/api";
 import type {RequestContext} from "@shared/cloudflare-types";
 import type {LoginCredentials} from "@shared/types";
 import {transformBetterAuthUser} from "../utils/auth-data";
+import {conditionalLog, conditionalError} from "../utils/logger";
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== "POST") {
@@ -18,7 +19,7 @@ export async function onRequest(context: RequestContext) {
     // 型安全にボディを取得
     const body = (await context.request.json()) as LoginCredentials;
 
-    console.log("Login attempt for:", body.email);
+    conditionalLog(context.env, "Login attempt for:", body.email);
 
     // バリデーション
     if (!body.email || !body.password) {
@@ -30,7 +31,10 @@ export async function onRequest(context: RequestContext) {
     }
 
     // Better Auth のサインイン（レスポンスヘッダーも取得）
-    console.log("Attempting Better Auth signInEmail with returnHeaders...");
+    conditionalLog(
+      context.env,
+      "Attempting Better Auth signInEmail with returnHeaders..."
+    );
 
     const result = await auth.api.signInEmail({
       body: {
@@ -41,7 +45,7 @@ export async function onRequest(context: RequestContext) {
       returnHeaders: true, // ← これが重要！
     });
 
-    console.log("Better Auth signInEmail result:", {
+    conditionalLog(context.env, "Better Auth signInEmail result:", {
       hasResponse: !!result.response,
       hasUser: !!result.response?.user,
       userEmail: result.response?.user?.email,
@@ -57,16 +61,6 @@ export async function onRequest(context: RequestContext) {
       );
     }
 
-    // ユーザー情報を安全に変換
-    // const user = {
-    //   id: result.response.user.id,
-    //   email: result.response.user.email,
-    //   emailVerified: result.response.user.emailVerified,
-    //   name: result.response.user.name || null,
-    //   image: result.response.user.image || null,
-    //   createdAt: new Date(result.response.user.createdAt),
-    //   updatedAt: new Date(result.response.user.updatedAt),
-    // };
     // 🆕 統一関数使用（1行）
     const user = transformBetterAuthUser(result.response.user);
 
@@ -74,7 +68,7 @@ export async function onRequest(context: RequestContext) {
     // （後でセッション確認APIで取得される）
     const session = undefined;
 
-    console.log("Extracted data:", {
+    conditionalLog(context.env, "Extracted data:", {
       hasUser: !!user,
       hasSession: !!session,
       token: result.response.token?.substring(0, 10) + "...",
@@ -92,18 +86,22 @@ export async function onRequest(context: RequestContext) {
     if (result.headers) {
       const setCookieHeader = result.headers.get("set-cookie");
       if (setCookieHeader) {
-        console.log("Setting cookies from Better Auth:", setCookieHeader);
+        conditionalLog(
+          context.env,
+          "Setting cookies from Better Auth:",
+          setCookieHeader
+        );
         response.headers.set("Set-Cookie", setCookieHeader);
       }
     }
 
     return response;
   } catch (error) {
-    console.error("Sign in error:", error);
+    conditionalError(context.env, "Sign in error:", error);
 
     // APIError の詳細なハンドリング
     if (error instanceof APIError) {
-      console.log("APIError details:", {
+      conditionalLog(context.env, "APIError details:", {
         status: error.status,
         statusCode: error.statusCode,
         message: error.message,

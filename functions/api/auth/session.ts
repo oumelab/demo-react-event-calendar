@@ -8,6 +8,7 @@ import {
 import {APIError} from "better-auth/api";
 import type {RequestContext} from "@shared/cloudflare-types";
 import {transformBetterAuthUser} from "../utils/auth-data";
+import {conditionalLog, conditionalError} from "../utils/logger";
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== "GET") {
@@ -17,7 +18,7 @@ export async function onRequest(context: RequestContext) {
   try {
     const auth = createAuthForRuntime(context.env);
 
-    console.log("=== Better Auth Session Check (Enhanced) ===");
+    conditionalLog(context.env, "=== Better Auth Session Check (Enhanced) ===");
 
     // Better Auth のgetSessionを改善された方法で呼び出し
     const sessionResult = await auth.api.getSession({
@@ -25,7 +26,7 @@ export async function onRequest(context: RequestContext) {
       asResponse: false, // オブジェクトとして取得
     });
 
-    console.log("Better Auth getSession result:", {
+    conditionalLog(context.env, "Better Auth getSession result:", {
       hasUser: !!sessionResult?.user,
       hasSession: !!sessionResult?.session,
       userEmail: sessionResult?.user?.email,
@@ -34,17 +35,7 @@ export async function onRequest(context: RequestContext) {
 
     // Better Auth でセッションが取得できた場合
     if (sessionResult?.session && sessionResult?.user) {
-      console.log("✅ Better Auth session found!");
-
-      // const user = {
-      //   id: sessionResult.user.id,
-      //   email: sessionResult.user.email,
-      //   emailVerified: sessionResult.user.emailVerified,
-      //   name: sessionResult.user.name || null,
-      //   image: sessionResult.user.image || null,
-      //   createdAt: new Date(sessionResult.user.createdAt),
-      //   updatedAt: new Date(sessionResult.user.updatedAt),
-      // };
+      conditionalLog(context.env, "✅ Better Auth session found!");
 
       // ✅：統一関数使用（1行）
       const user = transformBetterAuthUser(sessionResult.user);
@@ -65,7 +56,8 @@ export async function onRequest(context: RequestContext) {
     }
 
     // Better Auth が失敗した場合のフォールバック（直接DB確認）
-    console.log(
+    conditionalLog(
+      context.env,
       "⚠️ Better Auth session not found, falling back to direct DB check"
     );
 
@@ -87,7 +79,7 @@ export async function onRequest(context: RequestContext) {
     }
 
     // 直接データベースでセッション確認
-    console.log("=== Direct DB Session Check (Fallback) ===");
+    conditionalLog(context.env, "=== Direct DB Session Check (Fallback) ===");
     const dbClient = getDbClient(context.env);
     const dbSessionResult = await dbClient.execute({
       sql: `SELECT 
@@ -102,17 +94,7 @@ export async function onRequest(context: RequestContext) {
 
     if (dbSessionResult.rows.length > 0) {
       const row = dbSessionResult.rows[0];
-      console.log("✅ Session found in DB (fallback)");
-
-      // const user = {
-      //   id: String(row.user_id),
-      //   email: String(row.email),
-      //   emailVerified: Boolean(row.emailVerified),
-      //   name: row.name ? String(row.name) : null,
-      //   image: row.image ? String(row.image) : null,
-      //   createdAt: new Date(row.user_createdAt as string),
-      //   updatedAt: new Date(row.user_updatedAt as string),
-      // };
+      conditionalLog(context.env, "✅ Session found in DB (fallback)");
 
       // 🆕：統一関数使用（1行）
       const user = transformBetterAuthUser({
@@ -141,14 +123,14 @@ export async function onRequest(context: RequestContext) {
     }
 
     // どちらの方法でもセッションが見つからない場合
-    console.log("❌ No session found");
+    conditionalLog(context.env, "❌ No session found");
     return unauthenticatedResponse("セッションが無効です");
   } catch (error) {
-    console.error("Session check error:", error);
+    conditionalError(context.env, "Session check error:", error);
 
     // APIError の詳細ログ
     if (error instanceof APIError) {
-      console.log("APIError in getSession:", {
+      conditionalLog(context.env, "APIError in getSession:", {
         status: error.status,
         statusCode: error.statusCode,
         message: error.message,
