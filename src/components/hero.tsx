@@ -1,11 +1,14 @@
 // src/components/Hero.tsx
-import {Link, useLocation} from "react-router";
-import {useAuth} from "../hooks/useAuth";
-import {CalendarDays, Users, Zap} from "lucide-react";
+import { useAuthStore } from "@/stores/auth-store";
+import { CalendarDays, Users, Zap } from "lucide-react";
+import { Link, useLocation } from "react-router";
 
 export default function Hero() {
-  const {isAuthenticated} = useAuth();
+   const { user } = useAuthStore();
   const location = useLocation();
+
+  // 認証状態の判定（Zustand版）
+  const isAuthenticated = !!user;
 
   // イベント一覧ページ（トップページ）でのみ表示
   const shouldShowHero =
