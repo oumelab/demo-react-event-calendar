@@ -1,21 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { User } from '@shared/types';
+import type { LoginCredentials, RegisterCredentials, User } from '@shared/types';
 import { toast } from 'sonner';
 
 // 既存のAPI関数をインポート（プロジェクトの実装に合わせて調整）
 // import { signIn, signUp, signOut, getSession } from '@/lib/api';
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-}
 
 interface AuthState {
   // 状態
@@ -23,8 +12,8 @@ interface AuthState {
   isLoading: boolean;
   
   // アクション
-  login: (data: LoginData) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (data: LoginCredentials) => Promise<void>;
+  register: (data: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
   checkSession: () => Promise<void>;
   clearUser: () => void;
@@ -39,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: true,
       
       // ログイン
-      login: async (data: LoginData) => {
+      login: async (data: LoginCredentials) => {
         // 二重ログイン防止
         const currentState = get();
         if (currentState.isLoading) {
@@ -73,7 +62,7 @@ export const useAuthStore = create<AuthState>()(
       },
       
       // 新規登録
-      register: async (data: RegisterData) => {
+      register: async (data: RegisterCredentials) => {
         try {
           set({ isLoading: true });
           
