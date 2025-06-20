@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { User } from '@shared/types';
+import { toast } from 'sonner';
 
 // 既存のAPI関数をインポート（プロジェクトの実装に合わせて調整）
 // import { signIn, signUp, signOut, getSession } from '@/lib/api';
@@ -63,6 +64,8 @@ export const useAuthStore = create<AuthState>()(
 
           const result = await response.json();
           set({ user: result.user, isLoading: false });
+          // 成功通知
+          toast.success('ログインしました');
         } catch (error) {
           set({ isLoading: false });
           throw error; // フォーム側でエラーハンドリング
@@ -87,6 +90,9 @@ export const useAuthStore = create<AuthState>()(
 
           const result = await response.json();
           set({ user: result.user, isLoading: false });
+
+          // 成功通知
+          toast.success('アカウントを作成しました');
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -103,6 +109,9 @@ export const useAuthStore = create<AuthState>()(
           });
           
           set({ user: null, isLoading: false });
+
+          // 成功通知
+          toast.success('ログアウトしました');
         } catch (error) {
           // ログアウトエラーでも状態はクリア
           set({ user: null, isLoading: false });

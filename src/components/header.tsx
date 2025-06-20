@@ -1,16 +1,20 @@
 import {CalendarDays} from "lucide-react";
 import {Link} from "react-router";
-import {useAuth} from "../hooks/useAuth";
+import {useAuthStore} from "@/stores/auth-store";
 import UserMenu from "./UserMenu";
 
 export default function Header() {
-  const {user, isAuthenticated, isLoading, logout} = useAuth();
+  const {user, isLoading, logout} = useAuthStore();
+  // 認証状態の判定（Zustand版）
+  const isAuthenticated = !!user;
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
       console.error("Logout failed:", error);
+      // エラー通知のみここで実行（ストアでは成功通知のみ）
+      // エラー処理はUIレイヤーで行う
     }
   };
 

@@ -9,9 +9,17 @@ import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import AuthPage from "./pages/AuthPage";
+import { useAuthStore } from "./stores/auth-store";
+import { useEffect } from "react";
 
 export default function App() {
-  // return <RouterProvider router={router} />;
+  const { checkSession } = useAuthStore();
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
+
   return (
     <>
       <RouterProvider router={router} />{" "}
