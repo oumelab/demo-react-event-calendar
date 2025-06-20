@@ -57,18 +57,6 @@ export interface RegisterCredentials {
   name: string;
 }
 
-// AuthContextType の定義
-export interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<AuthResponse>;
-  register: (credentials: RegisterCredentials) => Promise<AuthResponse>;
-  logout: () => Promise<AuthResponse>;
-  refreshUser: () => Promise<void>;
-}
-
 // 既存のSignInRequest/SignUpRequestはエイリアスとして保持
 export type SignInRequest = LoginCredentials;
 export type SignUpRequest = RegisterCredentials;
