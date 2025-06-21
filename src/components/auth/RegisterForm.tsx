@@ -1,7 +1,6 @@
 // src/components/auth/RegisterForm.tsx
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthMutations } from "@/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { registerSchema, type RegisterFormData } from "../../lib/auth-schemas";
 import { Button } from "../ui/button";
@@ -21,8 +20,7 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({onSuccess}: RegisterFormProps) {
-  const [error, setError] = useState<string>("");
-  const {register: registerUser} = useAuthStore();
+  const { register, isRegistering} = useAuthMutations();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -35,24 +33,20 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
 
   const handleSubmit = async (data: RegisterFormData) => {
     try {
-      setError(""); // エラークリア
-      await registerUser(data);
-      // 成功通知は auth-store で実行
+      await register(data);
       onSuccess();
     } catch (error) {
-      // エラーはフォーム内に表示
-      const message =
-        error instanceof Error ? error.message : "アカウント作成に失敗しました";
-      setError(message);
+      const message = error instanceof Error ? error.message : 'アカウント作成に失敗しました';
+      form.setError('root', { type: 'manual', message });
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {error && (
+        {form.formState.errors.root && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
+            <p className="text-red-800 text-sm">{form.formState.errors.root.message}</p>
           </div>
         )}
         <FormField
@@ -130,7 +124,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
           }`}
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "処理中..." : "アカウント作成"}
+          {isRegistering ? "処理中..." : "アカウント作成"}
         </Button>
       </form>
     </Form>

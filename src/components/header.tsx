@@ -2,11 +2,18 @@ import {CalendarDays} from "lucide-react";
 import {Link} from "react-router";
 import {useAuthStore} from "@/stores/auth-store";
 import UserMenu from "./UserMenu";
+import {useAuthMutations, useSessionQuery} from "@/hooks/useAuth";
 
 export default function Header() {
-  const {user, isLoading, logout} = useAuthStore();
-  // 認証状態の判定（Zustand版）
-  const isAuthenticated = !!user;
+  const {isLoading} = useSessionQuery();
+  const {logout} = useAuthMutations();
+  // const {user, isAuthenticated} = useAuthStore((state) => ({
+  //   user: state.user,
+  //   isAuthenticated: !!state.user,
+  // }));
+  // 状態を一つずつ、別々に取得する
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => !!state.user);
 
   const handleLogout = async () => {
     try {

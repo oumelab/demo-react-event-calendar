@@ -8,6 +8,7 @@ export default function Layout() {
   return (
     <>
       <div className="container mx-auto pb-16 min-h-screen px-4">
+        
         {/* Header */}
         <Header />
 

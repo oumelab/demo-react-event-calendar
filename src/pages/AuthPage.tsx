@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSessionQuery } from '@/hooks/useAuth';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { AuthForm } from '../components/auth/AuthForm';
 import Card from '../components/card';
@@ -9,11 +10,9 @@ import Card from '../components/card';
 export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isLoading } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => !!state.user);
+  const { isLoading } = useSessionQuery();
   const { redirectAfterAuth } = useAuthRedirect();
-
-  // 認証状態の判定（Zustand版）
-  const isAuthenticated = !!user;
   
   // URLパスによってモードを切り替え
   const isLogin = location.pathname === '/login';

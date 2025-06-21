@@ -5,13 +5,14 @@ import { useAuthStore } from "@/stores/auth-store";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
+import { useSessionQuery } from "@/hooks/useAuth";
 
 export default function EventDetail() {
   const {id} = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const {user, isLoading: authLoading} = useAuthStore();
-  const isAuthenticated = !!user;
+  const isAuthenticated = useAuthStore((state) => !!state.user);
+ const {isLoading: authLoading} = useSessionQuery();
 
   const {
     data: event,

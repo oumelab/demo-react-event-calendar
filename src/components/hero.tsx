@@ -4,11 +4,8 @@ import { CalendarDays, Users, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 export default function Hero() {
-   const { user } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => !!state.user);
   const location = useLocation();
-
-  // 認証状態の判定（Zustand版）
-  const isAuthenticated = !!user;
 
   // イベント一覧ページ（トップページ）でのみ表示
   const shouldShowHero =
