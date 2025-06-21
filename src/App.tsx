@@ -1,19 +1,20 @@
 import {createBrowserRouter, Navigate, RouterProvider} from "react-router";
 import Layout from "./components/layout";
-import EventList from "./pages/event-list";
-import EventDetail from "./pages/event-detail";
+import ProtectedRoute from "./components/ProtectedRoute";
 import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
-import ProtectedRoute from "./components/ProtectedRoute";
+import EventDetail from "./pages/event-detail";
+import EventList from "./pages/event-list";
 import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import {AuthSyncer} from "./components/auth/AuthSyncer";
 import AuthPage from "./pages/AuthPage";
 
 export default function App() {
-  // return <RouterProvider router={router} />;
   return (
     <>
+      <AuthSyncer />
       <RouterProvider router={router} />{" "}
       {/* 開発環境のみでデバッグツールを表示 */}
       {process.env.NODE_ENV === "development" && (

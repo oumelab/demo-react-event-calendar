@@ -1,16 +1,18 @@
-import {useQuery} from "@tanstack/react-query";
-import {Link, useParams, useNavigate, useLocation} from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { getEventById } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
+import { CalendarDays, MapPin, Users } from "lucide-react";
 import Card from "../components/card";
-import {CalendarDays, MapPin, Users} from "lucide-react";
 import DEFAULT_IMAGE from "/default.png";
-import {getEventById} from "@/lib/api";
-import {useAuth} from "../hooks/useAuth";
+import { useSessionQuery } from "@/hooks/useAuth";
 
 export default function EventDetail() {
   const {id} = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const {isAuthenticated, isLoading: authLoading} = useAuth();
+  const isAuthenticated = useAuthStore((state) => !!state.user);
+ const {isLoading: authLoading} = useSessionQuery();
 
   const {
     data: event,
@@ -72,14 +74,14 @@ export default function EventDetail() {
           <div className="flex gap-2">
             <Link
               to="/login"
-              state={{ from: { pathname: location.pathname } }}
+              state={{from: {pathname: location.pathname}}}
               className="flex-1 py-3 text-center bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-colors"
             >
               ログイン
             </Link>
             <Link
               to="/register"
-              state={{ from: { pathname: location.pathname } }}
+              state={{from: {pathname: location.pathname}}}
               className="flex-1 py-3 text-center border border-sky-600 text-sky-600 rounded-xl hover:bg-sky-50 transition-colors"
             >
               新規登録
@@ -144,7 +146,6 @@ export default function EventDetail() {
               </div>
 
               {renderActionButton()}
-              
             </>
           )}
         </Card>

@@ -1,5 +1,6 @@
+import { useAuthStore } from '@/stores/auth-store';
+import { useSessionQuery } from '@/hooks/useAuth';
 import { Navigate, useLocation } from 'react-router';
-import { useAuth } from '../hooks/useAuth';
 
 // 認証保護コンポーネント
 
@@ -8,7 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const isAuthenticated = useAuthStore((state) => !!state.user);
+  const { isLoading } = useSessionQuery();
   const location = useLocation();
 
   // ローディング中は待機

@@ -1,7 +1,8 @@
 // src/pages/AuthPage.tsx
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthStore } from '@/stores/auth-store';
+import { useSessionQuery } from '@/hooks/useAuth';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { AuthForm } from '../components/auth/AuthForm';
 import Card from '../components/card';
@@ -9,7 +10,8 @@ import Card from '../components/card';
 export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const isAuthenticated = useAuthStore((state) => !!state.user);
+  const { isLoading } = useSessionQuery();
   const { redirectAfterAuth } = useAuthRedirect();
   
   // URLパスによってモードを切り替え

@@ -37,7 +37,9 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.4",
-    "zod": "^3.25.63"
+    "wrangler": "^4.20.5",
+    "zod": "^3.25.63",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250515.0",
