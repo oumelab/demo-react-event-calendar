@@ -31,12 +31,35 @@ export const RegisterSchema = baseAuthSchema.extend({
 
 // 🆕 イベントスキーマ（新規作成）
 export const CreateEventSchema = z.object({
-  title: z.string().trim().min(1, 'タイトルは必須です').max(100, 'タイトルは100文字以内で入力してください'),
-  date: z.string().min(1, '開催日時は必須です'),
-  location: z.string().min(1, '開催場所は必須です').max(100, '開催場所は100文字以内で入力してください'),
-  description: z.string().max(1000, '説明は1000文字以内で入力してください').optional(),
-  image_url: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
-  capacity: z.number().int('定員は整数で入力してください').min(1, '定員は1人以上で設定してください').optional(),
+  title: z
+    .string({ required_error: "タイトルは必須です" })
+    .trim()
+    .min(1, 'タイトルは必須です')
+    .max(100, 'タイトルは100文字以内で入力してください'),
+  date: z
+    .string({ required_error: "開催日時は必須です" })
+    .min(1, '開催日時は必須です'),
+  location: z
+    .string({ required_error: "開催場所は必須です" })
+    .min(1, '開催場所は必須です')
+    .max(100, '開催場所は100文字以内で入力してください'),
+  description: z
+    .string()
+    .max(1000, '説明は1000文字以内で入力してください')
+    .optional(),
+  image_url: z
+    .string()
+    .url('有効なURLを入力してください')
+    .optional()
+    .or(z.literal('')),
+  capacity: z
+    .number({ 
+      required_error: "定員は数値で入力してください",
+      invalid_type_error: "定員は数値で入力してください" 
+    })
+    .int('定員は整数で入力してください')
+    .min(1, '定員は1人以上で設定してください')
+    .optional(),
 });
 
 export const UpdateEventSchema = CreateEventSchema.partial();
