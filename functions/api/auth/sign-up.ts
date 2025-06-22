@@ -2,9 +2,9 @@
 import {createAuthForRuntime} from "../utils/db";
 import {authSuccessResponse, authErrorResponse} from "../utils/response";
 import { validateRequest, isValidationError } from "../utils/validation";
-import { RegisterSchema } from "@shared/schemas";
+import { RegisterSchema } from "../../../shared/schemas";
 import {APIError} from "better-auth/api";
-import type {RequestContext} from "@shared/cloudflare-types";
+import type {RequestContext} from "../../../shared/cloudflare-types";
 import {transformBetterAuthUser} from "../utils/auth-data";
 import {conditionalLog, conditionalError} from "../utils/logger";
 

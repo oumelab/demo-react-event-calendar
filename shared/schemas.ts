@@ -4,11 +4,11 @@ import { z } from 'zod';
 // 共通フィールドのスキーマ
 const baseAuthSchema = z.object({
   email: z
-    .string()
+    .string({ required_error: "メールアドレスは必須です" })
     .min(1, "メールアドレスは必須です")
     .email("有効なメールアドレスを入力してください"),
   password: z
-    .string()
+    .string({ required_error: "パスワードは必須です" })
     .min(8, "パスワードは8文字以上で入力してください")
     .max(128, "パスワードは128文字以内で入力してください"),
 });
@@ -16,14 +16,14 @@ const baseAuthSchema = z.object({
 // ログインスキーマ（既存 loginSchema の移行）
 export const LoginSchema = baseAuthSchema.extend({
   password: z
-    .string()
+    .string({ required_error: "パスワードは必須です" })
     .min(1, "パスワードは必須です"), // ログイン時は既存パスワードなので文字数チェック不要
 });
 
 // 新規登録スキーマ（既存 registerSchema の移行）
 export const RegisterSchema = baseAuthSchema.extend({
   name: z
-    .string()
+    .string({ required_error: "お名前は必須です" })
     .trim()
     .min(1, "お名前は必須です")
     .max(20, "お名前は20文字以内で入力してください"), // Cookie警告解決済み
