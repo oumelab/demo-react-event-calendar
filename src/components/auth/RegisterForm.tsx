@@ -2,7 +2,7 @@
 import { useAuthMutations } from "@/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { registerSchema, type RegisterFormData } from "../../lib/auth-schemas";
+import { RegisterSchema, type RegisterFormData } from "@shared/schemas";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -23,7 +23,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
   const { register, isRegistering} = useAuthMutations();
 
   const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       name: "",
       email: "",

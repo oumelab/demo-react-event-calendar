@@ -1,10 +1,10 @@
 // functions/api/auth/sign-in.ts (Better Auth対応版)
 import {createAuthForRuntime} from "../utils/db";
 import {authSuccessResponse, authErrorResponse} from "../utils/response";
-import {validateEmail} from "../utils/auth";
+import { validateRequest, isValidationError } from "../utils/validation";
+import { LoginSchema } from "../../../shared/schemas";
 import {APIError} from "better-auth/api";
-import type {RequestContext} from "@shared/cloudflare-types";
-import type {LoginCredentials} from "@shared/types";
+import type {RequestContext} from "../../../shared/cloudflare-types";
 import {transformBetterAuthUser} from "../utils/auth-data";
 import {conditionalLog, conditionalError} from "../utils/logger";
 
@@ -16,19 +16,18 @@ export async function onRequest(context: RequestContext) {
   try {
     const auth = createAuthForRuntime(context.env);
 
-    // 型安全にボディを取得
-    const body = (await context.request.json()) as LoginCredentials;
+    // リクエストボディを取得
+    const body = (await context.request.json());
 
-    conditionalLog(context.env, "Login attempt for:", body.email);
-
-    // バリデーション
-    if (!body.email || !body.password) {
-      return authErrorResponse("メールアドレスとパスワードは必須です", 400);
+    // 🆕 Zodバリデーション使用
+    const validatedData = validateRequest(LoginSchema, body);
+    if (isValidationError(validatedData)) {
+      return validatedData; // バリデーションエラーレスポンスをそのまま返す
     }
 
-    if (!validateEmail(body.email)) {
-      return authErrorResponse("有効なメールアドレスを入力してください", 400);
-    }
+    const { email, password } = validatedData;
+
+    conditionalLog(context.env, "Login attempt for:", email);
 
     // Better Auth のサインイン（レスポンスヘッダーも取得）
     conditionalLog(
@@ -38,8 +37,8 @@ export async function onRequest(context: RequestContext) {
 
     const result = await auth.api.signInEmail({
       body: {
-        email: body.email,
-        password: body.password,
+        email,
+        password,
       },
       headers: context.request.headers,
       returnHeaders: true, // ← これが重要！

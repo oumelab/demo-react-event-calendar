@@ -1,9 +1,9 @@
 import { getDbClient } from '../utils/db';
 import { getCurrentUser } from '../utils/auth';
-import { validateEventData } from '../utils/event-validation';
+import { validateRequest, isValidationError } from '../utils/validation';
+import { CreateEventSchema } from '../../../shared/schemas';
 import { jsonResponse, errorResponse } from '../utils/response';
-import type { RequestContext } from '@shared/cloudflare-types';
-import type { CreateEventRequest } from '@shared/types';
+import type { RequestContext } from '../../../shared/cloudflare-types';
 import { createId } from '@paralleldrive/cuid2';
 
 export async function onRequest(context: RequestContext) {
@@ -18,13 +18,16 @@ export async function onRequest(context: RequestContext) {
       return errorResponse('認証が必要です', 401);
     }
 
-    const body: CreateEventRequest = await context.request.json();
+    // リクエストボディを取得
+    const body = await context.request.json();
     
-    // バリデーション
-    const validationErrors = validateEventData(body);
-    if (validationErrors.length > 0) {
-      return errorResponse(validationErrors.join(', '), 400);
+    // 🆕 Zodバリデーション使用
+    const validatedData = validateRequest(CreateEventSchema, body);
+    if (isValidationError(validatedData)) {
+      return validatedData; // バリデーションエラーレスポンスをそのまま返す
     }
+
+    const { title, date, location, description, image_url, capacity } = validatedData;
 
     const client = getDbClient(context.env);
     const eventId = createId();
@@ -35,12 +38,12 @@ export async function onRequest(context: RequestContext) {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         eventId,
-        body.title,
-        body.date,
-        body.location,
-        body.description || '',
-        body.image_url || null,
-        body.capacity || null,
+        title,
+        date,
+        location,
+        description || '',
+        image_url || null,
+        capacity || null,
         user.id
       ]
     });
@@ -50,7 +53,12 @@ export async function onRequest(context: RequestContext) {
       eventId,
       event: {
         id: eventId,
-        ...body,
+        title,
+        date,
+        location,
+        description: description || '',
+        image_url: image_url || undefined,
+        capacity: capacity || undefined,
         creator_id: user.id,
         attendees: 0,
         created_at: Math.floor(Date.now() / 1000)

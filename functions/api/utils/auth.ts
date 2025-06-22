@@ -27,32 +27,6 @@ export async function getCurrentUser(request: Request, env: Env): Promise<User |
   }
 }
 
-// バリデーション関数（ビジネスロジック）
-export function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-export function validatePassword(password: string): {
-  isValid: boolean;
-  errors: string[];
-} {
-  const errors: string[] = [];
-  
-  if (password.length < 8) {
-    errors.push('パスワードは8文字以上である必要があります');
-  }
-  
-  if (password.length > 128) {
-    errors.push('パスワードは128文字以下である必要があります');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
-}
-
 // ユーティリティ関数
 export function isValidUser(user: unknown): user is User {
   if (typeof user !== 'object' || user === null) {

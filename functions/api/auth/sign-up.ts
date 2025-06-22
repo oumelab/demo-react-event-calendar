@@ -1,10 +1,10 @@
 // functions/api/auth/sign-up.ts (Better Auth対応版)
 import {createAuthForRuntime} from "../utils/db";
 import {authSuccessResponse, authErrorResponse} from "../utils/response";
-import {validateEmail, validatePassword} from "../utils/auth";
+import { validateRequest, isValidationError } from "../utils/validation";
+import { RegisterSchema } from "../../../shared/schemas";
 import {APIError} from "better-auth/api";
-import type {RequestContext} from "@shared/cloudflare-types";
-import type {RegisterCredentials} from "@shared/types";
+import type {RequestContext} from "../../../shared/cloudflare-types";
 import {transformBetterAuthUser} from "../utils/auth-data";
 import {conditionalLog, conditionalError} from "../utils/logger";
 
@@ -16,27 +16,20 @@ export async function onRequest(context: RequestContext) {
   try {
     const auth = createAuthForRuntime(context.env);
 
-    // 型安全にボディを取得
-    const body = (await context.request.json()) as RegisterCredentials;
+    // リクエストボディを取得
+    const body = (await context.request.json());
 
-    conditionalLog(context.env, "Registration attempt for:", body.email);
-
-    // バリデーション
-    if (!body.email || !body.password || !body.name) {
-      return authErrorResponse(
-        "メールアドレス、パスワード、名前は必須です",
-        400
-      );
+    
+    // 🆕 Zodバリデーション使用
+    const validatedData = validateRequest(RegisterSchema, body);
+    if (isValidationError(validatedData)) {
+      return validatedData; // バリデーションエラーレスポンスをそのまま返す
     }
-
-    if (!validateEmail(body.email)) {
-      return authErrorResponse("有効なメールアドレスを入力してください", 400);
-    }
-
-    const passwordValidation = validatePassword(body.password);
-    if (!passwordValidation.isValid) {
-      return authErrorResponse(passwordValidation.errors.join(", "), 400);
-    }
+    
+    const { email, password, name } = validatedData;
+    
+    conditionalLog(context.env, "Registration attempt for:", email);
+    
 
     conditionalLog(
       context.env,
@@ -45,9 +38,9 @@ export async function onRequest(context: RequestContext) {
 
     const result = await auth.api.signUpEmail({
       body: {
-        email: body.email,
-        password: body.password,
-        name: body.name,
+        email,
+        password,
+        name,
       },
       headers: context.request.headers,
       returnHeaders: true, // ← これが重要！
