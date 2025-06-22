@@ -2,7 +2,7 @@
 import { useAuthMutations } from '@/hooks/useAuth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { loginSchema, type LoginFormData } from '../../lib/auth-schemas';
+import { LoginSchema, type LoginFormData } from '@shared/schemas';
 import { Button } from '../ui/button';
 import {
   Form,
@@ -23,7 +23,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login, isLoggingIn } = useAuthMutations();
   
   const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',
