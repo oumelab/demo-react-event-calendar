@@ -26,16 +26,16 @@ React Router によるクライアントサイドルーティングを実践し�
 - [x] ユーザー認証機能の実装 [#3](https://github.com/oumelab/demo-react-event-calendar/issues/3)
 - [x] イベント情報管理のCRUD機能APIの実装 [#4](https://github.com/oumelab/demo-react-event-calendar/issues/4)
 - [x] React Hook Form + Zod 導入 [#16](https://github.com/oumelab/demo-react-event-calendar/issues/16)
+- [x] Zustand導入 [#29](https://github.com/oumelab/demo-react-event-calendar/issues/29)
 
 ### 今後の実装予定
-- [ ] Zustand導入 [#29](https://github.com/oumelab/demo-react-event-calendar/issues/29)
 - [ ] イベント管理フォーム実装 [#17](https://github.com/oumelab/demo-react-event-calendar/issues/17)
 - [ ] イベント申し込み機能の実装 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [ ] イベント申し込みキャンセル機能 [#28](https://github.com/oumelab/demo-react-event-calendar/issues/28)
 - [ ] 画像アップロード機能実装 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 
 ### 使用技術
-- フロントエンド: Vite, React, React Router, Tailwind CSS, shadcn/ui, TanStack Query
+- フロントエンド: Vite, React, React Router, Tailwind CSS, shadcn/ui, TanStack Query, Zustand, React Hook Form
 - バックエンド: Cloudflare Pages Functions
 - データベース: Turso
 - 認証： Better Auth
