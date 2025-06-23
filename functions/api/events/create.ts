@@ -3,7 +3,9 @@ import { getCurrentUser } from '../utils/auth';
 import { validateRequest, isValidationError } from '../utils/validation';
 import { CreateEventSchema } from '../../../shared/schemas';
 import { jsonResponse, errorResponse } from '../utils/response';
+import { transformEventRow } from '../utils/data';
 import type { RequestContext } from '../../../shared/cloudflare-types';
+import type { EventOperationResponse } from '../../../shared/types';
 import { createId } from '@paralleldrive/cuid2';
 
 export async function onRequest(context: RequestContext) {
@@ -48,25 +50,52 @@ export async function onRequest(context: RequestContext) {
       ]
     });
 
-    return jsonResponse({ 
+    // return jsonResponse({ 
+    //   message: 'イベントが作成されました',
+    //   eventId,
+    //   event: {
+    //     id: eventId,
+    //     title,
+    //     date,
+    //     location,
+    //     description: description || '',
+    //     image_url: image_url || undefined,
+    //     capacity: capacity || undefined,
+    //     creator_id: user.id,
+    //     attendees: 0,
+    //     created_at: Math.floor(Date.now() / 1000)
+    //   }
+    // }, 201);
+
+    // 🆕 作成されたイベントを取得
+    const createdEventResult = await client.execute({
+      sql: "SELECT * FROM events WHERE id = ?",
+      args: [eventId],
+    });
+
+    // 🔧 transformEventRow を使用して安全に型変換
+    const createdEvent = transformEventRow(createdEventResult.rows[0]);
+
+    // 🔧 EventOperationResponse 形式で返す
+    const response: EventOperationResponse = {
+      success: true,
       message: 'イベントが作成されました',
       eventId,
-      event: {
-        id: eventId,
-        title,
-        date,
-        location,
-        description: description || '',
-        image_url: image_url || undefined,
-        capacity: capacity || undefined,
-        creator_id: user.id,
-        attendees: 0,
-        created_at: Math.floor(Date.now() / 1000)
-      }
-    }, 201);
+      event: createdEvent
+    };
+
+    return jsonResponse(response, 201);
 
   } catch (error) {
     console.error('Error creating event:', error);
-    return errorResponse('イベントの作成中にエラーが発生しました', 500);
+    
+    // 🔧 エラーも EventOperationResponse 形式で返す
+    const errorResponse: EventOperationResponse = {
+      success: false,
+      message: 'イベントの作成中にエラーが発生しました',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+    
+    return jsonResponse(errorResponse, 500);
   }
 }

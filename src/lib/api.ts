@@ -2,7 +2,10 @@ import type {
   EventWithAttendees, 
   AuthResponse, 
   LoginCredentials, 
-  RegisterCredentials
+  RegisterCredentials,
+  CreateEventRequest,
+  UpdateEventRequest,
+  EventOperationResponse
 } from "@shared/types";
 
 // ベースAPIクライアント設定
@@ -38,6 +41,32 @@ export async function getEvents(): Promise<EventWithAttendees[]> {
 // 単一イベントの情報+参加者数を取得
 export async function getEventById(id: string): Promise<EventWithAttendees> {
   const response = await fetchWithCredentials(`${API_BASE_URL}/events/${id}`);
+  return response.json();
+}
+
+// イベント作成
+export async function createEvent(eventData: CreateEventRequest): Promise<EventOperationResponse> {
+  const response = await fetchWithCredentials(`${API_BASE_URL}/events/create`, {
+    method: 'POST',
+    body: JSON.stringify(eventData),
+  });
+  return response.json();
+}
+
+// イベント更新
+export async function updateEvent(id: string, eventData: UpdateEventRequest): Promise<EventOperationResponse> {
+  const response = await fetchWithCredentials(`${API_BASE_URL}/events/${id}/update`, {
+    method: 'PUT',
+    body: JSON.stringify(eventData),
+  });
+  return response.json();
+}
+
+// イベント削除
+export async function deleteEvent(id: string): Promise<EventOperationResponse> {
+  const response = await fetchWithCredentials(`${API_BASE_URL}/events/${id}/delete`, {
+    method: 'DELETE',
+  });
   return response.json();
 }
 

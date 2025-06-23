@@ -1,6 +1,7 @@
 import {validateEventAccess, isEventAuthError} from "../../utils/event-auth";
 import {jsonResponse, errorResponse} from "../../utils/response";
 import type {RequestContext} from "@shared/cloudflare-types";
+import type {EventOperationResponse} from "../../../../shared/types";
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== "DELETE") {
@@ -23,9 +24,15 @@ export async function onRequest(context: RequestContext) {
       args: [eventId],
     });
 
-    const count = Number(attendeeCount.rows[0].count);
+        const count = Number(attendeeCount.rows[0].count);
     if (count > 0) {
-      return errorResponse(`参加者が${count}人いるため削除できません`, 400);
+      // 🔧 EventOperationResponse 形式でエラーを返す
+      const response: EventOperationResponse = {
+        success: false,
+        message: `参加者が${count}人いるため削除できません`,
+        error: `Cannot delete event with ${count} attendees`
+      };
+      return jsonResponse(response, 400);
     }
 
     // イベント削除
@@ -34,13 +41,25 @@ export async function onRequest(context: RequestContext) {
       args: [eventId],
     });
 
-    return jsonResponse({
+    // 🔧 EventOperationResponse 形式で返す
+    const response: EventOperationResponse = {
+      success: true,
       message: "イベントが削除されました",
-      eventId,
-    });
+      eventId
+    };
+
+    return jsonResponse(response);
   } catch (error) {
     console.error("Error deleting event:", error);
-    return errorResponse("イベントの削除中にエラーが発生しました", 500);
+    
+    // 🔧 エラーも EventOperationResponse 形式で返す
+    const errorResponse: EventOperationResponse = {
+      success: false,
+      message: "イベントの削除中にエラーが発生しました",
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+    
+    return jsonResponse(errorResponse, 500);
   }
 }
 

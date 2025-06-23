@@ -2,7 +2,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateEventSchema, UpdateEventSchema, type CreateEventData, type UpdateEventData } from '@shared/schemas';
+import { CreateEventSchema, UpdateEventSchema } from '@shared/schemas';
+import type { CreateEventRequest, UpdateEventRequest } from '@shared/types';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -17,18 +18,26 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Event } from '@shared/types';
 
 interface EventFormProps {
-  mode: 'create' | 'edit';
-  initialData?: Event;
-  onSubmit: (data: CreateEventData | UpdateEventData) => Promise<void>;
+  mode: 'create';
+  initialData?: never;
+  onSubmit: (data: CreateEventRequest) => Promise<void>;
   isSubmitting?: boolean;
 }
 
-// 日付時間の変換ユーティリティ
+interface EventEditFormProps {
+  mode: 'edit';
+  initialData: Event;
+  onSubmit: (data: UpdateEventRequest) => Promise<void>;
+  isSubmitting?: boolean;
+}
+
+type EventFormAllProps = EventFormProps | EventEditFormProps;
+
+// 🔄 日付変換ユーティリティ（フォーム内部のみで使用）
 const formatDateTime = (datetimeLocal: string): string => {
   if (!datetimeLocal) return '';
   
   try {
-    // "2024-06-01T08:30" → "2024年6月1日08:30"
     const dateObj = new Date(datetimeLocal);
     const year = dateObj.getFullYear();
     const month = dateObj.getMonth() + 1;
@@ -38,14 +47,13 @@ const formatDateTime = (datetimeLocal: string): string => {
     
     return `${year}年${month}月${day}日${hours}:${minutes}`;
   } catch {
-    return datetimeLocal; // フォールバック
+    return datetimeLocal;
   }
 };
 
 const parseDateTimeString = (dateTimeStr: string): string => {
   if (!dateTimeStr) return '';
   
-  // "2025年7月25日14:00" のような形式をパース → "2025-07-25T14:00"
   const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{2}:\d{2})?/);
   
   if (match) {
@@ -55,11 +63,9 @@ const parseDateTimeString = (dateTimeStr: string): string => {
     return `${formattedDate}T${formattedTime}`;
   }
   
-  // パースに失敗した場合のフォールバック
   return '';
 };
 
-// 今日の日付をYYYY-MM-DDTHH:mm形式で取得（min属性用）
 const getTodayDateTime = (): string => {
   const now = new Date();
   const year = now.getFullYear();
@@ -70,18 +76,15 @@ const getTodayDateTime = (): string => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }: EventFormProps) {
+export function EventForm(props: EventFormAllProps) {
+  const { mode, onSubmit, isSubmitting = false } = props;
+  const initialData = props.mode === 'edit' ? props.initialData : undefined;
   const isEdit = mode === 'edit';
   
-  // 初期データから日付と時間を抽出してdatetime-local形式に変換
-  const initialDateTime = isEdit && initialData?.date 
-    ? parseDateTimeString(initialData.date)
-    : '';
-  
-  // 共通スキーマを使用
+  // 🔧 既存のスキーマをそのまま使用（型を増やさない）
   const schema = isEdit ? UpdateEventSchema : CreateEventSchema;
   
-  const form = useForm<CreateEventData | UpdateEventData>({
+  const form = useForm<CreateEventRequest | UpdateEventRequest>({
     resolver: zodResolver(schema),
     defaultValues: isEdit && initialData ? {
       title: initialData.title,
@@ -100,27 +103,34 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
     },
   });
 
-  // 内部状態として日時を管理（フォームとは別）
-  const [eventDateTime, setEventDateTime] = React.useState(initialDateTime);
+  // 🔧 フォーム内部でdatetime-local値を管理
+  const [localDateTime, setLocalDateTime] = React.useState(() => {
+    return isEdit && initialData?.date 
+      ? parseDateTimeString(initialData.date)
+      : '';
+  });
 
-  // 日時が変更されたときにフォームのdateフィールドを更新
+  // datetime-localの値が変更されたら、フォームのdateフィールドを更新
   React.useEffect(() => {
-    const formattedDate = formatDateTime(eventDateTime);
-    if (formattedDate) {
-      form.setValue('date', formattedDate);
-    }
-  }, [eventDateTime, form]);
+    const formattedDate = formatDateTime(localDateTime);
+    form.setValue('date', formattedDate);
+  }, [localDateTime, form]);
 
-  const handleSubmit = async (data: CreateEventData | UpdateEventData) => {
+  const handleSubmit = async (data: CreateEventRequest | UpdateEventRequest) => {
     try {
-      // 空文字列を適切にハンドリング
+      // 🔧 送信データは既存の型のまま（追加の型定義不要）
       const submitData = {
         ...data,
         description: data.description?.trim() || undefined,
         image_url: data.image_url?.trim() || undefined,
       };
       
-      await onSubmit(submitData);
+      // 型に応じて適切な関数を呼び出し
+      if (isEdit) {
+        await (onSubmit as (data: UpdateEventRequest) => Promise<void>)(submitData as UpdateEventRequest);
+      } else {
+        await (onSubmit as (data: CreateEventRequest) => Promise<void>)(submitData as CreateEventRequest);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : `イベントの${isEdit ? '更新' : '作成'}に失敗しました`;
       form.setError('root', { type: 'manual', message });
@@ -130,7 +140,6 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* エラーメッセージ表示 */}
         {form.formState.errors.root && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-800 text-sm">{form.formState.errors.root.message}</p>
@@ -161,37 +170,39 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
           )}
         />
 
-        {/* 開催日時 */}
+        {/* 🔧 開催日時 - datetime-localを使うが、フォームフィールドは既存のまま */}
         <div className="space-y-2">
           <label className="text-sm font-medium">
             開催日時
             {!isEdit && <span className="text-red-500 ml-1">*</span>}
           </label>
           
-          <div>
-            <Input
-              type="datetime-local"
-              className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
-              disabled={form.formState.isSubmitting}
-              value={eventDateTime}
-              onChange={(e) => setEventDateTime(e.target.value)}
-              min={getTodayDateTime()} // 今日以降の日時のみ選択可能
-            />
-            {!eventDateTime && !isEdit && (
-              <p className="text-red-500 text-sm mt-1">開催日時は必須です</p>
-            )}
-          </div>
+          <Input
+            type="datetime-local"
+            className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+            disabled={form.formState.isSubmitting}
+            value={localDateTime}
+            onChange={(e) => setLocalDateTime(e.target.value)}
+            min={getTodayDateTime()}
+          />
           
-          {/* 隠しフィールド - 実際のフォーム値 */}
+          {/* 隠しフィールドとしてバリデーション */}
           <FormField
             control={form.control}
             name="date"
-            render={({ field }) => (
-              <div className="hidden">
-                <input {...field} />
-              </div>
+            render={() => (
+              <FormItem className="hidden">
+                <FormControl>
+                  <Input type="hidden" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+          
+          {!localDateTime && !isEdit && (
+            <p className="text-red-500 text-sm">開催日時は必須です</p>
+          )}
           
           <p className="text-xs text-gray-500">
             開催日時を選択してください。保存時に「2025年7月25日14:00」の形式で統一されます
@@ -222,7 +233,7 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
           )}
         />
 
-        {/* 説明（オプション） */}
+        {/* 説明 */}
         <FormField
           control={form.control}
           name="description"
@@ -246,7 +257,7 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
           )}
         />
 
-        {/* 画像URL（オプション） */}
+        {/* 画像URL */}
         <FormField
           control={form.control}
           name="image_url"
@@ -270,7 +281,7 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
           )}
         />
 
-        {/* 定員（オプション） */}
+        {/* 定員 */}
         <FormField
           control={form.control}
           name="capacity"
@@ -305,7 +316,7 @@ export function EventForm({ mode, initialData, onSubmit, isSubmitting = false }:
           <Button
             type="submit"
             className="flex-1 bg-sky-600 hover:bg-sky-700 text-white"
-            disabled={form.formState.isSubmitting || isSubmitting || (!eventDateTime && !isEdit)}
+            disabled={form.formState.isSubmitting || isSubmitting || (!localDateTime && !isEdit)}
           >
             {form.formState.isSubmitting || isSubmitting ? (
               <>
