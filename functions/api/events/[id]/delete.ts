@@ -30,7 +30,8 @@ export async function onRequest(context: RequestContext) {
       const response: EventOperationResponse = {
         success: false,
         message: `参加者が${count}人いるため削除できません`,
-        error: `Cannot delete event with ${count} attendees`
+        // error: `Cannot delete event with ${count} attendees`
+        error: `参加者が${count}人いるため削除できません`,
       };
       return jsonResponse(response, 400);
     }
