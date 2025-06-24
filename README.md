@@ -24,41 +24,33 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   </colgroup>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-      <a href="https://demo-react-event-calendar.pages.dev/" target="_blank">
         <picture>
           <source srcset="./public/screenshot.webp" type="image/webp" />
           <img src="./public/screenshot.png" alt="トップページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
-      </a>
       <p><em>トップページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-      <a href="https://demo-react-event-calendar.pages.dev/" target="_blank">
         <picture>
           <source srcset="./public/screenshot-2.webp" type="image/webp" />
           <img src="./public/screenshot-2.png" alt="イベント一覧ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
-      </a>
       <p><em>イベント一覧ページ</em></p>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-      <a href="https://demo-react-event-calendar.pages.dev/" target="_blank">
         <picture>
           <source srcset="./public/screenshot-3.webp" type="image/webp" />
           <img src="./public/screenshot-3.png" alt="イベント詳細ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
-      </a>
       <p><em>イベント詳細ページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-      <a href="https://demo-react-event-calendar.pages.dev/" target="_blank">
         <picture>
           <source srcset="./public/screenshot-4.webp" type="image/webp" />
           <img src="./public/screenshot-4.png" alt="イベント作成フォーム" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
-      </a>
       <p><em>イベント作成フォーム</em></p>
     </td>
   </tr>
