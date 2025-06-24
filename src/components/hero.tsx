@@ -2,6 +2,7 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { CalendarDays, Users, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router";
+import { Button } from "./ui/button";
 
 export default function Hero() {
   const isAuthenticated = useAuthStore((state) => !!state.user);
@@ -65,11 +66,12 @@ export default function Hero() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 text-center">
+          <div className="space-y-6 text-center">
             <p className="text-lg font-semibold text-gray-900">
-              おかえりなさい！新しいイベントをチェックしましょう
+              おかえりなさい！<br className="sm:hidden" />新しいイベントをチェックしましょう
             </p>
-            <button
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Button
               onClick={() => {
                 const eventsSection = document.getElementById("new-events");
                 if (eventsSection) {
@@ -79,10 +81,19 @@ export default function Hero() {
                   });
                 }
               }}
-              className="inline-block px-8 py-3 bg-sky-600 text-white font-semibold rounded-lg hover:bg-sky-700 transition-colors"
+              className="w-full sm:w-fit px-8 py-3 bg-sky-600 text-white font-semibold rounded-lg hover:bg-sky-700 transition-colors cursor-pointer"
             >
               イベントを見る
-            </button>
+            </Button>
+            <Button asChild>
+              <Link
+                to="/events/create"
+                className="w-full sm:w-fit text-sky-600 border border-sky-600 px-8 py-3 rounded-md font-semibold hover:bg-sky-700 hover:text-white transition-colors"
+              >
+                イベントを作成
+              </Link>
+            </Button>
+            </div>
           </div>
         )}
       </div>

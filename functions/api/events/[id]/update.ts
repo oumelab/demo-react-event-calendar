@@ -3,6 +3,8 @@ import {UpdateEventSchema} from "../../../../shared/schemas";
 import {validateEventAccess, isEventAuthError} from "../../utils/event-auth";
 import {jsonResponse, errorResponse} from "../../utils/response";
 import type {RequestContext} from "../../../../shared/cloudflare-types";
+import type {EventOperationResponse} from "../../../../shared/types";
+import { transformEventRow } from "functions/api/utils/data";
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== "PUT") {
@@ -33,6 +35,7 @@ export async function onRequest(context: RequestContext) {
     // 空のオブジェクトチェック（partialスキーマの特殊対応）
     if (Object.keys(validatedData).length === 0) {
       return jsonResponse({
+        success: true,
         message: "更新する項目がありませんでした",
         eventId,
         event: event, // 既存のイベント情報をそのまま返す
@@ -61,13 +64,27 @@ export async function onRequest(context: RequestContext) {
       args: [eventId],
     });
 
-    return jsonResponse({
+    // 🔧 transformEventRow を使用して安全に型変換
+    const transformedEvent = transformEventRow(updatedEvent.rows[0]);
+
+    // 🔧 EventOperationResponse 形式で返す
+    const response: EventOperationResponse = {
+      success: true,
       message: "イベントが更新されました",
       eventId,
-      event: updatedEvent.rows[0],
-    });
+      event: transformedEvent // 🆕 型安全な変換
+    };
+
+    return jsonResponse(response);
   } catch (error) {
     console.error("Error updating event:", error);
-    return errorResponse("イベントの更新中にエラーが発生しました", 500);
+    // 🔧 エラーも EventOperationResponse 形式で返す
+    const errorResponse: EventOperationResponse = {
+      success: false,
+      message: "イベントの更新中にエラーが発生しました",
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+    
+    return jsonResponse(errorResponse, 500);
   }
 }

@@ -79,7 +79,7 @@ export interface CreateEventRequest {
   title: string;
   date: string;
   location: string;
-  description: string;
+  description?: string;
   image_url?: string;
   capacity?: number;
 }
