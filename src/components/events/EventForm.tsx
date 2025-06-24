@@ -200,7 +200,7 @@ export function EventForm(props: EventFormAllProps) {
             )}
           />
           
-          {!localDateTime && !isEdit && form.formState.isSubmitted && (
+          {!localDateTime && form.formState.isSubmitted && (
             <p className="text-red-500 text-sm">開催日時は必須です</p>
           )}
           
