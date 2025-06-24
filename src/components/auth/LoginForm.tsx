@@ -58,7 +58,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               <FormControl>
                 <Input
                   type="email"
-                  className='border border-gray-500 focus:ring-sky-500'
+                  className='bg-white/70 border border-zinc-500 focus:ring-sky-500'
                   placeholder="your@email.com"
                   autoComplete="email"
                   disabled={form.formState.isSubmitting}
@@ -78,7 +78,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               <FormLabel>パスワード</FormLabel>
               <FormControl>
                 <PasswordInput
-                  className='border border-gray-500 focus:ring-sky-500'
+                  className='bg-white/70 border border-zinc-500 focus:ring-sky-500'
                   placeholder="パスワードを入力"
                   autoComplete="current-password"
                   disabled={form.formState.isSubmitting}
@@ -92,7 +92,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
         <Button
           type="submit"
-          className={`w-full mt-3 py-3 px-4 rounded-lg font-medium transition-colors ${
+          className={`w-full mt-3 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer ${
               isLoggingIn || form.formState.isSubmitting
                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                 : "bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"

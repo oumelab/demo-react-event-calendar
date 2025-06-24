@@ -158,7 +158,7 @@ export function EventForm(props: EventFormAllProps) {
               </FormLabel>
               <FormControl>
                 <Input
-                  className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="例: React勉強会 - 最新機能を学ぼう"
                   maxLength={100}
                   disabled={form.formState.isSubmitting}
@@ -179,7 +179,7 @@ export function EventForm(props: EventFormAllProps) {
           
           <Input
             type="datetime-local"
-            className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+            className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
             disabled={form.formState.isSubmitting}
             value={localDateTime}
             onChange={(e) => setLocalDateTime(e.target.value)}
@@ -221,7 +221,7 @@ export function EventForm(props: EventFormAllProps) {
               </FormLabel>
               <FormControl>
                 <Input
-                  className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="例: 東京都渋谷区〇〇ビル、オンライン（Zoom）"
                   maxLength={100}
                   disabled={form.formState.isSubmitting}
@@ -242,7 +242,7 @@ export function EventForm(props: EventFormAllProps) {
               <FormLabel>イベント説明</FormLabel>
               <FormControl>
                 <Textarea
-                  className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500 min-h-[120px]"
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500 min-h-[120px]"
                   placeholder="イベントの詳細、対象者、持ち物、注意事項などを記載してください"
                   maxLength={1000}
                   disabled={form.formState.isSubmitting}
@@ -267,7 +267,7 @@ export function EventForm(props: EventFormAllProps) {
               <FormControl>
                 <Input
                   type="url"
-                  className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="https://example.com/image.jpg"
                   disabled={form.formState.isSubmitting}
                   {...field}
@@ -292,7 +292,7 @@ export function EventForm(props: EventFormAllProps) {
                 <Input
                   type="number"
                   min="1"
-                  className="border border-gray-300 focus:ring-sky-500 focus:border-sky-500"
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="例: 30"
                   disabled={form.formState.isSubmitting}
                   {...field}
@@ -315,7 +315,7 @@ export function EventForm(props: EventFormAllProps) {
         <div className="flex gap-4 pt-4">
           <Button
             type="submit"
-            className="flex-1 bg-sky-600 hover:bg-sky-700 text-white"
+            className="flex-1 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
             disabled={form.formState.isSubmitting || isSubmitting || (!localDateTime && !isEdit)}
           >
             {form.formState.isSubmitting || isSubmitting ? (

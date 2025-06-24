@@ -7,6 +7,7 @@ import { getEventById, queryKeys } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import type { UpdateEventRequest } from '@shared/types';
+import Card from '@/components/card';
 
 export default function EventEditPage() {
   const { id } = useParams();
@@ -124,14 +125,16 @@ export default function EventEditPage() {
       </div>
 
       {/* イベント編集フォーム */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"> */}
+        <Card>
         <EventForm
           mode="edit"
           initialData={event}
           onSubmit={handleSubmit}
           isSubmitting={isUpdating}
         />
-      </div>
+        </Card>
+      {/* </div> */}
 
       {/* キャンセルリンク */}
       <div className="mt-6 text-center">

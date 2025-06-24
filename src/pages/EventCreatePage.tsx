@@ -1,4 +1,5 @@
 // src/pages/EventCreatePage.tsx
+import Card from '@/components/card';
 import { EventForm } from '@/components/events/EventForm';
 import { useEventMutations } from '@/hooks/useEvents';
 import type { CreateEventRequest } from '@shared/types';
@@ -24,13 +25,15 @@ export default function EventCreatePage() {
       </div>
 
       {/* イベント作成フォーム */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"> */}
+      <Card>
         <EventForm
           mode="create"
           onSubmit={handleSubmit}
           isSubmitting={isCreating}
         />
-      </div>
+      </Card>
+      {/* </div> */}
 
       {/* キャンセルリンク */}
       <div className="mt-6 text-center">

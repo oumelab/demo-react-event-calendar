@@ -6,8 +6,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {Link} from "react-router";
 import {User as UserType} from "@shared/types";
-import {ChevronDown, LogOut, User} from "lucide-react";
+import {ChevronDown, LogOut, Plus, User} from "lucide-react";
 
 export default function UserMenu({
   user,
@@ -46,6 +47,15 @@ export default function UserMenu({
             <span className="truncate">{user.name}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-zinc-200 h-[1px] mx-[2px]" />
+          <DropdownMenuItem asChild>
+            <Link
+              to="/events/create"
+              className="w-full flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors cursor-pointer"
+            >
+              <Plus size={14} />
+              イベント作成
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <button
               onClick={handleLogout}

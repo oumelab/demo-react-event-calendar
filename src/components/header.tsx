@@ -3,14 +3,12 @@ import {Link} from "react-router";
 import {useAuthStore} from "@/stores/auth-store";
 import UserMenu from "./UserMenu";
 import {useAuthMutations, useSessionQuery} from "@/hooks/useAuth";
+import {Button} from "./ui/button";
 
 export default function Header() {
   const {isLoading} = useSessionQuery();
   const {logout} = useAuthMutations();
-  // const {user, isAuthenticated} = useAuthStore((state) => ({
-  //   user: state.user,
-  //   isAuthenticated: !!state.user,
-  // }));
+
   // 状態を一つずつ、別々に取得する
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => !!state.user);
@@ -46,12 +44,14 @@ export default function Header() {
             >
               ログイン
             </Link>
-            <Link
-              to="/register"
-              className="hidden sm:block text-sm bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors"
-            >
-              新規登録
-            </Link>
+            <Button asChild>
+              <Link
+                to="/register"
+                className="hidden sm:block text-sm bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors"
+              >
+                新規登録
+              </Link>
+            </Button>
           </div>
         )}
       </div>

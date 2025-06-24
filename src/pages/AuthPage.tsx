@@ -18,7 +18,7 @@ export default function AuthPage() {
   const isLogin = location.pathname === '/login';
   const mode = isLogin ? 'login' : 'register';
 
-  // 🔧 重要：認証済みユーザーのリダイレクト処理を復活
+  // 認証済みユーザーのリダイレクト処理
   useEffect(() => {
     if (isAuthenticated) {
       // ProtectedRouteからのリダイレクトかどうかを確認

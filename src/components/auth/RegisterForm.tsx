@@ -61,7 +61,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
               <FormControl>
                 <Input
                   type="text"
-                  className="border border-gray-500 focus:ring-sky-500"
+                  className="bg-white/70 border border-zinc-500 focus:ring-sky-500"
                   placeholder="山田太郎"
                   maxLength={20}
                   autoComplete="name"
@@ -83,7 +83,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
               <FormControl>
                 <Input
                   type="email"
-                  className="border border-gray-500 focus:ring-sky-500"
+                  className="bg-white/70 border border-zinc-500 focus:ring-sky-500"
                   placeholder="your@email.com"
                   autoComplete="email"
                   disabled={form.formState.isSubmitting}
@@ -103,7 +103,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
               <FormLabel>パスワード</FormLabel>
               <FormControl>
                 <PasswordInput
-                  className="border border-gray-500 focus:ring-sky-500"
+                  className="bg-white/70 border border-zinc-500 focus:ring-sky-500"
                   placeholder="8文字以上で入力してください"
                   autoComplete="new-password"
                   disabled={form.formState.isSubmitting}
@@ -117,7 +117,7 @@ export function RegisterForm({onSuccess}: RegisterFormProps) {
 
         <Button
           type="submit"
-          className={`w-full mt-3 py-3 px-4 rounded-lg font-medium transition-colors ${
+          className={`w-full mt-3 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer ${
             form.formState.isSubmitting
               ? "bg-gray-400 text-gray-700 cursor-not-allowed"
               : "bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"

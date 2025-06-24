@@ -22,7 +22,7 @@ export function useEventMutations() {
     onSuccess: (data) => {
       if (!data.success) {
         // サーバーエラーはthrowしてフォーム側でキャッチ
-        throw new Error(data.error || 'イベントの作成に失敗しました');
+        throw new Error(data.message || 'イベントの作成に失敗しました');
       }
       
       // ✅ 成功時のみtoast通知
@@ -50,7 +50,7 @@ export function useEventMutations() {
       updateEvent(id, eventData),
     onSuccess: (data, variables) => {
       if (!data.success) {
-        throw new Error(data.error || 'イベントの更新に失敗しました');
+        throw new Error(data.message || 'イベントの更新に失敗しました');
       }
       
       // ✅ 成功時のみtoast通知
@@ -73,7 +73,7 @@ export function useEventMutations() {
     mutationFn: (eventId: string) => deleteEvent(eventId),
     onSuccess: (data, eventId) => {
       if (!data.success) {
-        throw new Error(data.error || 'イベントの削除に失敗しました');
+        throw new Error(data.message || 'イベントの削除に失敗しました');
       }
       
       // ✅ 成功時のみtoast通知
