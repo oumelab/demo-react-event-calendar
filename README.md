@@ -24,19 +24,19 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   </colgroup>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/screenshot.png" target="_blank">
+    <a href="./public/docs/screenshot/screenshot.webp" target="_blank">
         <picture>
-          <source srcset="./public/screenshot.webp" type="image/webp" />
-          <img src="./public/screenshot.png" alt="トップページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+          <source srcset="./public/docs/screenshot/screenshot.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot.png" alt="トップページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
         </a>
       <p><em>トップページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/screenshot-2.png" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-2.webp" target="_blank">
         <picture>
-          <source srcset="./public/screenshot-2.webp" type="image/webp" />
-          <img src="./public/screenshot-2.png" alt="イベント一覧ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+          <source srcset="./public/docs/screenshot/screenshot-2.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot-2.png" alt="イベント一覧ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
         </a>
       <p><em>イベント一覧ページ</em></p>
@@ -44,19 +44,19 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   </tr>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/screenshot-3.png" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-3.webp" target="_blank">
         <picture>
-          <source srcset="./public/screenshot-3.webp" type="image/webp" />
-          <img src="./public/screenshot-3.png" alt="イベント詳細ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+          <source srcset="./public/docs/screenshot/screenshot-3.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot-3.png" alt="イベント詳細ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
         </a>
       <p><em>イベント詳細ページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/screenshot-4.png" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-4.webp" target="_blank">
         <picture>
-          <source srcset="./public/screenshot-4.webp" type="image/webp" />
-          <img src="./public/screenshot-4.png" alt="イベント作成フォーム" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+          <source srcset="./public/docs/screenshot/screenshot-4.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot-4.png" alt="イベント作成フォーム" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
         </picture>
         </a>
       <p><em>イベント作成フォーム</em></p>
@@ -107,37 +107,59 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 
 ### 🏗️ システムアーキテクチャ
 
-```mermaid
-graph TB
-    subgraph "クライアント（ブラウザ）"
-        React[React App<br/>Vite + TypeScript]
-        Zustand[Zustand<br/>状態管理]
-        TanStack[TanStack Query<br/>サーバー状態]
-        ReactRouter[React Router v7<br/>ルーティング]
-    end
+<a href="./public/docs/system-architecture.webp" target="_blank">
+  <picture>
+    <source srcset="./public/docs/system-architecture.webp" type="image/webp" />
+      <img src="./public/docs/system-architecture.png" alt="システムアーキテクチャ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  </picture>
+</a>
 
-    subgraph "Cloudflare Pages"
-        StaticFiles[静的ファイル配信]
-        Functions[Pages Functions<br/>API endpoints]
-    end
+<details>
+  <summary>Mermaid</summary>
 
-    subgraph "データベース"
-        Turso[(Turso libSQL)]
-    end
+  ```mermaid
+  graph TB
+      subgraph "クライアント（ブラウザ）"
+          React[React App<br/>Vite + TypeScript]
+          Zustand[Zustand<br/>状態管理]
+          TanStack[TanStack Query<br/>サーバー状態]
+          ReactRouter[React Router v7<br/>ルーティング]
+      end
 
-    subgraph "認証"
-        BetterAuth[Better Auth<br/>セッション管理]
-    end
+      subgraph "Cloudflare Pages"
+          StaticFiles[静的ファイル配信]
+          Functions[Pages Functions<br/>API endpoints]
+      end
 
-    React --> StaticFiles
-    TanStack --> Functions
-    Zustand -.-> TanStack
-    Functions --> Turso
-    Functions --> BetterAuth
-    BetterAuth --> Turso
-```
+      subgraph "データベース"
+          Turso[(Turso libSQL)]
+      end
+
+      subgraph "認証"
+          BetterAuth[Better Auth<br/>セッション管理]
+      end
+
+      React --> StaticFiles
+      TanStack --> Functions
+      Zustand -.-> TanStack
+      Functions --> Turso
+      Functions --> BetterAuth
+      BetterAuth --> Turso
+
+  ```
+</details>
 
 ### 🗄️ データベース構成（ER 図）
+
+<a href="./public/docs/database-configuration.webp" target="_blank">
+  <picture>
+    <source srcset="./public/docs/database-configuration.webp" type="image/webp" />
+    <img src="./public/docs/database-configuration.png" alt="データベース構成" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  </picture>
+</a>
+
+<details>
+  <summary>Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -211,7 +233,19 @@ erDiagram
     events ||--o{ attendees : has
 ```
 
+</details>
+
 ### 🔄 状態管理フロー
+
+<a href="./public/docs/state-management-flow.webp" target="_blank">
+  <picture>
+    <source srcset="./public/docs/state-management-flow.webp" type="image/webp" />
+    <img src="./public/docs/state-management-flow.png" alt="状態管理フロー" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  </picture>
+</a>
+
+<details>
+  <summary>Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -233,6 +267,8 @@ sequenceDiagram
     Z-->>C: 状態変更通知
     C-->>U: UI更新
 ```
+</details>
+
 
 ### 🌐 API エンドポイント構成
 
