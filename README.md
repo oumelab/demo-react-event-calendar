@@ -24,7 +24,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   </colgroup>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/docs/screenshot/screenshot.webp" target="_blank">
+    <a href="./public/docs/screenshot/screenshot.png" target="_blank">
         <picture>
           <source srcset="./public/docs/screenshot/screenshot.webp" type="image/webp" />
           <img src="./public/docs/screenshot/screenshot.png" alt="トップページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -33,7 +33,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
       <p><em>トップページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/docs/screenshot/screenshot-2.webp" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-2.png" target="_blank">
         <picture>
           <source srcset="./public/docs/screenshot/screenshot-2.webp" type="image/webp" />
           <img src="./public/docs/screenshot/screenshot-2.png" alt="イベント一覧ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -44,7 +44,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   </tr>
   <tr>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/docs/screenshot/screenshot-3.webp" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-3.png" target="_blank">
         <picture>
           <source srcset="./public/docs/screenshot/screenshot-3.webp" type="image/webp" />
           <img src="./public/docs/screenshot/screenshot-3.png" alt="イベント詳細ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -53,7 +53,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
       <p><em>イベント詳細ページ</em></p>
     </td>
     <td width="50%" align="center" style="padding: 8px;">
-    <a href="./public/docs/screenshot/screenshot-4.webp" target="_blank">
+    <a href="./public/docs/screenshot/screenshot-4.png" target="_blank">
         <picture>
           <source srcset="./public/docs/screenshot/screenshot-4.webp" type="image/webp" />
           <img src="./public/docs/screenshot/screenshot-4.png" alt="イベント作成フォーム" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -107,7 +107,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 
 ### 🏗️ システムアーキテクチャ
 
-<a href="./public/docs/system-architecture.webp" target="_blank">
+<a href="./public/docs/system-architecture.png" target="_blank">
   <picture>
     <source srcset="./public/docs/system-architecture.webp" type="image/webp" />
       <img src="./public/docs/system-architecture.png" alt="システムアーキテクチャ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -151,7 +151,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 
 ### 🗄️ データベース構成（ER 図）
 
-<a href="./public/docs/database-configuration.webp" target="_blank">
+<a href="./public/docs/database-configuration.png" target="_blank">
   <picture>
     <source srcset="./public/docs/database-configuration.webp" type="image/webp" />
     <img src="./public/docs/database-configuration.png" alt="データベース構成" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -237,7 +237,7 @@ erDiagram
 
 ### 🔄 状態管理フロー
 
-<a href="./public/docs/state-management-flow.webp" target="_blank">
+<a href="./public/docs/state-management-flow.png" target="_blank">
   <picture>
     <source srcset="./public/docs/state-management-flow.webp" type="image/webp" />
     <img src="./public/docs/state-management-flow.png" alt="状態管理フロー" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
