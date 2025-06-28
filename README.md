@@ -86,8 +86,9 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 
 ### 実装予定機能
 
-- [ ] **イベント申し込み機能** - 実際の申し込み処理とメール通知 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
-- [ ] **申し込みキャンセル** - 参加キャンセル機能 [#28](https://github.com/oumelab/demo-react-event-calendar/issues/28)
+- [ ] **イベント申し込み・キャンセル機能** - 参加申し込みとキャンセル機能 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
+- [ ] **メール通知** - メール通知システム実装 [#28](https://github.com/oumelab/demo-react-event-calendar/issues/28)
+- [ ] **ユーザー情報編集機能** - ユーザープロフィールページ・ユーザー情報の編集機能実装 [#18](https://github.com/oumelab/demo-react-event-calendar/issues/18)
 - [ ] **画像アップロード** - イベント画像のアップロード機能 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 
 ## 🛠️ 使用技術
