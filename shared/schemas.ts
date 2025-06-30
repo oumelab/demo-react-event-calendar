@@ -81,24 +81,28 @@ export const EventCancelSchema = z.object({
 }).optional();
 
 // 申し込み履歴取得用のスキーマ（クエリパラメータ用）
+// export const UserRegistrationsQuerySchema = z.object({
+//   limit: z
+//     .string()
+//     .transform((val) => parseInt(val, 10))
+//     .pipe(z.number().int().min(1).max(100))
+//     .optional()
+//     .default("20"),
+//   offset: z
+//     .string()
+//     .transform((val) => parseInt(val, 10))
+//     .pipe(z.number().int().min(0))
+//     .optional()
+//     .default("0"),
+//   status: z
+//     .enum(['all', 'active', 'cancelled'])
+//     .optional()
+//     .default('active'),
+// }).optional();
 export const UserRegistrationsQuerySchema = z.object({
-  limit: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(1).max(100))
-    .optional()
-    .default("20"),
-  offset: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(0))
-    .optional()
-    .default("0"),
-  status: z
-    .enum(['all', 'active', 'cancelled'])
-    .optional()
-    .default('active'),
-}).optional();
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
 
 // 🆕 バックエンド用のデータ検証スキーマ
 // ========================================
