@@ -7,6 +7,8 @@ import EventDetail from "./pages/event-detail";
 import EventList from "./pages/event-list";
 import EventCreatePage from "./pages/EventCreatePage";
 import EventEditPage from "./pages/EventEditPage";
+import UserRegistrationsPage from "./pages/UserRegistrationsPage";
+import EventCancelCompletePage from "./pages/EventCancelCompletePage";
 import NotFound from "./pages/not-found";
 // Tanstack Queryのデバッグツール
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
@@ -71,6 +73,22 @@ const router = createBrowserRouter([
         Component: () => (
           <ProtectedRoute>
             <EventConfirm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "events/:id/cancel-complete",
+        Component: () => (
+          <ProtectedRoute>
+            <EventCancelCompletePage />
+          </ProtectedRoute>
+        ),
+      },
+       {
+        path: "user/registrations",
+        Component: () => (
+          <ProtectedRoute>
+            <UserRegistrationsPage />
           </ProtectedRoute>
         ),
       },
