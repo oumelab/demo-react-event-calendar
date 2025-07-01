@@ -67,11 +67,82 @@ export interface Attendee {
   event_id: string;
   email: string;
   created_at: number;
-  user_id?: string; // オプショナルで Issue #5 に備える
+  user_id?: string; // オプショナルで既存データとの互換性保持
 }
 
 export interface AttendeeWithUser extends Attendee {
   user?: User;
+}
+
+// 🆕 Issue #5: イベント申し込み・キャンセル機能用の型定義
+// ===============================================================
+
+// イベント申し込み情報（API レスポンス用）
+export interface EventRegistration {
+  id: string;
+  event_id: string;
+  user_id: string;
+  email: string;
+  created_at: number;
+}
+
+// ユーザーの申し込み履歴（フロントエンド表示用）
+export interface UserRegistration {
+  id: string;
+  event: Event;
+  registered_at: number;
+  can_cancel: boolean; // キャンセル可能かどうか
+}
+
+// イベント申し込み API レスポンス
+export interface EventApplyResponse {
+  success: boolean;
+  message: string;
+  registration: EventRegistration;
+}
+
+// イベントキャンセル API レスポンス
+export interface EventCancelResponse {
+  success: boolean;
+  message: string;
+  cancelled_registration_id: string;
+}
+
+// ユーザー申し込み履歴 API レスポンス
+export interface UserRegistrationsResponse {
+  registrations: UserRegistration[];
+}
+
+// イベント申し込み状態（フロントエンド用）
+export interface EventRegistrationStatus {
+  isRegistered: boolean;
+  registrationId?: string;
+  canRegister: boolean; // 申し込み可能かどうか
+  canCancel: boolean;   // キャンセル可能かどうか
+  reason?: string;      // 申し込み/キャンセル不可の理由
+}
+
+// イベント詳細 + 申し込み状態（フロントエンド用）
+export interface EventWithRegistrationStatus extends EventWithAttendees {
+  registrationStatus?: EventRegistrationStatus;
+}
+
+// 🆕 既存型の拡張
+// ===============
+
+// EventWithCreatorは既存のEventWithAttendeesを拡張
+export interface EventWithCreator extends EventWithAttendees {
+  creator_name?: string;
+  creator_email?: string;
+}
+
+// API 操作結果の型（既存）
+export interface EventOperationResponse {
+  success: boolean;
+  message: string;
+  eventId?: string;
+  event?: Event;
+  error?: string;
 }
 
 // イベント管理API用の型定義
@@ -92,19 +163,4 @@ export interface UpdateEventRequest {
   description?: string;
   image_url?: string;
   capacity?: number;
-}
-
-// EventWithCreatorは既存のEventWithAttendeesを拡張
-export interface EventWithCreator extends EventWithAttendees {
-  creator_name?: string;
-  creator_email?: string;
-}
-
-// API操作結果の型
-export interface EventOperationResponse {
-  success: boolean;
-  message: string;
-  eventId?: string;
-  event?: Event;
-  error?: string;
 }

@@ -3,6 +3,7 @@ import {Link, useLocation, useNavigate, useParams} from "react-router";
 import {getEventById, queryKeys} from "@/lib/api";
 import {useAuthStore} from "@/stores/auth-store";
 import {useEventDelete} from "@/hooks/useEvents";
+import {useEventRegistrationStatus} from "@/hooks/useEventRegistration";
 import {CalendarDays, MapPin, Users} from "lucide-react";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
@@ -24,10 +25,14 @@ export default function EventDetail() {
     error,
   } = useQuery({
     // queryKey: ["event", id],
-    queryKey: queryKeys.event(id as string), // 🔧 統一されたqueryKeyを使用
+    queryKey: queryKeys.event(id as string), // 統一されたqueryKeyを使用
     queryFn: () => getEventById(id as string),
     enabled: !!id,
   });
+
+  // 申し込み状況の判定
+  const registrationStatus = useEventRegistrationStatus(id as string, event, user);
+  const { isRegistered } = registrationStatus;
 
   const isEventCreator = event && user ? user.id === event.creator_id : false;
 
@@ -103,6 +108,30 @@ export default function EventDetail() {
         </div>
       );
     }
+
+    // 申し込み済みの場合の表示
+    if (isRegistered) {
+      return (
+        <div className="space-y-2">
+          <button
+            className="text-green-800 bg-green-100 border border-green-300 py-4 w-full rounded-xl cursor-default"
+            disabled
+          >
+            ✅ 申し込み済み
+          </button>
+          <p className="text-sm text-gray-600 text-center">
+            申し込み履歴から管理できます
+          </p>
+          <Link
+            to="/user/registrations"
+            className="block py-2 px-4 text-center text-sky-600 border border-sky-600 rounded-lg hover:bg-sky-50 transition-colors text-sm"
+          >
+            申し込み履歴を見る
+          </Link>
+        </div>
+      );
+    }
+
     return (
       <button
         onClick={() => navigate(`/events/${event?.id}/apply`)}
