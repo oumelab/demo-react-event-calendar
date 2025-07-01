@@ -1,4 +1,4 @@
-// functions/api/user/registrations.ts - ユーザー申し込み履歴API
+// functions/api/user/registrations.ts - ユーザー申し込み履歴API（修正版）
 import { getDbClient } from '../utils/db';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { getCurrentUser } from '../utils/auth';
@@ -94,7 +94,8 @@ export async function onRequest(context: RequestContext) {
 
     const client = getDbClient(context.env);
 
-    // 3. ユーザーの申し込み履歴取得（JOINクエリでイベント情報も取得）
+    // 🔧 修正: 既存パターンに合わせて、別々のクエリで取得
+    // 3. ユーザーの申し込み履歴取得（attendees情報のみ）
     const registrationsResult = await client.execute({
       sql: `
         SELECT 
@@ -102,18 +103,8 @@ export async function onRequest(context: RequestContext) {
           a.event_id,
           a.email as attendee_email,
           a.user_id,
-          a.created_at as registered_at,
-          e.id as event_id,
-          e.title as event_title,
-          e.date as event_date,
-          e.location as event_location,
-          e.description as event_description,
-          e.image_url as event_image_url,
-          e.capacity as event_capacity,
-          e.created_at as event_created_at,
-          e.creator_id as event_creator_id
+          a.created_at as registered_at
         FROM attendees a
-        JOIN events e ON a.event_id = e.id
         WHERE a.user_id = ?
         ORDER BY a.created_at DESC
         LIMIT ? OFFSET ?
@@ -123,24 +114,48 @@ export async function onRequest(context: RequestContext) {
 
     conditionalLog(context.env, 'Found registrations:', registrationsResult.rows.length);
 
-    // 4. データを UserRegistration 型に変換
-    const registrations: UserRegistration[] = registrationsResult.rows.map(row => {
-      // イベント情報を再構築
-      const eventData = {
-        id: row.event_id,
-        title: row.event_title,
-        date: row.event_date,
-        location: row.event_location,
-        description: row.event_description,
-        image_url: row.event_image_url,
-        capacity: row.event_capacity,
-        created_at: row.event_created_at,
-        creator_id: row.event_creator_id,
+    if (registrationsResult.rows.length === 0) {
+      // 申し込み履歴がない場合は空配列を返す
+      const response: UserRegistrationsResponse = {
+        registrations: []
       };
+      return jsonResponse(response);
+    }
 
-      // transformEventRow を使用して安全に型変換
-      const event = transformEventRow(eventData);
+    // 4. イベント情報を取得（申し込み済みイベントのみ）
+    const eventIds = registrationsResult.rows.map(row => String(row.event_id));
+    const placeholders = eventIds.map(() => '?').join(',');
+    
+    const eventsResult = await client.execute({
+      sql: `SELECT * FROM events WHERE id IN (${placeholders})`,
+      args: eventIds
+    });
 
+    // 🔧 修正: 各イベントの参加者数を取得（既存パターンと同じ）
+    const attendeesResult = await client.execute(
+      'SELECT event_id, COUNT(*) as count FROM attendees GROUP BY event_id'
+    );
+
+    // 参加者数をマッピング（既存パターンと同じ）
+    const attendeesMap = new Map<string, number>();
+    for (const row of attendeesResult.rows) {
+      const eventId = String(row.event_id);
+      attendeesMap.set(eventId, Number(row.count));
+    }
+
+    // イベント情報をマッピング
+    const eventsMap = new Map();
+    for (const eventRow of eventsResult.rows) {
+      const event = transformEventRow(eventRow);
+      const attendees = attendeesMap.get(event.id) || 0; // 🔧 参加者数を追加
+      eventsMap.set(event.id, {
+        ...event,
+        attendees // 既存パターンと同じように参加者数を含める
+      });
+    }
+
+    // 5. データを UserRegistration 型に変換
+    const registrations: UserRegistration[] = registrationsResult.rows.map(row => {
       // 申し込み情報を再構築
       const attendeeData = {
         id: row.attendee_id,
@@ -153,18 +168,25 @@ export async function onRequest(context: RequestContext) {
       // transformAttendeeRow を使用して安全に型変換
       const attendee = transformAttendeeRow(attendeeData);
 
+      // イベント情報を取得
+      const event = eventsMap.get(String(row.event_id));
+      if (!event) {
+        conditionalError(context.env, 'Event not found for registration:', row.event_id);
+        throw new Error(`Event not found: ${row.event_id}`);
+      }
+
       // キャンセル可能フラグの判定
       const canCancel = canCancelRegistration(event.date, context.env);
 
       return {
         id: attendee.id,
-        event,
+        event, // 既に参加者数を含んでいる
         registered_at: attendee.created_at,
         can_cancel: canCancel,
       };
     });
 
-    // 5. 🆕 UserRegistrationsResponse 形式で返す（既存パターン）
+    // 6. UserRegistrationsResponse 形式で返す
     const response: UserRegistrationsResponse = {
       registrations
     };
