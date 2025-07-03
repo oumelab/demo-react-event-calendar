@@ -1,4 +1,4 @@
-import {createBrowserRouter, Navigate, RouterProvider} from "react-router";
+import {createBrowserRouter, Navigate, RouterProvider, ScrollRestoration} from "react-router";
 import Layout from "./components/layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventApply from "./pages/event-apply";
@@ -15,11 +15,21 @@ import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import {AuthSyncer} from "./components/auth/AuthSyncer";
 import AuthPage from "./pages/AuthPage";
 
+function LayoutWithScrollRestoration() {
+  return (
+    <>
+      <Layout />
+      {/* React Router の ScrollRestoration で全ページのスクロール位置を自動管理 */}
+      <ScrollRestoration />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <>
       <AuthSyncer />
-      <RouterProvider router={router} />{" "}
+      <RouterProvider router={router} />
       {/* 開発環境のみでデバッグツールを表示 */}
       {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
@@ -30,7 +40,7 @@ export default function App() {
 
 const router = createBrowserRouter([
   {
-    Component: Layout,
+    Component: LayoutWithScrollRestoration,
     children: [
       {
         index: true,
