@@ -1,14 +1,26 @@
 // src/pages/UserRegistrationsPage.tsx - ユーザー申し込み履歴ページ
 
-import { useState } from "react";
-import { Link } from "react-router";
-import { CalendarDays, MapPin, Users, Clock, Loader2, Calendar, AlertCircle } from "lucide-react";
+import {useState} from "react";
+import {Link} from "react-router";
+import {
+  CalendarDays,
+  MapPin,
+  Users,
+  Clock,
+  Loader2,
+  Calendar,
+  AlertCircle,
+} from "lucide-react";
 import Card from "../components/card";
-import { useAuthStore } from "@/stores/auth-store";
-import { useUserRegistrationsSimple, useEventCancel } from "@/hooks/useEventRegistration";
-import type { UserRegistration, EventWithAttendees } from "@shared/types";
+import {useAuthStore} from "@/stores/auth-store";
+import {
+  useUserRegistrationsSimple,
+  useEventCancel,
+} from "@/hooks/useEventRegistration";
+import type {UserRegistration, EventWithAttendees} from "@shared/types";
 
 import DEFAULT_IMAGE from "/default.png";
+import {Button} from "@/components/ui/button";
 
 export default function UserRegistrationsPage() {
   const user = useAuthStore((state) => state.user);
@@ -16,7 +28,11 @@ export default function UserRegistrationsPage() {
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   // 申し込み履歴を取得
-  const { data: userRegistrations, isLoading, error } = useUserRegistrationsSimple();
+  const {
+    data: userRegistrations,
+    isLoading,
+    error,
+  } = useUserRegistrationsSimple();
   const cancelMutation = useEventCancel();
 
   /**
@@ -29,7 +45,7 @@ export default function UserRegistrationsPage() {
     const year = date.getFullYear();
     const month = date.getMonth() + 1; // 0ベースなので+1
     const day = date.getDate();
-    
+
     return `${year}年${month}月${day}日`;
   };
 
@@ -56,7 +72,9 @@ export default function UserRegistrationsPage() {
               申し込み履歴の取得に失敗しました
             </h3>
             <p className="text-gray-600 mb-4">
-              {error instanceof Error ? error.message : '不明なエラーが発生しました'}
+              {error instanceof Error
+                ? error.message
+                : "不明なエラーが発生しました"}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -80,9 +98,9 @@ export default function UserRegistrationsPage() {
       // 成功時は自動的にキャンセル完了ページへ遷移
     } catch (error) {
       setCancelError(
-        error instanceof Error 
-          ? error.message 
-          : 'キャンセル処理中にエラーが発生しました'
+        error instanceof Error
+          ? error.message
+          : "キャンセル処理中にエラーが発生しました"
       );
       setShowCancelDialog(null);
     }
@@ -91,9 +109,11 @@ export default function UserRegistrationsPage() {
   // 開催日時チェック関数
   const isEventNotStarted = (dateTimeStr: string): boolean => {
     try {
-      const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/);
+      const match = dateTimeStr.match(
+        /(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/
+      );
       if (!match) return true;
-      
+
       const [, year, month, day, hours, minutes] = match;
       const eventDate = new Date();
       eventDate.setFullYear(parseInt(year, 10));
@@ -103,7 +123,7 @@ export default function UserRegistrationsPage() {
       eventDate.setMinutes(parseInt(minutes, 10));
       eventDate.setSeconds(0);
       eventDate.setMilliseconds(0);
-      
+
       return eventDate > new Date();
     } catch {
       return true;
@@ -111,7 +131,11 @@ export default function UserRegistrationsPage() {
   };
 
   // 登録アイテムコンポーネント
-  const RegistrationItem = ({ registration }: { registration: UserRegistration }) => {
+  const RegistrationItem = ({
+    registration,
+  }: {
+    registration: UserRegistration;
+  }) => {
     // バックエンドで参加者数を含むデータが返されるため、EventWithAttendeesとして扱う
     const event = registration.event as EventWithAttendees;
     const canCancel = registration.can_cancel && isEventNotStarted(event.date);
@@ -133,7 +157,7 @@ export default function UserRegistrationsPage() {
           <div className="flex-1">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-bold text-gray-800">
-                <Link 
+                <Link
                   to={`/events/${event.id}`}
                   className="hover:text-sky-600 transition-colors"
                 >
@@ -175,36 +199,38 @@ export default function UserRegistrationsPage() {
             {/* イベント説明（短縮版） */}
             {event.description && (
               <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                {event.description.length > 100 
+                {event.description.length > 100
                   ? `${event.description.substring(0, 100)}...`
-                  : event.description
-                }
+                  : event.description}
               </p>
             )}
 
             {/* アクションボタン */}
             <div className="flex gap-2">
-              <Link
-                to={`/events/${event.id}`}
-                className="px-4 py-2 text-sm border border-sky-600 text-sky-600 rounded-lg hover:bg-sky-50 transition-colors"
-              >
-                詳細を見る
-              </Link>
-              
+              <Button asChild variant="outline">
+                <Link
+                  to={`/events/${event.id}`}
+                  className="px-4 py-2 text-sm border border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors"
+                >
+                  詳細を見る
+                </Link>
+              </Button>
+
               {canCancel && (
-                <button
+                <Button
+                  variant="destructive"
                   onClick={() => setShowCancelDialog(event.id)}
                   disabled={cancelMutation.isPending}
-                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {cancelMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    'キャンセル'
+                    "キャンセル"
                   )}
-                </button>
+                </Button>
               )}
-              
+
               {!canCancel && !isPastEvent && (
                 <span className="px-4 py-2 text-sm bg-gray-100 text-gray-500 rounded-lg">
                   キャンセル不可
@@ -221,25 +247,27 @@ export default function UserRegistrationsPage() {
   const renderCancelDialog = () => {
     if (!showCancelDialog) return null;
 
-    const event = registrations.find(r => r.event.id === showCancelDialog)?.event;
+    const event = registrations.find(
+      (r) => r.event.id === showCancelDialog
+    )?.event;
     if (!event) return null;
 
     return (
-      <div className="fixed inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl border border-gray-200">
-          <h3 className="text-lg font-bold mb-4">申し込みキャンセルの確認</h3>
+      <div className="fixed inset-0 bg-white/30 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-2xl border border-zinc-300">
+          <h3 className="text-2xl font-bold mb-4">申し込みキャンセルの確認</h3>
           <p className="text-gray-600 mb-2">
             以下のイベントの申し込みをキャンセルしますか？
           </p>
           <div className="bg-gray-50 p-3 rounded-lg mb-4">
-            <p className="font-medium">{event.title}</p>
+            <p className="text-lg font-bold mb-2">{event.title}</p>
             <p className="text-sm text-gray-600">{event.date}</p>
             <p className="text-sm text-gray-600">{event.location}</p>
           </div>
-          <p className="text-sm text-red-600 mb-6">
+          <p className="text-sm text-destructive mb-6">
             ※ この操作は取り消すことができません
           </p>
-          
+
           {cancelError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-800 text-sm">{cancelError}</p>
@@ -247,24 +275,28 @@ export default function UserRegistrationsPage() {
           )}
 
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={() => {
                 setShowCancelDialog(null);
                 setCancelError(null);
               }}
               disabled={cancelMutation.isPending}
-              className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex-1 border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               戻る
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="destructive"
               onClick={() => handleCancel(showCancelDialog)}
               disabled={cancelMutation.isPending}
-              className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {cancelMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {cancelMutation.isPending && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              )}
               キャンセル実行
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -288,7 +320,7 @@ export default function UserRegistrationsPage() {
               イベント一覧へ
             </Link>
           </div>
-          
+
           {user && (
             <p className="text-gray-600">
               {user.name}さんの申し込み履歴 ({registrations.length}件)
@@ -328,9 +360,9 @@ export default function UserRegistrationsPage() {
         ) : (
           <div className="space-y-4">
             {registrations.map((registration) => (
-              <RegistrationItem 
-                key={registration.id} 
-                registration={registration} 
+              <RegistrationItem
+                key={registration.id}
+                registration={registration}
               />
             ))}
           </div>

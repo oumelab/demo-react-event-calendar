@@ -88,7 +88,7 @@ export default function Hero() {
             <Button asChild>
               <Link
                 to="/events/create"
-                className="w-full sm:w-fit text-sky-600 border border-sky-600 px-8 py-3 rounded-md font-semibold hover:bg-sky-700 hover:text-white transition-colors"
+                className="w-full sm:w-fit text-sky-600 border border-sky-600 px-8 py-3 rounded-md font-semibold hover:bg-sky-50 transition-colors"
               >
                 イベントを作成
               </Link>

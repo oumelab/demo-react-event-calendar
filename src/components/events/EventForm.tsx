@@ -315,7 +315,7 @@ export function EventForm(props: EventFormAllProps) {
         <div className="flex gap-4 pt-4">
           <Button
             type="submit"
-            className="flex-1 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
+            className="flex-1 h-10 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
             disabled={form.formState.isSubmitting || isSubmitting || (!localDateTime && !isEdit)}
           >
             {form.formState.isSubmitting || isSubmitting ? (

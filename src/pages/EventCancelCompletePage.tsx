@@ -1,19 +1,17 @@
 // src/pages/EventCancelCompletePage.tsx - イベント申し込みキャンセル完了ページ
 
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams, Link, useLocation, useNavigate } from "react-router";
-import { CheckCircle, Calendar, MapPin, Users, AlertCircle, Home, List } from "lucide-react";
-import Card from "../components/card";
 import { getEventById, queryKeys } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, Calendar, CheckCircle, Home, List, MapPin, Users } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
+import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
 
 export default function EventCancelCompletePage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   // 🆕 キャンセル完了状態のチェック（不正アクセス防止）
   useEffect(() => {
@@ -77,27 +75,27 @@ export default function EventCancelCompletePage() {
   return (
     <div className="max-w-2xl mx-auto py-8">
       <Card>
-        {/* 🎉 成功メッセージ */}
-        <div className="text-center mb-8">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        {/* 成功メッセージ */}
+        <div className="text-center mb-12">
+          <CheckCircle className="size-12 sm:size-16 text-green-500 mx-auto mb-5" />
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
             キャンセルが完了しました
-          </h1>
-          <p className="text-gray-600">
-            イベントの申し込みを正常にキャンセルいたしました。
+          </h2>
+          <p className="text-left sm:text-center text-gray-600">
+            イベントの申し込みを正常にキャンセルしました。
           </p>
         </div>
 
         {/* イベント情報の表示 */}
-        <div className="border rounded-lg p-6 mb-6 bg-gray-50">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-sky-600" />
+        <div className="border-t border-blue-200 py-8 px-2 mb-1">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8 flex items-center gap-2">
+            <Calendar className="size-5 sm:size-6 text-sky-600" />
             キャンセルしたイベント
-          </h2>
+          </h3>
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-5">
             {/* イベント画像 */}
-            <div className="sm:w-32 h-24 flex-shrink-0">
+            <div className="h-48 sm:aspect-[4/3] sm:w-64 sm:h-auto flex-shrink-0">
               <img
                 src={event.image_url || DEFAULT_IMAGE}
                 alt={event.title}
@@ -107,7 +105,7 @@ export default function EventCancelCompletePage() {
 
             {/* イベント詳細 */}
             <div className="flex-1">
-              <h3 className="font-bold text-gray-800 mb-2">{event.title}</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-6">{event.title}</h3>
               
               <div className="space-y-1 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
@@ -131,22 +129,15 @@ export default function EventCancelCompletePage() {
         </div>
 
         {/* 📝 キャンセル完了後の案内 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-medium text-blue-800 mb-2">
-            📌 キャンセル完了のお知らせ
-          </h3>
-          <div className="text-sm text-blue-700 space-y-1">
-            <p>• 申し込みキャンセル処理が正常に完了いたしました</p>
-            <p>• 定員に空きができたため、他の方が申し込み可能になりました</p>
-            <p>• 再度参加をご希望の場合は、イベント詳細ページから再申し込みが可能です</p>
-            {user?.name && (
-              <p>• {user.name}さんの申し込み履歴からも確認いただけます</p>
-            )}
-          </div>
+        <div className="bg-white/60 border border-blue-200 rounded-lg p-4 mb-10">
+          <p className="text-blue-800">
+            再度参加をご希望の場合は、イベント詳細ページから再申し込みが可能です
+          </p>
         </div>
 
         {/* 🚀 アクションボタン */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="space-y-4 border-t border-blue-200 pt-8 pb-2">
+          <div className="flex flex-col sm:flex-row gap-3">
           <Link
             to={`/events/${event.id}`}
             className="flex-1 py-3 text-center border border-sky-600 text-sky-600 rounded-lg hover:bg-sky-50 transition-colors flex items-center justify-center gap-2"
@@ -162,36 +153,17 @@ export default function EventCancelCompletePage() {
             <List className="w-4 h-4" />
             申し込み履歴
           </Link>
+          </div>
           
           <Link
             to="/events"
-            className="flex-1 py-3 text-center bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center gap-2"
+            className="py-3 text-center bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4" />
-            イベント一覧
+            イベント一覧<span className="text-xs sm:text-sm">(他のイベントを探す)</span>
           </Link>
         </div>
-
-        {/* 💡 次のアクションの提案 */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="font-medium text-gray-800 mb-3">他にもお探しですか？</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <Link
-              to="/events"
-              className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="font-medium text-gray-800">🔍 他のイベントを探す</div>
-              <div className="text-gray-600">新しいイベントを見つけてみませんか？</div>
-            </Link>
-            <Link
-              to="/user/registrations"
-              className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="font-medium text-gray-800">📋 申し込み状況を確認</div>
-              <div className="text-gray-600">他の申し込み済みイベントを確認</div>
-            </Link>
-          </div>
-        </div>
+        
       </Card>
     </div>
   );

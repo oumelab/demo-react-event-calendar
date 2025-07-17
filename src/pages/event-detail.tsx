@@ -4,7 +4,7 @@ import {getEventById, queryKeys} from "@/lib/api";
 import {useAuthStore} from "@/stores/auth-store";
 import {useEventDelete} from "@/hooks/useEvents";
 import {useEventRegistrationStatus} from "@/hooks/useEventRegistration";
-import {CalendarDays, MapPin, Users} from "lucide-react";
+import {CalendarDays, Edit, MapPin, Users} from "lucide-react";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
 import {useSessionQuery} from "@/hooks/useAuth";
@@ -114,7 +114,7 @@ export default function EventDetail() {
       return (
         <div className="space-y-2">
           <button
-            className="text-green-800 bg-green-100 border border-green-300 py-4 w-full rounded-xl cursor-default"
+            className="text-sky-800 bg-sky-50 border border-sky-600 py-4 w-full rounded-xl cursor-default"
             disabled
           >
             ✅ 申し込み済み
@@ -124,7 +124,7 @@ export default function EventDetail() {
           </p>
           <Link
             to="/user/registrations"
-            className="block py-2 px-4 text-center text-sky-600 border border-sky-600 rounded-lg hover:bg-sky-50 transition-colors text-sm"
+            className="block py-2 px-4 text-center text-white border bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors text-sm"
           >
             申し込み履歴を見る
           </Link>
@@ -143,7 +143,7 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-8 mx-auto">
+    <div className="py-8 flex flex-col-reverse md:flex-row gap-8 mx-auto">
       <Card>
         {event && (
           <>
@@ -168,7 +168,7 @@ export default function EventDetail() {
               <h2 className="text-2xl font-bold mb-4 text-gray-800">
                 イベントの詳細
               </h2>
-              <div className="flex flex-wrap gap-4 text-base">
+              <div className="flex flex-wrap gap-3 text-base">
                 <div className="flex items-center">
                   <CalendarDays className="w-4 h-4 mr-2 text-blue-500" />
                   <span>{event.date}〜</span>
@@ -192,7 +192,7 @@ export default function EventDetail() {
           )}
           {isEventCreator && (
             <>
-            <hr className="mb-5 text-zinc-400" />
+            <hr className="mb-5 text-blue-300" />
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 イベント管理
               </h3>
@@ -230,26 +230,14 @@ export default function EventDetail() {
                       </>
                     ) : (
                       <>
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
+                        <Edit className="w-4 h-4 mr-2" />
                         イベントを削除
                       </>
                     )}
                   </Button>
                 ) : (
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p className="text-sm text-yellow-700">
+                  <div className="p-2 text-center bg-zinc-300 rounded-md">
+                    <p className="text-sm">
                       <strong>削除不可:</strong> 参加者が{event?.attendees}
                       人います
                     </p>
