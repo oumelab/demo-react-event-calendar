@@ -3,21 +3,22 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router";
-import { CalendarDays, MapPin, Users, Clock, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { CalendarDays, MapPin, Users, Clock, Loader2, AlertCircle, CheckCircle, User } from "lucide-react";
 import Card from "../components/card";
 import { getEventById, queryKeys } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEventApply, useEventRegistrationStatus } from "@/hooks/useEventRegistration";
 import DEFAULT_IMAGE from "/default.png";
+import { Button } from "@/components/ui/button";
 
 export default function EventApply() {
   const { id } = useParams();
   const user = useAuthStore((state) => state.user);
   
-  // 🆕 申し込み・エラー状態管理
+  // 申し込み・エラー状態管理
   const [applyError, setApplyError] = useState<string | null>(null);
   
-  // 🆕 申し込み用のmutation
+  // 申し込み用のmutation
   const applyMutation = useEventApply();
 
   const {
@@ -30,7 +31,7 @@ export default function EventApply() {
     enabled: !!id,
   });
 
-  // 🆕 申し込み状況の判定
+  // 申し込み状況の判定
   const registrationStatus = useEventRegistrationStatus(id as string, event, user);
   const {
     isRegistered,
@@ -102,18 +103,22 @@ export default function EventApply() {
             <h2 className="text-xl font-bold mb-4">申し込みできません</h2>
             <p className="text-gray-600 mb-6">{message}</p>
             <div className="flex gap-3 justify-center">
+              <Button asChild variant="outline">
               <Link
                 to={path}
                 className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
               >
                 {buttonText}
               </Link>
+              </Button>
+              <Button asChild variant="outline">
               <Link
-                to="/events"
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                to={`/events/${id}`}
+                className="px-6 py-2 border border-sky-600 text-sky-600 rounded-lg hover:bg-sky-50 transition-colors"
               >
-                イベント一覧へ
+                イベント詳細へ戻る
               </Link>
+              </Button>
             </div>
           </div>
         </Card>
@@ -121,7 +126,7 @@ export default function EventApply() {
     );
   }
 
-  // 🆕 申し込み処理
+  // 申し込み処理
   const handleApply = async () => {
     if (!id) return;
     
@@ -142,23 +147,23 @@ export default function EventApply() {
     <div className="max-w-2xl mx-auto py-8">
       <Card>
         <Link to={`/events/${id}`}>
-          <p className="text-sky-700 underline text-lg">← イベント詳細に戻る</p>
+          <p className="text-sky-700 underline">← イベント詳細に戻る</p>
         </Link>
         
-        <h2 className="text-4xl font-bold my-4 text-gray-800">
+        <h2 className="text-4xl font-bold my-6 text-gray-800">
           イベントに申し込む
         </h2>
 
         {/* イベント情報の確認 */}
-        <div className="border rounded-lg p-6 mb-6 bg-gray-50">
+        <div className="border-t border-blue-200 py-8 mb-1">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+            <CheckCircle className="size-5 text-sky-500" />
             申し込み内容の確認
           </h3>
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-5">
             {/* イベント画像 */}
-            <div className="sm:w-32 h-24 flex-shrink-0">
+            <div className="h-48 sm:aspect-[4/3] sm:w-64 sm:h-auto flex-shrink-0">
               <img
                 src={event.image_url || DEFAULT_IMAGE}
                 alt={event.title}
@@ -168,9 +173,9 @@ export default function EventApply() {
 
             {/* イベント詳細 */}
             <div className="flex-1">
-              <h4 className="font-bold text-gray-800 mb-2">{event.title}</h4>
+              <h4 className="text-xl font-bold text-gray-800 mb-6">{event.title}</h4>
               
-              <div className="space-y-1 text-sm text-gray-600">
+              <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-blue-500" />
                   <span>{event.date}</span>
@@ -196,8 +201,9 @@ export default function EventApply() {
         </div>
 
         {/* 申し込み者情報 */}
-        <div className="border rounded-lg p-6 mb-6 bg-blue-50">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">
+        <div className="border-t border-blue-200 py-8 mb-1">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <User className="size-5 text-sky-500" />
             申し込み者情報
           </h3>
           <div className="space-y-2 text-sm">
@@ -213,16 +219,16 @@ export default function EventApply() {
         </div>
 
         {/* 注意事項 */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <h3 className="font-medium text-yellow-800 mb-2">
-            📌 申し込み前にご確認ください
+        <div className="bg-white/70 border border-blue-200 rounded-lg p-4 sm:p-5 mb-8">
+          <h3 className="font-medium mb-2">
+            注意事項 :
           </h3>
-          <div className="text-sm text-yellow-700 space-y-1">
-            <p>• 申し込み後のキャンセルは、申し込み履歴ページから行えます</p>
-            <p>• イベント開始後のキャンセルはできません</p>
-            <p>• 定員に達した場合、申し込みが制限される場合があります</p>
-            <p>• イベントの詳細変更がある場合は、事前にお知らせいたします</p>
-          </div>
+          <ul className="text-sm space-y-1 list-disc list-inside pl-2">
+            <li>申し込み後のキャンセルは、申し込み履歴ページから行えます</li>
+            <li>イベント開始後のキャンセルはできません</li>
+            <li>定員に達した場合、申し込みが制限される場合があります</li>
+            <li>イベントの詳細変更がある場合は、事前にお知らせいたします</li>
+          </ul>
         </div>
 
         {/* エラー表示 */}
@@ -239,23 +245,19 @@ export default function EventApply() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             to={`/events/${id}`}
-            className="flex-1 py-3 text-center border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+            className="flex-1 py-3 text-center border border-sky-600 text-sky-600 rounded-xl hover:bg-sky-50 transition-colors"
           >
             戻る
           </Link>
           <button
             onClick={handleApply}
             disabled={applyMutation.isPending}
-            className="flex-1 py-3 bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             {applyMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             {applyMutation.isPending ? '申し込み中...' : '申し込みを確定する'}
           </button>
         </div>
-
-        <p className="text-xs text-gray-400 mt-4 text-center">
-          申し込みが完了すると、確認ページに移動します。
-        </p>
       </Card>
     </div>
   );
