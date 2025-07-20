@@ -40,19 +40,27 @@ export function createAuthForRuntime(env: Env) {
     env.ENVIRONMENT === "development" ||
     !env.TURSO_DB_URL?.includes(".turso.io");
 
-  // 🆕 trustedOrigins の設定（環境に応じて動的設定）
+  // 動的 trustedOrigins 設定
   const trustedOrigins = isLocalDevelopment
     ? [
-        "http://localhost:5173", // Vite 開発サーバー
-        "http://localhost:8788", // Wrangler 開発サーバー
-        "http://127.0.0.1:5173", // Vite（IPアドレス）
-        "http://127.0.0.1:8788", // Wrangler（IPアドレス）
+        "http://localhost:5173",
+        "http://localhost:4173", 
+        "http://localhost:8788",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:4173",
+        "http://127.0.0.1:8788",
       ]
     : [
-        // 本番・プレビュー環境の場合（実際のドメインに置き換える）
-        "https://your-domain.pages.dev", // プレビュー環境
-        "https://your-production-domain.com", // 本番環境
+        "https://demo-react-event-calendar.pages.dev",
+        // プレビュー環境を包括的に許可
+        "https://*.demo-react-event-calendar.pages.dev",
       ];
+
+  console.log("🔍 Environment debug:", {
+    ENVIRONMENT: env.ENVIRONMENT,
+    isLocalDevelopment,
+    trustedOrigins,
+  });
 
   // ✅ デバッグ用ログ追加
   console.log("🔍 Environment debug:", {
