@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import type { User } from '@shared/types';
+import type { UserWithAnonymous } from 'better-auth/plugins';
+
 
 interface AuthState {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: UserWithAnonymous | null;
+  setUser: (user: UserWithAnonymous | null) => void;
   isAuthenticated: () => boolean;
 }
 

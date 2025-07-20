@@ -1,9 +1,8 @@
 // src/pages/AuthPage.tsx
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSessionQuery } from '@/hooks/useAuth';
-import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { AuthForm } from '../components/auth/AuthForm';
 import Card from '../components/card';
 
@@ -12,27 +11,30 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => !!state.user);
   const { isLoading } = useSessionQuery();
-  const { redirectAfterAuth } = useAuthRedirect();
   
   // URLパスによってモードを切り替え
   const isLogin = location.pathname === '/login';
   const mode = isLogin ? 'login' : 'register';
 
+  // 統一されたリダイレクト処理（useCallback でメモ化）
+  const handleAuthSuccess = useCallback(() => {
+    const from = location.state?.from?.pathname;
+    
+    if (from && from !== '/login' && from !== '/register') {
+      // ProtectedRoute から来た場合：元のページに戻る
+      navigate(from, { replace: true });
+    } else {
+      // 直接アクセスの場合：イベント一覧へ
+      navigate('/events', { replace: true });
+    }
+  }, [location.state?.from?.pathname, navigate]);
+
   // 認証済みユーザーのリダイレクト処理
   useEffect(() => {
     if (isAuthenticated) {
-      // ProtectedRouteからのリダイレクトかどうかを確認
-      const hasRedirectTarget = location.state?.from?.pathname;
-
-      if (hasRedirectTarget) {
-        // ProtectedRouteから来た場合：元のページに戻る
-        redirectAfterAuth();
-      } else {
-        // 直接ログインページにアクセスした場合：イベント一覧へ
-        navigate('/events', { replace: true });
-      }
+      handleAuthSuccess();
     }
-  }, [isAuthenticated, navigate, location.state, redirectAfterAuth]);
+  }, [isAuthenticated, handleAuthSuccess]);
 
   // 🔧 ローディング中または認証済みの場合は何も表示しない
   if (isLoading || isAuthenticated) {
@@ -49,10 +51,10 @@ export default function AuthPage() {
     ? "アカウントにログインしてイベントに参加しましょう"
     : "アカウントを作成してイベントに参加しましょう"}</p>
 
-        <AuthForm mode={mode} onSuccess={redirectAfterAuth} />
+        <AuthForm mode={mode} onSuccess={handleAuthSuccess} />
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mb-6">
             {isLogin ? 'アカウントをお持ちでない方は' : 'すでにアカウントをお持ちの方は'}
           </p>
           <a

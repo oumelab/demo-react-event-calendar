@@ -3,10 +3,11 @@ import { getDbClient } from './db';
 import { errorResponse } from './response';
 import { transformEventRow } from './data';
 import type { RequestContext } from '@shared/cloudflare-types';
-import type { Event, User } from '@shared/types';
+import type { UserWithAnonymous } from 'better-auth/plugins';
+import type { Event } from '@shared/types';
 
 export interface EventAuthResult {
-  user: User;
+  user: UserWithAnonymous;
   event: Event;
   eventId: string;
   client: ReturnType<typeof getDbClient>;
