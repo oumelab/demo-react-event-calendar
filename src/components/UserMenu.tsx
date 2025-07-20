@@ -7,14 +7,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {Link} from "react-router";
-import {User as UserType} from "@shared/types";
+import type { UserWithAnonymous } from "better-auth/plugins";
 import {Calendar, ChevronDown, LogOut, Plus, User} from "lucide-react";
 
 export default function UserMenu({
   user,
   handleLogout,
 }: {
-  user: UserType;
+  user: UserWithAnonymous;
   handleLogout: () => void;
 }) {
   return (
