@@ -84,6 +84,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 - [x] **状態管理** - Zustand による効率的な状態管理 [#29](https://github.com/oumelab/demo-react-event-calendar/issues/29)
 - [x] **ルーティング** - React Router v6 → v7 へのアップデート
 - [x] **イベント申し込み・キャンセル機能** - 参加申し込みとキャンセル機能 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
+- [x] **Anonymous 認証** - 登録なしでゲストとしてイベント申し込みが可能、本アカウントへデータ移行も可能 [#43]
 
 ### 実装予定機能
 
@@ -103,7 +104,7 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 | **データベース**       | Turso（libSQL）                                      |
 | **認証**               | Better Auth                                          |
 | **デプロイ**           | Cloudflare Pages                                     |
-| **開発ツール**         | TypeScript, bun                                      |
+| **開発ツール**         | TypeScript, Bun                                      |
 
 ## 📊 プロジェクト構成図
 
@@ -119,36 +120,36 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 <details>
   <summary>Mermaid</summary>
 
-  ```mermaid
-  graph TB
-      subgraph "クライアント（ブラウザ）"
-          React[React App<br/>Vite + TypeScript]
-          Zustand[Zustand<br/>状態管理]
-          TanStack[TanStack Query<br/>サーバー状態]
-          ReactRouter[React Router v7<br/>ルーティング]
-      end
+```mermaid
+---
+config:
+  theme: neo
+---
+graph TB
+    subgraph "クライアント（ブラウザ）"
+        React[React App<br/>Vite + TypeScript]
+        Zustand[Zustand<br/>状態管理]
+        TanStack[TanStack Query<br/>サーバー状態]
+        ReactRouter[React Router v7<br/>ルーティング]
+    end
+    subgraph "Cloudflare Pages"
+        StaticFiles[静的ファイル配信]
+        Functions[Pages Functions<br/>API endpoints]
+    end
+    subgraph "データベース"
+        Turso[(Turso libSQL)]
+    end
+    subgraph "認証"
+        BetterAuth[Better Auth<br/>セッション管理]
+    end
+    React --> StaticFiles
+    TanStack --> Functions
+    Zustand -.-> TanStack
+    Functions --> Turso
+    Functions --> BetterAuth
+    BetterAuth --> Turso
+```
 
-      subgraph "Cloudflare Pages"
-          StaticFiles[静的ファイル配信]
-          Functions[Pages Functions<br/>API endpoints]
-      end
-
-      subgraph "データベース"
-          Turso[(Turso libSQL)]
-      end
-
-      subgraph "認証"
-          BetterAuth[Better Auth<br/>セッション管理]
-      end
-
-      React --> StaticFiles
-      TanStack --> Functions
-      Zustand -.-> TanStack
-      Functions --> Turso
-      Functions --> BetterAuth
-      BetterAuth --> Turso
-
-  ```
 </details>
 
 ### 🗄️ データベース構成（ER 図）
@@ -164,6 +165,10 @@ React の実践型学習プラットフォーム [React Road](https://react-road
   <summary>Mermaid</summary>
 
 ```mermaid
+---
+config:
+  theme: redux-color
+---
 erDiagram
     users {
         text id PK
@@ -171,6 +176,7 @@ erDiagram
         boolean emailVerified
         text name
         text image
+        boolean isAnonymous
         integer createdAt
         integer updatedAt
     }
@@ -250,50 +256,128 @@ erDiagram
   <summary>Mermaid</summary>
 
 ```mermaid
+---
+config:
+  theme: redux-color
+---
 sequenceDiagram
     participant U as User
     participant C as Component
     participant Z as Zustand Store
     participant T as TanStack Query
-    participant A as API Functions
+    participant A as Better Auth API
     participant D as Database
 
     U->>C: ログインボタンクリック
-    C->>T: useMutation.mutate()
-    T->>A: POST /api/auth/sign-in
-    A->>D: ユーザー認証
-    D-->>A: セッション作成
+    C->>T: authClient.signIn.email()
+    T->>A: Better Auth認証
+    A->>D: ユーザー認証・セッション作成
+    D-->>A: 認証結果
     A-->>T: レスポンス返却
-    T->>T: onSuccess()
     T->>Z: ユーザー情報を更新
     Z-->>C: 状態変更通知
     C-->>U: UI更新
 ```
-</details>
 
+</details>
 
 ### 🌐 API エンドポイント構成
 
 ### **🗓️ イベント管理**
-| エンドポイント            | メソッド | 認証 | 説明           |
-| ------------------------- | -------- | ---- | -------------- |
+
+| エンドポイント            | メソッド | 認証 | 説明             |
+| ------------------------- | -------- | ---- | ---------------- |
 | `/api/events`             | GET      | -    | イベント一覧取得 |
 | `/api/events/[id]`        | GET      | -    | イベント詳細取得 |
-| `/api/events/create`      | POST     | ✅   | イベント作成   |
-| `/api/events/[id]/update` | PUT      | ✅   | イベント更新   |
-| `/api/events/[id]/delete` | DELETE   | ✅   | イベント削除   |
+| `/api/events/create`      | POST     | ✅   | イベント作成     |
+| `/api/events/[id]/update` | PUT      | ✅   | イベント更新     |
+| `/api/events/[id]/delete` | DELETE   | ✅   | イベント削除     |
 
 ### **📝 イベント参加**
-| エンドポイント            | メソッド | 認証 | 説明                     |
-| ------------------------- | -------- | ---- | ------------------------ |
-| `/api/events/[id]/apply`  | POST     | ✅   | イベント申し込み         |
-| `/api/events/[id]/cancel` | DELETE   | ✅   | イベント申し込みキャンセル |
-| `/api/user/registrations` | GET      | ✅   | ユーザー申し込み履歴取得  |
 
-### **🔐 認証**
-| エンドポイント      | メソッド | 認証 | 説明               |
+| エンドポイント            | メソッド | 認証 | 説明                       |
+| ------------------------- | -------- | ---- | -------------------------- |
+| `/api/events/[id]/apply`  | POST     | ✅   | イベント申し込み           |
+| `/api/events/[id]/cancel` | DELETE   | ✅   | イベント申し込みキャンセル |
+| `/api/user/registrations` | GET      | ✅   | ユーザー申し込み履歴取得   |
+
+### **🔐 認証システム**
+
+Better Auth による統一認証エンドポイント
+| エンドポイント | メソッド | 認証 | 説明 |
 | ------------------- | -------- | ---- | ------------------ |
-| `/api/auth/sign-in` | POST     | -    | ユーザーログイン   |
-| `/api/auth/sign-up` | POST     | -    | ユーザー新規登録   |
-| `/api/auth/sign-out`| POST     | ✅   | ユーザーログアウト |
-| `/api/auth/session` | GET      | -    | セッション情報取得 |
+| `/api/auth/sign-in` | POST | - | ユーザーログイン |
+| `/api/auth/sign-up` | POST | - | ユーザー新規登録 |
+| `/api/auth/sign-out`| POST | ✅ | ユーザーログアウト |
+| `/api/auth/session` | GET | - | セッション情報取得 |
+
+> Note: Better Auth の [[catchall]] ハンドラーにより、認証関連のエンドポイントは自動的に提供されます。
+
+## 🚀 Anonymous 認証の特徴
+
+### ゲストユーザー体験
+
+- 登録なしで即体験: 面倒な会員登録なしでイベントの閲覧・申し込みが可能
+- 一時的なデータ保存: 申し込み履歴は匿名ユーザー ID で一時保存
+- スムーズなアップグレード: ワンクリックで正規ユーザーに移行
+
+### データ移行システム
+
+<a href="./public/docs/anonymous-login-flow.png" target="_blank">
+  <picture>
+    <source srcset="./public/docs/anonymous-login-flow.webp" type="image/webp" />
+    <img src="./public/docs/anonymous-login-flow.png" alt="状態管理フロー" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  </picture>
+</a>
+
+<details>
+  <summary>Mermaid</summary>
+
+```mermaid
+graph LR
+    A[ゲストユーザー] --> B[イベント申し込み]
+    B --> C[一時データ保存]
+    C --> D[アカウント作成]
+    D --> E[データ自動移行]
+    E --> F[正規ユーザー]
+
+    style A fill:#e1f5fe
+    style F fill:#e8f5e8
+    style E fill:#fff3e0
+```
+
+</details>
+
+### 移行されるデータ
+
+- ✅ イベント申し込み履歴
+- ✅ ユーザー設定・preferences
+- ✅ セッション情報
+
+## 🔧 開発環境
+
+### 必要なツール
+
+- Node.js: 22.16.0 (.nvmrc で指定)
+- パッケージマネージャー: bun
+- TypeScript: ^5.7.2
+
+### 開発サーバー起動
+
+```bash
+# フロントエンド (Vite)
+bun run dev
+
+# バックエンド (Wrangler + Vite)
+bunx wrangler pages dev -- bun run dev
+```
+
+### ビルド・プレビュー
+
+```bash
+# ビルド
+bun run build
+
+# プレビュー
+bun run preview
+```
