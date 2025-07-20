@@ -1,70 +1,154 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// src/hooks/useAuth.ts (Better Auth版)
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { authClient } from '@/lib/auth-client';
+import { useAuthStore } from '@/stores/auth-store';
 import { toast } from 'sonner';
-import { signIn, signUp, signOut, getSession, queryKeys } from '@/lib/api';
 import type { LoginCredentials, RegisterCredentials } from '@shared/types';
+import type { UserWithAnonymous } from 'better-auth/plugins';
 
-/**
- * セッション情報を取得するためのQueryフック
- */
+// TanStack Query用のキー定義
+export const authQueryKeys = {
+  session: ['auth', 'session'] as const,
+  user: ['auth', 'user'] as const,
+} as const;
+
+// セッション取得Query
 export function useSessionQuery() {
   return useQuery({
-    queryKey: queryKeys.session,
-    queryFn: getSession,
-    retry: false, // 認証失敗時にリトライはしない
-    refetchOnWindowFocus: true, // ウィンドウにフォーカスが戻った時にセッションを再確認
-    staleTime: 5 * 60 * 1000, // 5分間はキャッシュを新鮮なものとして扱う
+    queryKey: authQueryKeys.session,
+    queryFn: async () => {
+      const { data, error } = await authClient.getSession();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5分間
+    gcTime: 10 * 60 * 1000, // 10分間
+    retry: false,
   });
 }
 
-/**
- * ログイン、新規登録、ログアウトのMutationをまとめたフック
- */
+// 認証Mutations
 export function useAuthMutations() {
   const queryClient = useQueryClient();
+  const setUser = useAuthStore((state) => state.setUser);
 
-  // 認証状態が変化した時にセッション情報を再取得する共通処理
-  const invalidateSession = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.session });
-  };
-
+  // ログインMutation
   const loginMutation = useMutation({
-    mutationFn: (credentials: LoginCredentials) => signIn(credentials),
+    mutationFn: async (credentials: LoginCredentials) => {
+      const { data, error } = await authClient.signIn.email({
+        email: credentials.email,
+        password: credentials.password,
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data;
+    },
     onSuccess: (data) => {
-      if (!data.success) {
-        throw new Error(data.error || 'ログインに失敗しました');
+      if (data?.user) {
+        // 🔧 isAnonymous は Better Auth の user には含まれていない
+        setUser({
+          ...data.user,
+          image: data.user.image ?? undefined, // null → undefined 変換
+        } as UserWithAnonymous);
+        queryClient.setQueryData(authQueryKeys.session, data);
       }
       toast.success('ログインしました');
-      invalidateSession();
     },
+    // onError削除 - エラー時はtoast表示しない
   });
 
+  // 新規登録Mutation
   const registerMutation = useMutation({
-    mutationFn: (credentials: RegisterCredentials) => signUp(credentials),
+    mutationFn: async (credentials: RegisterCredentials) => {
+      const { data, error } = await authClient.signUp.email({
+        email: credentials.email,
+        password: credentials.password,
+        name: credentials.name,
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data;
+    },
     onSuccess: (data) => {
-      if (!data.success) {
-        throw new Error(data.error || '新規登録に失敗しました');
+      if (data?.user) {
+        // 🔧 isAnonymous は Better Auth の user には含まれていない
+        setUser({
+          ...data.user,
+          image: data.user.image ?? undefined, // null → undefined 変換
+        } as UserWithAnonymous);
+        queryClient.setQueryData(authQueryKeys.session, data);
       }
       toast.success('アカウントを作成しました');
-      invalidateSession();
     },
+    // onError削除 - エラー時はtoast表示しない
   });
 
+  // ログアウトMutation
   const logoutMutation = useMutation({
-    mutationFn: signOut,
-    onSuccess: () => {
-      toast.success('ログアウトしました');
-      // ログアウト時はキャッシュを即座にクリアして未認証状態にする
-      queryClient.setQueryData(queryKeys.session, { success: true, authenticated: false });
-      invalidateSession();
+    mutationFn: async () => {
+      const { error } = await authClient.signOut();
+      
+      if (error) {
+        throw new Error(error.message);
+      }
     },
+    onSuccess: () => {
+      setUser(null);
+      queryClient.setQueryData(authQueryKeys.session, null);
+      queryClient.removeQueries({ queryKey: authQueryKeys.session });
+      queryClient.clear();
+      toast.success('ログアウトしました');
+    },
+    // onError削除 - エラー時はtoast表示しない
+  });
+
+  // 🆕 匿名ログインMutation
+  const anonymousLoginMutation = useMutation({
+    mutationFn: async () => {
+      queryClient.clear();
+
+      const { data, error } = await authClient.signIn.anonymous();
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data?.user) {
+        // 🎯 匿名ログイン時のみ isAnonymous を true に、image フィールドが存在しない
+        setUser({
+          ...data.user,
+          image: undefined,
+          isAnonymous: true // 匿名ログインなので true
+        } as UserWithAnonymous);
+        queryClient.setQueryData(authQueryKeys.session, data);
+      }
+      toast.success('ゲストとしてログインしました');
+    },
+    // onError削除 - エラー時はtoast表示しない、呼び出し元でハンドリング
   });
 
   return {
+    // 関数
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
+    anonymousLogin: anonymousLoginMutation.mutateAsync, // 🆕 匿名ログイン追加
+    
+    // ローディング状態
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
+    isAnonymousLogging: anonymousLoginMutation.isPending, // 🆕 匿名ログインローディング状態
   };
 }

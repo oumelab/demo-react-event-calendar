@@ -1,4 +1,6 @@
 // フロントとバックエンドで共有する型定義
+import type { UserWithAnonymous } from 'better-auth/plugins';
+import type { Session } from 'better-auth/types';
 
 // 既存のEvent型
 export interface Event {
@@ -17,29 +19,13 @@ export interface EventWithAttendees extends Event {
   attendees: number;
 }
 
-// 認証関連の型定義
-export interface User {
-  id: string;
-  email: string;
-  emailVerified: boolean;
-  name: string | null;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Session {
-  id: string;
-  userId: string;
-  expiresAt: Date;
-  user: User;
-}
+// User型と Session型は Better Auth のものを使用
 
 // API レスポンス用の型
 export interface AuthResponse {
   success: boolean;
   authenticated: boolean;
-  user?: User;
+  user?: UserWithAnonymous;
   session?: Session;
   message?: string;
   error?: string;
@@ -70,9 +56,6 @@ export interface Attendee {
   user_id?: string; // オプショナルで既存データとの互換性保持
 }
 
-export interface AttendeeWithUser extends Attendee {
-  user?: User;
-}
 
 // 🆕 Issue #5: イベント申し込み・キャンセル機能用の型定義
 // ===============================================================

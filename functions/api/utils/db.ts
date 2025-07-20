@@ -40,12 +40,27 @@ export function createAuthForRuntime(env: Env) {
     env.ENVIRONMENT === "development" ||
     !env.TURSO_DB_URL?.includes(".turso.io");
 
+  // 🆕 trustedOrigins の設定（環境に応じて動的設定）
+  const trustedOrigins = isLocalDevelopment
+    ? [
+        "http://localhost:5173", // Vite 開発サーバー
+        "http://localhost:8788", // Wrangler 開発サーバー
+        "http://127.0.0.1:5173", // Vite（IPアドレス）
+        "http://127.0.0.1:8788", // Wrangler（IPアドレス）
+      ]
+    : [
+        // 本番・プレビュー環境の場合（実際のドメインに置き換える）
+        "https://your-domain.pages.dev", // プレビュー環境
+        "https://your-production-domain.com", // 本番環境
+      ];
+
   // ✅ デバッグ用ログ追加
   console.log("🔍 Environment debug:", {
     ENVIRONMENT: env.ENVIRONMENT,
     hasTursoUrl: !!env.TURSO_DB_URL,
     includesTurso: env.TURSO_DB_URL?.includes(".turso.io"),
     isLocalDevelopment,
+    trustedOrigins,
   });
 
   return betterAuth({
@@ -54,6 +69,8 @@ export function createAuthForRuntime(env: Env) {
       type: "sqlite",
     },
     secret: env.BETTER_AUTH_SECRET || "dev-secret-min-32-chars",
+
+    trustedOrigins,
 
     emailAndPassword: {
       enabled: true,
@@ -72,7 +89,7 @@ export function createAuthForRuntime(env: Env) {
       storeSessionInDatabase: true, // データベースにセッション保存
     },
 
-    // 🆕 Anonymous プラグイン追加
+    // Anonymous プラグイン追加
     plugins: [
       anonymous({
         emailDomainName: "demo-events.local", // プロジェクト専用ドメイン
@@ -83,14 +100,46 @@ export function createAuthForRuntime(env: Env) {
             `🔄 匿名ユーザー ${anonymousUser.user.id} → 正規ユーザー ${newUser.user.id} にデータを移行しました`
           );
 
-          // 将来的にここで実際のデータ移行処理を実装
-          // 例：イベント申し込み履歴の移行など
-          //
-          // const client = getDbClient(env);
-          // await client.execute({
-          //   sql: 'UPDATE attendees SET user_id = ? WHERE user_id = ?',
-          //   args: [newUser.user.id, anonymousUser.user.id]
-          // });
+          try {
+            const client = getDbClient(env);
+
+            // 1. イベント申し込み履歴の移行
+            const attendeesUpdateResult = await client.execute({
+              sql: "UPDATE attendees SET user_id = ? WHERE user_id = ?",
+              args: [newUser.user.id, anonymousUser.user.id],
+            });
+
+            console.log(
+              `✅ 申し込み履歴 ${attendeesUpdateResult.rowsAffected} 件を移行完了`
+            );
+
+            // 2. 作成したイベントの移行（将来的に匿名ユーザーでも作成可能になった場合）
+            const eventsUpdateResult = await client.execute({
+              sql: "UPDATE events SET creator_id = ? WHERE creator_id = ?",
+              args: [newUser.user.id, anonymousUser.user.id],
+            });
+
+            if (eventsUpdateResult.rowsAffected > 0) {
+              console.log(
+                `✅ 作成イベント ${eventsUpdateResult.rowsAffected} 件を移行完了`
+              );
+            }
+
+            // 3. その他のユーザー関連データの移行（将来の拡張用）
+            // 例：お気に入り、通知設定、閲覧履歴など
+
+            console.log(
+              `🎉 データ移行完了: ${anonymousUser.user.id} → ${newUser.user.id}`
+            );
+          } catch (error) {
+            console.error("❌ データ移行中にエラーが発生:", error);
+
+            // エラーが発生しても登録処理は継続させる
+            // Better Auth のアカウント作成は成功させ、データ移行のみ失敗とする
+            console.log(
+              "⚠️ アカウント作成は完了、データ移行はスキップされました"
+            );
+          }
         },
       }),
     ],

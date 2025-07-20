@@ -1,12 +1,12 @@
-import { getDbClient } from '../utils/db';
-import { getCurrentUser } from '../utils/auth';
-import { validateRequest, isValidationError } from '../utils/validation';
-import { CreateEventSchema } from '../../../shared/schemas';
-import { jsonResponse, errorResponse } from '../utils/response';
-import { transformEventRow } from '../utils/data';
-import type { RequestContext } from '../../../shared/cloudflare-types';
-import type { EventOperationResponse } from '../../../shared/types';
 import { createId } from '@paralleldrive/cuid2';
+import type { RequestContext } from '../../../shared/cloudflare-types';
+import { CreateEventSchema } from '../../../shared/schemas';
+import type { EventOperationResponse } from '../../../shared/types';
+import { getCurrentUser } from '../utils/auth';
+import { transformEventRow } from '../utils/data';
+import { getDbClient } from '../utils/db';
+import { errorResponse, jsonResponse } from '../utils/response';
+import { isValidationError, validateRequest } from '../utils/validation';
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== 'POST') {
@@ -18,6 +18,14 @@ export async function onRequest(context: RequestContext) {
     const user = await getCurrentUser(context.request, context.env);
     if (!user) {
       return errorResponse('認証が必要です', 401);
+    }
+
+    // 匿名ユーザー制限を追加
+    if (user.isAnonymous) {
+      return errorResponse(
+        'イベントの作成には正規のアカウント登録が必要です。アカウントを作成してください。', 
+        403
+      );
     }
 
     // リクエストボディを取得

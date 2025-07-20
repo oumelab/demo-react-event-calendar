@@ -211,10 +211,12 @@ export default function EventApply() {
               <span className="font-medium text-gray-700">お名前:</span>
               <span className="ml-2">{user?.name}</span>
             </div>
+            {!user?.isAnonymous && (
             <div>
               <span className="font-medium text-gray-700">メールアドレス:</span>
               <span className="ml-2">{user?.email}</span>
             </div>
+            )}
           </div>
         </div>
 

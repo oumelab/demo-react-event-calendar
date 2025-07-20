@@ -1,32 +1,27 @@
+// src/components/auth/AuthSyncer.tsx
 import { useEffect } from 'react';
 import { useSessionQuery } from '@/hooks/useAuth';
 import { useAuthStore } from '@/stores/auth-store';
+import { UserWithAnonymous } from 'better-auth/plugins';
 
-/**
- * Tanstack Query のセッション状態を Zustand ストアに同期させるためのコンポーネント
- * 無限ループを防ぐため、ユーザーIDを比較して本当に必要な時だけ状態を更新する
- */
 export function AuthSyncer() {
-  // サーバーからの認証状態を取得
   const { data: sessionData, isLoading } = useSessionQuery();
-
-  // 状態を個別に取得することで、不要な再レンダリングと型エラーを回避する
   const currentUser = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
 
   useEffect(() => {
-    // ローディングが完了していることを確認
     if (!isLoading) {
-      const serverUser = sessionData?.success && sessionData.authenticated ? sessionData.user : null;
-
-      // 現在ストアにいるユーザーのIDと、サーバーから取得したユーザーのIDを比較する
+      const serverUser = sessionData?.user ?? null;
+      
+      // ユーザーIDが変わった場合のみ更新
       if (currentUser?.id !== serverUser?.id) {
-        // IDが異なる場合のみ、Zustandストアの状態を更新する
-        setUser(serverUser ?? null);
+        setUser(serverUser ? {
+          ...serverUser,
+          isAnonymous: serverUser.isAnonymous ?? false
+        } as UserWithAnonymous : null);
       }
     }
-  }, [sessionData, isLoading, currentUser, setUser]);
+  }, [sessionData, isLoading, currentUser?.id, setUser]);
 
-  // このコンポーネントはUIを描画しない
-  return null;
+  return null; // UIを持たない
 }

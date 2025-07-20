@@ -10,8 +10,26 @@ import {
 } from '@/lib/api';
 import type { 
   EventWithAttendees,
-  User 
 } from '@shared/types';
+import type { UserWithAnonymous } from 'better-auth/plugins';
+import { useAuthStore } from '@/stores/auth-store';
+
+// ========== ユーザー固有クエリキー定義 ==========
+
+/**
+ * ユーザー固有のクエリキー定義
+ */
+export const userSpecificQueryKeys = {
+  // ユーザーIDを含む申し込み履歴クエリキー（ページネーション対応）
+  userRegistrations: (userId: string) => 
+    ['user-registrations', 'user', userId] as const,
+  userRegistrationsPaginated: (userId: string, limit: number, offset: number) => 
+    ['user-registrations', 'user', userId, { limit, offset }] as const,
+  
+  // ユーザーIDを含むイベント申し込み状況クエリキー
+  eventRegistrationStatus: (eventId: string, userId: string) => 
+    ['event-registration', 'status', eventId, userId] as const,
+} as const;
 
 // ========== イベント申し込み・キャンセル用Mutation ==========
 
@@ -23,21 +41,27 @@ import type {
 export function useEventApply() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: (eventId: string) => applyToEvent(eventId),
     onSuccess: (_, eventId: string) => {
+      // ユーザー固有のクエリキーで無効化（ページネーション対応）
+      if (user?.id) {
+        queryClient.invalidateQueries({ 
+          queryKey: userSpecificQueryKeys.userRegistrations(user.id) 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: userSpecificQueryKeys.eventRegistrationStatus(eventId, user.id) 
+        });
+      }
+
       // 関連するクエリのキャッシュを無効化してリフレッシュ
       queryClient.invalidateQueries({ queryKey: queryKeys.events });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.userRegistrations });
-      
-      // 楽観的更新のためにイベント申し込み状況もクリア
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.eventRegistrationStatus(eventId) 
-      });
 
-      // 🆕 申し込み完了ページへ自動遷移
+      // 申し込み完了ページへ自動遷移
       navigate(`/events/${eventId}/confirm`, {
         state: { fromApplication: true }, // 正当な申し込み経由であることを示すフラグ
         replace: true,
@@ -58,21 +82,27 @@ export function useEventApply() {
 export function useEventCancel() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: (eventId: string) => cancelEventRegistration(eventId),
     onSuccess: (_, eventId: string) => {
+      // ユーザー固有のクエリキーで無効化（ページネーション対応）
+      if (user?.id) {
+        queryClient.invalidateQueries({ 
+          queryKey: userSpecificQueryKeys.userRegistrations(user.id) 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: userSpecificQueryKeys.eventRegistrationStatus(eventId, user.id) 
+        });
+      }
+
       // 関連するクエリのキャッシュを無効化してリフレッシュ
       queryClient.invalidateQueries({ queryKey: queryKeys.events });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.userRegistrations });
       
-      // 楽観的更新のためにイベント申し込み状況もクリア
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.eventRegistrationStatus(eventId) 
-      });
-
-      // 🆕 キャンセル完了ページへ自動遷移
+      // キャンセル完了ページへ自動遷移
       navigate(`/events/${eventId}/cancel-complete`, {
         state: { 
           fromCancellation: true
@@ -90,13 +120,17 @@ export function useEventCancel() {
 // ========== ユーザー申し込み履歴用Query ==========
 
 /**
- * ユーザーの申し込み履歴取得用Query
+ * ユーザーの申し込み履歴取得用Query（ユーザー固有キー対応）
  * ページネーション対応
  */
 export function useUserRegistrations(limit: number = 20, offset: number = 0) {
+  const user = useAuthStore((state) => state.user);
+
   return useQuery({
-    queryKey: queryKeys.userRegistrationsPaginated(limit, offset),
+    // ユーザーIDを含むページネーション対応クエリキー
+    queryKey: user?.id ? userSpecificQueryKeys.userRegistrationsPaginated(user.id, limit, offset) : [],
     queryFn: () => getUserRegistrations(limit, offset),
+    enabled: !!user?.id, // ユーザーIDが存在する場合のみクエリ実行
     staleTime: 1000 * 60 * 5, // 5分間はキャッシュを使用
     gcTime: 1000 * 60 * 30,   // 30分間メモリに保持（旧cacheTime）
     retry: (failureCount, error) => {
@@ -126,7 +160,7 @@ export function useUserRegistrationsSimple() {
 export function useEventRegistrationStatus(
   eventId: string, 
   event?: EventWithAttendees, 
-  user?: User | null
+  user?: UserWithAnonymous | null
 ) {
   const { data: userRegistrations } = useUserRegistrationsSimple();
   

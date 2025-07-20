@@ -20,7 +20,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { login, isLoggingIn } = useAuthMutations();
+  const { login, isLoggingIn, anonymousLogin, isAnonymousLogging } = useAuthMutations();
   
   const form = useForm<LoginFormData>({
     resolver: zodResolver(LoginSchema),
@@ -36,6 +36,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       onSuccess();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'ログインに失敗しました';
+      form.setError('root', { type: 'manual', message });
+    }
+  };
+
+   // 🆕 匿名ログイン処理（既存パターンに合わせて実装）
+  const handleAnonymousLogin = async () => {
+    try {
+      await anonymousLogin();
+      onSuccess();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'ゲストログインに失敗しました';
       form.setError('root', { type: 'manual', message });
     }
   };
@@ -101,6 +112,48 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         >
           {isLoggingIn ? '処理中...' : 'ログイン'}
         </Button>
+
+        {/* 🆕 区切り線 */}
+        <div className="my-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">または</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 🆕 匿名ログインボタン */}
+        <Button
+          type="button"
+          onClick={handleAnonymousLogin}
+          disabled={isAnonymousLogging || form.formState.isSubmitting}
+          className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+            isAnonymousLogging || form.formState.isSubmitting
+              ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+          }`}
+        >
+          {isAnonymousLogging ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              ゲストログイン中...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center">
+              🎭 ゲストとして試用する
+            </span>
+          )}
+        </Button>
+
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          アカウント登録不要でイベントを閲覧・申し込みできます
+        </p>
       </form>
     </Form>
   );
