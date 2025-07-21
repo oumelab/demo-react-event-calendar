@@ -124,7 +124,7 @@ export function UpgradeAccountDialog({ open, onClose, onSuccess }: UpgradeAccoun
         </DialogHeader>
 
         {/* データ移行の説明 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-5 mb-4">
           <h4 className="flex items-center gap-2 font-bold text-sky-700 mb-3">
             移行されるデータ
           </h4>
@@ -138,6 +138,7 @@ export function UpgradeAccountDialog({ open, onClose, onSuccess }: UpgradeAccoun
               閲覧履歴・設定
             </li>
           </ul>
+          {/* <p className="text-sm text-gray-500 mt-4">※ デモ運用のため、ダミーのメールアドレスでも登録できます。</p> */}
         </div>
 
         <Form {...form}>

@@ -117,7 +117,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         <div className="my-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
+              <span className="w-full border-t border-blue-200" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-gray-500">または</span>
@@ -132,8 +132,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           disabled={isAnonymousLogging || form.formState.isSubmitting}
           className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
             isAnonymousLogging || form.formState.isSubmitting
-              ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+              ? "bg-gray-400 text-gray-700 border-sky-700 cursor-not-allowed"
+              : "bg-gray-50 text-gray-600 hover:bg-blue-50 border hover:text-sky-600 border-blue-300 cursor-pointer"
           }`}
         >
           {isAnonymousLogging ? (
@@ -146,7 +146,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </span>
           ) : (
             <span className="flex items-center justify-center">
-              🎭 ゲストとして試用する
+              👤 ゲストとして試用する
             </span>
           )}
         </Button>

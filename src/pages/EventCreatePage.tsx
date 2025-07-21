@@ -45,29 +45,29 @@ export default function EventCreatePage() {
       {/* イベント作成フォーム or 匿名ユーザーの場合のメッセージ */}
       <Card>
         {user?.isAnonymous ? (
-          <div className="text-center py-8">
+          <div className="w-full py-8">
             <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-left w-fit mx-auto">
               イベントの作成にはアカウント登録が必要です。
             </h2>
-            <div className="bg-sky-50 border border-blue-200 rounded-lg p-4 my-6">
-              <h3 className="font-semibold mb-2">
-                現在のゲスト活動：
+            <div className="bg-sky-50 border border-blue-200 rounded-lg px-4 md:py-4 my-6 grid grid-cols-1 md:grid-cols-2 gap-0 md:min-h-56">
+              <div className="py-6 md:py-4">
+              <h3 className="font-semibold text-sky-900 mb-2 w-fit mx-auto">
+                現在のゲスト活動
               </h3>
-              <ul className="text-sm text-sky-600 text-left space-y-1 py-2 w-fit mx-auto list-disc">
+              <ul className="text-sm text-sky-600 text-left space-y-1 pt-2 w-fit mx-auto list-disc">
                 <li>イベント閲覧・申し込み ✓</li>
                 <li>申し込み履歴の一時保存 ✓</li>
               </ul>
-              
-              <div className="mt-3 pt-3 border-t border-blue-200">
-                <h4 className="font-semibold mb-2">
-                  アカウント登録で追加される機能：
+              </div>
+              <div className="py-6 md:py-4 border-t md:border-t-0 md:border-l border-blue-200">
+                <h4 className="font-semibold text-sky-900 mb-2 w-fit mx-auto">
+                  アカウント登録で追加される機能
                 </h4>
-                <ul className="text-sm text-sky-600 text-left space-y-1 py-2 w-fit mx-auto list-disc">
+                <ul className="text-sm text-sky-600 text-left space-y-1 pt-2 w-fit mx-auto list-disc">
                   <li>イベントの作成・管理</li>
                   <li>申し込み履歴の永続保存</li>
                   <li>イベント情報の編集・削除</li>
-                  <li>参加者との連絡機能</li>
                 </ul>
               </div>
             </div>
@@ -83,8 +83,8 @@ export default function EventCreatePage() {
                 </div>
               </Button>
             
-            <p className="mt-4 text-sm text-zinc-500">
-              ゲストをログアウトして新規登録フォームへ移動します
+            <p className="mt-4 text-sm text-zinc-500 w-fit mx-auto">
+              デモ運用のため、メールアドレス等はダミーでも登録できます。
             </p>
           </div>
         ) : (
