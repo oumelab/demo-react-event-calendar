@@ -62,6 +62,26 @@ React の実践型学習プラットフォーム [React Road](https://react-road
       <p><em>イベント作成フォーム</em></p>
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center" style="padding: 8px;">
+    <a href="./public/docs/screenshot/screenshot-7.png" target="_blank">
+        <picture>
+          <source srcset="./public/docs/screenshot/screenshot-7.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot-7.png" alt="申し込み履歴ページ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+        </picture>
+        </a>
+      <p><em>イベント申し込み履歴ページ</em></p>
+    </td>
+    <td width="50%" align="center" style="padding: 8px;">
+    <a href="./public/docs/screenshot/screenshot-8.png" target="_blank">
+        <picture>
+          <source srcset="./public/docs/screenshot/screenshot-8.webp" type="image/webp" />
+          <img src="./public/docs/screenshot/screenshot-8.png" alt="本アカウント登録ダイアログ" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+        </picture>
+        </a>
+      <p><em>Anonymous→本アカウント登録ダイアログ</em></p>
+    </td>
+  </tr>
 </table>
 
 ## ✨ 主な機能
