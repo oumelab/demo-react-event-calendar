@@ -143,13 +143,13 @@ export default function UserRegistrationsPage() {
 
     return (
       <Card key={registration.id}>
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* イベント画像 */}
-          <div className="md:w-48 h-32 flex-shrink-0">
+          <div className="w-full md:w-48 h-auto flex-shrink-0">
             <img
               src={event.image_url || DEFAULT_IMAGE}
               alt={event.title}
-              className="w-full h-full object-cover rounded-lg"
+              className="aspect-video md:aspect-auto w-full h-full object-cover rounded-lg"
             />
           </div>
 
@@ -206,8 +206,8 @@ export default function UserRegistrationsPage() {
             )}
 
             {/* アクションボタン */}
-            <div className="flex gap-2">
-              <Button asChild variant="outline">
+            <div className="mt-6 flex flex-col sm:flex-row gap-2">
+              <Button asChild variant="outline" className="flex-1 lg:flex-none lg:w-56">
                 <Link
                   to={`/events/${event.id}`}
                   className="px-4 py-2 text-sm border border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors"
@@ -221,7 +221,7 @@ export default function UserRegistrationsPage() {
                   variant="destructive"
                   onClick={() => setShowCancelDialog(event.id)}
                   disabled={cancelMutation.isPending}
-                  className="px-4 py-2 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 lg:flex-none lg:w-56 px-4 py-2 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {cancelMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
