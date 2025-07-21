@@ -84,13 +84,17 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 - [x] **状態管理** - Zustand による効率的な状態管理 [#29](https://github.com/oumelab/demo-react-event-calendar/issues/29)
 - [x] **ルーティング** - React Router v6 → v7 へのアップデート
 - [x] **イベント申し込み・キャンセル機能** - 参加申し込みとキャンセル機能 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
-- [x] **Anonymous 認証** - 登録なしでゲストとしてイベント申し込みが可能、本アカウントへデータ移行も可能 [#43]
+- [x] **Anonymous 認証** - 登録なしでゲストとしてイベント申し込みが可能、本アカウントへデータ移行も可能 [#43](https://github.com/oumelab/demo-react-event-calendar/issues/43)
 
 ### 実装予定機能
 
 - [ ] **イベント作成履歴** - イベント作成履歴の表示 [#40](https://github.com/oumelab/demo-react-event-calendar/issues/40)
 - [ ] **画像アップロード** - イベント画像のアップロード機能 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 - [ ] **ユーザー情報編集機能** - ユーザープロフィールページ・ユーザー情報の編集機能実装 [#18](https://github.com/oumelab/demo-react-event-calendar/issues/18)
+- [ ] **イベント終了日時** - イベントの終了日時を設定 [#42](https://github.com/oumelab/demo-react-event-calendar/issues/42)
+- [ ] **Google カレンダーに追加** - イベントを Google カレンダーに追加
+- [ ] **ページネーション** - イベント一覧のページネーション
+- [ ] **イベント検索機能** - イベント検索機能
 - [ ] **メール通知** - メール通知システム実装 [#28](https://github.com/oumelab/demo-react-event-calendar/issues/28)
 
 ## 🛠️ 使用技術
@@ -311,7 +315,7 @@ Better Auth による統一認証エンドポイント
 | `/api/auth/sign-out`| POST | ✅ | ユーザーログアウト |
 | `/api/auth/session` | GET | - | セッション情報取得 |
 
-> Note: Better Auth の [[catchall]] ハンドラーにより、認証関連のエンドポイントは自動的に提供されます。
+> Note: Better Auth の [[catchall]] ハンドラーにより、認証関連のエンドポイントは自動的に提供される。
 
 ## 🚀 Anonymous 認証の特徴
 
