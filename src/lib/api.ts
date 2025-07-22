@@ -1,8 +1,5 @@
 import type { 
   EventWithAttendees, 
-  AuthResponse, 
-  LoginCredentials, 
-  RegisterCredentials,
   CreateEventRequest,
   UpdateEventRequest,
   EventOperationResponse,
@@ -73,7 +70,7 @@ export async function deleteEvent(id: string): Promise<EventOperationResponse> {
   return response.json();
 }
 
-// ========== 🆕 イベント申し込み・キャンセル関連API（新規追加） ==========
+// ========== イベント申し込み・キャンセル関連API ==========
 
 /**
  * イベント申し込み
@@ -119,40 +116,6 @@ export async function getUserRegistrations(
   const response = await fetchWithCredentials(
     `${API_BASE_URL}/user/registrations?${params}`
   );
-  return response.json();
-}
-
-// ========== 認証関連API ==========
-
-// ログイン
-export async function signIn(credentials: LoginCredentials): Promise<AuthResponse> {
-  const response = await fetchWithCredentials(`${API_BASE_URL}/auth/sign-in`, {
-    method: 'POST',
-    body: JSON.stringify(credentials),
-  });
-  return response.json();
-}
-
-// 新規登録
-export async function signUp(credentials: RegisterCredentials): Promise<AuthResponse> {
-  const response = await fetchWithCredentials(`${API_BASE_URL}/auth/sign-up`, {
-    method: 'POST',
-    body: JSON.stringify(credentials),
-  });
-  return response.json();
-}
-
-// セッション確認
-export async function getSession(): Promise<AuthResponse> {
-  const response = await fetchWithCredentials(`${API_BASE_URL}/auth/session`);
-  return response.json();
-}
-
-// ログアウト
-export async function signOut(): Promise<AuthResponse> {
-  const response = await fetchWithCredentials(`${API_BASE_URL}/auth/sign-out`, {
-    method: 'POST',
-  });
   return response.json();
 }
 
