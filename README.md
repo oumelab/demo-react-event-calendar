@@ -15,7 +15,8 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 
 [👀 View Demo site](https://demo-react-event-calendar.pages.dev/)
 <br />
-匿名ログイン（アカウント登録不要）で気軽に申し込み・キャンセル機能を試用可能です。
+<p>匿名ログイン（アカウント登録不要）で気軽に申し込み・キャンセル機能を試用可能です。</p>
+<br />
 
 <!-- デスクトップ表示用テーブル（2行2列） -->
 <table style="border-collapse: collapse; width: 100%;">
