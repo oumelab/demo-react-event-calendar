@@ -43,9 +43,6 @@ export interface RegisterCredentials {
   name: string;
 }
 
-// 既存のSignInRequest/SignUpRequestはエイリアスとして保持
-export type SignInRequest = LoginCredentials;
-export type SignUpRequest = RegisterCredentials;
 
 // Attendee型の拡張（認証対応）
 export interface Attendee {

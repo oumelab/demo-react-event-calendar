@@ -18,25 +18,6 @@ export function transformAttendeeRow(row: unknown): Attendee {
   };
 }
 
-// ✅ 残す: Better Auth 結果の抽出（簡略版）
-export function extractUserFromAuthResult(result: unknown) {
-  if (typeof result !== 'object' || result === null) {
-    return null;
-  }
-  
-  const authResult = result as Record<string, unknown>;
-  return authResult.user || null;
-}
-
-export function extractSessionFromAuthResult(result: unknown) {
-  if (typeof result !== 'object' || result === null) {
-    return null;
-  }
-  
-  const authResult = result as Record<string, unknown>;
-  return authResult.session || null;
-}
-
 // ヘルパー関数
 function safeString(value: unknown, defaultValue = ''): string {
   return value ? String(value) : defaultValue;

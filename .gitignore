@@ -36,3 +36,8 @@ functions/.wrangler/
 functions/**/.wrangler/
 cookies.txt
 *.cookie
+
+# Bundle Analysis
+bundle-analysis/
+stats.html
+stats-*.html
