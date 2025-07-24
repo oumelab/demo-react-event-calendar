@@ -6,9 +6,9 @@ import { transformEventRow } from '../utils/data';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { validateRequest, isValidationError } from '../utils/validation';
 import { conditionalLog, conditionalError } from '../utils/logger';
-import { UserCreatedEventsQuerySchema } from '@shared/schemas';
-import type { RequestContext } from '@shared/cloudflare-types';
-import type { UserCreatedEventsResponse, UserCreatedEvent } from '@shared/types';
+import { UserCreatedEventsQuerySchema } from '../../../shared/schemas';
+import type { RequestContext } from '../../../shared/cloudflare-types';
+import type { UserCreatedEventsResponse, UserCreatedEvent } from '../../../shared/types';
 
 /**
  * ユーザーが作成したイベント履歴を取得するAPI
