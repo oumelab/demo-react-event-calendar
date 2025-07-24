@@ -32,6 +32,10 @@ export default defineConfig({
     },
   },
   server: {
+    // Postman からのアクセスを許可
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: ['localhost', '127.0.0.1', 'all'],
     proxy: {
       // 開発環境のみで有効
       "/api": {
