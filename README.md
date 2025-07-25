@@ -108,10 +108,10 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 - [x] **イベント申し込み・キャンセル機能** - 参加申し込みとキャンセル機能 [#5](https://github.com/oumelab/demo-react-event-calendar/issues/5)
 - [x] **Anonymous 認証** - 登録なしでゲストとしてイベント申し込みが可能、本アカウントへデータ移行も可能 [#43](https://github.com/oumelab/demo-react-event-calendar/issues/43)
 - [x] **バンドルサイズ分析・最適化** - `rollup -plugin-visualizer`導入、チャンク分割・動的インポートによるバンドルサイズ削減・最適化 [#45](https://github.com/oumelab/demo-react-event-calendar/issues/45)
+- [x] **イベント作成履歴** - イベント作成履歴の表示 [#40](https://github.com/oumelab/demo-react-event-calendar/issues/40)
 
 ### 実装予定機能
 
-- [ ] **イベント作成履歴** - イベント作成履歴の表示 [#40](https://github.com/oumelab/demo-react-event-calendar/issues/40)
 - [ ] **画像アップロード** - イベント画像のアップロード機能 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 - [ ] **ユーザー情報編集機能** - ユーザープロフィールページ・ユーザー情報の編集機能実装 [#18](https://github.com/oumelab/demo-react-event-calendar/issues/18)
 - [ ] **イベント終了日時** - イベントの終了日時を設定 [#42](https://github.com/oumelab/demo-react-event-calendar/issues/42)
@@ -327,6 +327,7 @@ sequenceDiagram
 | `/api/events/[id]/apply`  | POST     | ✅   | イベント申し込み           |
 | `/api/events/[id]/cancel` | DELETE   | ✅   | イベント申し込みキャンセル |
 | `/api/user/registrations` | GET      | ✅   | ユーザー申し込み履歴取得   |
+| `/api/user/created-events` | GET      | ✅   | ユーザーイベント作成履歴取得   |
 
 ### **🔐 認証システム**
 
