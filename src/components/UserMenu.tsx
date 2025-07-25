@@ -1,4 +1,4 @@
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,9 +6,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Link} from "react-router";
-import type {UserWithAnonymous} from "better-auth/plugins";
-import {Calendar, ChevronDown, LogOut, Plus, User} from "lucide-react";
+import type { UserWithAnonymous } from "better-auth/plugins";
+import { ChevronDown, History, List, LogOut, Plus, User } from "lucide-react";
+import { Link } from "react-router";
 
 export default function UserMenu({
   user,
@@ -53,7 +53,7 @@ export default function UserMenu({
               to="/user/registrations"
               className="w-full flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors cursor-pointer"
             >
-              <Calendar size={14} />
+              <History size={14} />
               申し込み履歴
             </Link>
           </DropdownMenuItem>
@@ -64,7 +64,7 @@ export default function UserMenu({
                 to="/user/created-events"
                 className="w-full flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors cursor-pointer"
               >
-                <Calendar size={14} />
+                <List size={14} />
                 イベント管理
               </Link>
             </DropdownMenuItem>

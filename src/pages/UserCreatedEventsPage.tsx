@@ -1,37 +1,35 @@
 // src/pages/UserCreatedEventsPage.tsx - 簡単修正版（既存パターン完全踏襲）
 
-import {useState} from "react";
-import {Link} from "react-router";
-import {
-  CalendarDays,
-  MapPin,
-  Users,
-  Loader2,
-  Calendar,
-  AlertCircle,
-  Edit,
-  Trash2,
-  Plus,
-  UserPlus,
-} from "lucide-react";
-import Card from "../components/card";
-import {useAuthStore} from "@/stores/auth-store";
-import {useSessionQuery} from "@/hooks/useAuth";
+import { useSessionQuery } from "@/hooks/useAuth";
+import { isEventNotStarted } from "@/hooks/useEventRegistration";
+import { useEventDelete } from "@/hooks/useEvents";
 import {
   useEventEditNavigation,
   useUserCreatedEvents,
 } from "@/hooks/useUserCreatedEvents";
-import {useEventDelete} from "@/hooks/useEvents";
-import type {UserCreatedEvent} from "@shared/types";
+import { useAuthStore } from "@/stores/auth-store";
+import type { UserCreatedEvent } from "@shared/types";
+import {
+  AlertCircle,
+  Calendar,
+  CalendarDays,
+  Clock,
+  Edit,
+  Loader2,
+  MapPin,
+  Plus,
+  Trash2,
+  Users
+} from "lucide-react";
+import { Link, Navigate } from "react-router";
+import Card from "../components/card";
 
+import { Button } from "@/components/ui/button";
 import DEFAULT_IMAGE from "/default.png";
-import {Button} from "@/components/ui/button";
-import {UpgradeAccountDialog} from "@/components/auth/UpgradeAccountDialog";
 
 export default function UserCreatedEventsPage() {
   const user = useAuthStore((state) => state.user);
   const { isLoading: authLoading } = useSessionQuery();
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   // TanStack Query フックを統合
   const {
@@ -59,20 +57,13 @@ export default function UserCreatedEventsPage() {
     return `${year}年${month}月${day}日`;
   };
 
-  // アカウント移行成功後の処理
-  const handleUpgradeSuccess = () => {
-    setShowUpgradeDialog(false);
-    // 移行完了後、ページ内容が自動で正規ユーザー向けに切り替わる
-    // user.isAnonymous が false になるため、条件分岐で表示が変わる
-  };
-
   // ローディング状態
   if (authLoading || isLoading) {
     return (
       <div className="max-w-4xl mx-auto py-8">
         <div className="text-center py-10">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          {authLoading ? "認証状態を確認中..." : "作成イベント履歴を読み込み中..."}
+          {authLoading ? "認証状態を確認中..." : "作成履歴を読み込み中..."}
         </div>
       </div>
     );
@@ -103,74 +94,10 @@ export default function UserCreatedEventsPage() {
     );
   }
 
-  // 匿名ユーザーの場合：アップグレード促進画面
+ // 匿名ユーザーの場合：イベント作成ページへリダイレクト
   if (user?.isAnonymous) {
-    return (
-      <>
-        <div className="max-w-4xl mx-auto py-8">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-8 h-8 text-sky-600" />
-              <h1 className="text-3xl font-bold text-gray-800">作成イベント</h1>
-            </div>
-            <p className="text-gray-600">
-              イベント作成履歴の確認には正規アカウントが必要です。
-            </p>
-          </div>
-
-          <Card>
-            <div className="w-full py-8">
-              <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-center mb-4">
-                イベント作成履歴の確認にはアカウント登録が必要です
-              </h2>
-
-              <div className="bg-sky-50 border border-blue-200 rounded-lg px-4 py-6 my-6">
-                <h3 className="font-semibold text-sky-900 mb-3 text-center">
-                  アカウント登録で利用できる機能
-                </h3>
-                <ul className="text-sm text-sky-600 space-y-1 w-fit mx-auto list-disc">
-                  <li>イベントの作成・管理</li>
-                  <li>作成したイベントの履歴確認</li>
-                  <li>イベント情報の編集・削除</li>
-                  <li>申し込み履歴の永続保存</li>
-                </ul>
-              </div>
-
-              <Button
-                onClick={() => setShowUpgradeDialog(true)}
-                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-4 px-6 transition-colors duration-300 ease-in-out text-base cursor-pointer"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <UserPlus className="w-5 h-5" />
-                  データを引き継いでアカウント作成
-                </div>
-              </Button>
-
-              <p className="mt-4 text-sm text-zinc-500 text-center">
-                現在のゲスト活動データを引き継いで正規アカウントを作成できます
-              </p>
-            </div>
-          </Card>
-
-          <div className="mt-6 text-center">
-            <Link
-              to="/events"
-              className="text-gray-500 hover:text-gray-700 underline underline-offset-2"
-            >
-              イベント一覧に戻る
-            </Link>
-          </div>
-        </div>
-
-        {/* アカウント移行ダイアログ */}
-        <UpgradeAccountDialog
-          open={showUpgradeDialog}
-          onClose={() => setShowUpgradeDialog(false)}
-          onSuccess={handleUpgradeSuccess}
-        />
-      </>
-    );
+    // イベント作成ページへリダイレクト（置き換えモード）
+    return <Navigate to="/events/create" replace />;
   }
 
   // 正規ユーザーの場合：通常の作成履歴ページ
@@ -184,10 +111,11 @@ export default function UserCreatedEventsPage() {
   }) => {
     const {event, created_at, attendee_count, can_edit, can_delete} =
       createdEvent;
+    const isPastEvent = !isEventNotStarted(event.date); // useEventRegistrationフックからインポート
 
     return (
-      <Card>
-        <div className="flex flex-col md:flex-row gap-4">
+      <Card key={event.id}>
+        <div className="flex flex-col md:flex-row gap-6">
           {/* イベント画像 */}
           <div className="w-full md:w-48 h-auto flex-shrink-0">
             <img
@@ -198,10 +126,9 @@ export default function UserCreatedEventsPage() {
           </div>
 
           {/* イベント情報 */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col md:items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-2">
+                <h3 className="text-lg font-bold text-gray-800 mb-2 truncate">
                   <Link
                     to={`/events/${event.id}`}
                     className="hover:text-sky-600 transition-colors"
@@ -209,38 +136,58 @@ export default function UserCreatedEventsPage() {
                     {event.title}
                   </Link>
                 </h3>
+                {isPastEvent && (
+                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                  終了
+                </span>
+              )}
+            </div>
 
-                <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+             {/* イベント詳細 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
                   <div className="flex items-center">
-                    <CalendarDays className="w-4 h-4 mr-1 text-blue-500" />
+                    <CalendarDays className="w-4 h-4 mr-2 text-blue-500" />
                     <span>{event.date}</span>
                   </div>
                   <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-1 text-green-500" />
+                    <MapPin className="w-4 h-4 mr-2 text-green-500" />
                     <span>{event.location}</span>
                   </div>
                   <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-1 text-purple-500" />
+                    <Users className="w-4 h-4 mr-2 text-purple-500" />
                     <span>
-                      {attendee_count}人参加
-                      {event.capacity && ` / ${event.capacity}人`}
+                      参加者: {attendee_count}
+                      {event.capacity && `/${event.capacity}`}人
                     </span>
                   </div>
-                </div>
-
-                <p className="text-sm text-gray-500">
+                <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-orange-500" />
+                <span>
                   作成日: {formatCreatedDate(created_at)}
-                </p>
+                </span>
               </div>
+            </div>
 
               {/* アクションボタン */}
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="mt-6 flex flex-col sm:flex-row gap-2">
+                <Button
+                asChild
+                variant="outline"
+                className="flex-1 lg:flex-none lg:w-48"
+              >
+                <Link
+                  to={`/events/${event.id}`}
+                  className="px-4 py-2 text-sm border border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors"
+                >
+                  詳細を見る
+                </Link>
+              </Button>
+
                 {can_edit && (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="default"
                     onClick={() => navigateToEdit(event.id)}
-                    className="text-sky-600 border-sky-600 hover:bg-sky-50"
+                    className="flex-1 lg:flex-none lg:w-48 px-4 py-2 text-white bg-sky-600 hover:bg-sky-700 cursor-pointer transition-colors"
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     編集
@@ -249,30 +196,29 @@ export default function UserCreatedEventsPage() {
 
                 {can_delete ? (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="destructive"
                     onClick={() => confirmAndDelete(event.id, event.title)}
                     disabled={isDeleting}
-                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    className="flex-1 lg:flex-none lg:w-48 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     {isDeleting ? '削除中...' : '削除'}
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
-                    size="sm"
                     disabled
-                    className="text-gray-400 border-gray-300"
-                    title={`参加者がいるため削除できません（${attendee_count}人参加中）`}
+                    className="flex-1 lg:flex-none lg:w-48 px-4 py-2 text-gray-800 disabled:opacity-100 bg-gray-300 disabled:pointer-events-auto"
+                    title={`参加者がいるため削除できません（${event?.attendees}人参加中）`}
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    削除
+                    <span className="relative">
+                      <Trash2 className="w-4 h-4 text-gray-500" />
+                      <span className="absolute w-[1px] h-5 -bottom-[3px] rotate-45 bg-gray-800 rounded-md"></span>
+                    </span>
+                    <span className="sm:text-sm">参加者あり</span>
                   </Button>
                 )}
               </div>
             </div>
-          </div>
         </div>
       </Card>
     );
@@ -288,9 +234,9 @@ export default function UserCreatedEventsPage() {
             <h1 className="text-3xl font-bold text-gray-800">イベント管理</h1>
           </div>
           <div className="hidden sm:flex sm:gap-3">
-            <Button asChild className="bg-sky-600 hover:bg-sky-700">
+            <Button asChild className="bg-sky-600 text-white hover:bg-sky-700 px-4 py-2 w-32">
               <Link to="/events/create">
-                <Plus className="w-4 h-4 mr-1" />
+                <Plus className="w-4 h-4" />
                 新規作成
               </Link>
             </Button>
@@ -321,7 +267,7 @@ export default function UserCreatedEventsPage() {
             <p className="text-gray-500 mb-6">
               新しいイベントを作成して、参加者を募集しましょう。
             </p>
-            <Button asChild className="bg-sky-600 hover:bg-sky-700">
+            <Button asChild className="bg-sky-600 text-white hover:bg-sky-700">
               <Link to="/events/create">
                 <Plus className="w-4 h-4 mr-1" />
                 イベントを作成する

@@ -1,10 +1,10 @@
 // src/pages/event-confirm.tsx - 統一性改善のための軽微な更新
 
-import {getEventById, queryKeys} from "@/lib/api"; // 統一されたqueryKeys使用
-import {useQuery} from "@tanstack/react-query";
-import {Calendar, Home, List, MapPin, Users} from "lucide-react"; // アイコン追加
-import {useEffect} from "react";
-import {Link, useLocation, useNavigate, useParams} from "react-router";
+import { getEventById, queryKeys } from "@/lib/api"; // 統一されたqueryKeys使用
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, History, Home, MapPin, Users } from "lucide-react"; // アイコン追加
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import Card from "../components/card";
 
 export default function EventConfirm() {
@@ -138,7 +138,7 @@ export default function EventConfirm() {
               to="/user/registrations"
               className="flex-1 py-3 text-center bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
             >
-              <List className="w-4 h-4" />
+              <History className="w-4 h-4" />
               申し込み履歴
             </Link>
           </div>

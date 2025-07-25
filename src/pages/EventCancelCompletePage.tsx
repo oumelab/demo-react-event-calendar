@@ -2,7 +2,7 @@
 
 import { getEventById, queryKeys } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Calendar, CheckCircle, Home, List, MapPin, Users } from "lucide-react";
+import { AlertCircle, Calendar, CheckCircle, History, Home, MapPin, Users } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import Card from "../components/card";
@@ -150,7 +150,7 @@ export default function EventCancelCompletePage() {
             to="/user/registrations"
             className="flex-1 py-3 text-center bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
           >
-            <List className="w-4 h-4" />
+            <History className="w-4 h-4" />
             申し込み履歴
           </Link>
           </div>

@@ -17,6 +17,7 @@ import {useSessionQuery} from "@/hooks/useAuth"; // 🔧 追加
 import {
   useUserRegistrationsSimple,
   useEventCancel,
+  isEventNotStarted,
 } from "@/hooks/useEventRegistration";
 import type {UserRegistration, EventWithAttendees} from "@shared/types";
 
@@ -25,7 +26,7 @@ import {Button} from "@/components/ui/button";
 
 export default function UserRegistrationsPage() {
   const user = useAuthStore((state) => state.user);
-  const { isLoading: authLoading } = useSessionQuery();
+  const {isLoading: authLoading} = useSessionQuery();
   const [showCancelDialog, setShowCancelDialog] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -108,30 +109,6 @@ export default function UserRegistrationsPage() {
     }
   };
 
-  // 開催日時チェック関数
-  const isEventNotStarted = (dateTimeStr: string): boolean => {
-    try {
-      const match = dateTimeStr.match(
-        /(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/
-      );
-      if (!match) return true;
-
-      const [, year, month, day, hours, minutes] = match;
-      const eventDate = new Date();
-      eventDate.setFullYear(parseInt(year, 10));
-      eventDate.setMonth(parseInt(month, 10) - 1);
-      eventDate.setDate(parseInt(day, 10));
-      eventDate.setHours(parseInt(hours, 10));
-      eventDate.setMinutes(parseInt(minutes, 10));
-      eventDate.setSeconds(0);
-      eventDate.setMilliseconds(0);
-
-      return eventDate > new Date();
-    } catch {
-      return true;
-    }
-  };
-
   // 登録アイテムコンポーネント
   const RegistrationItem = ({
     registration,
@@ -157,7 +134,7 @@ export default function UserRegistrationsPage() {
 
           {/* イベント情報 */}
           <div className="flex-1">
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-start mb-2 truncate">
               <h3 className="text-lg font-bold text-gray-800">
                 <Link
                   to={`/events/${event.id}`}
@@ -209,7 +186,11 @@ export default function UserRegistrationsPage() {
 
             {/* アクションボタン */}
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
-              <Button asChild variant="outline" className="flex-1 lg:flex-none lg:w-56">
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 lg:flex-none lg:w-56"
+              >
                 <Link
                   to={`/events/${event.id}`}
                   className="px-4 py-2 text-sm border border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors"
