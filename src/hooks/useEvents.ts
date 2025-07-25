@@ -28,8 +28,9 @@ export function useEventMutations() {
       // ✅ 成功時のみtoast通知
       toast.success('イベントを作成しました');
       
-      // イベント一覧のキャッシュを無効化して再取得
+      // イベント一覧・作成履歴のキャッシュを無効化して再取得
       queryClient.invalidateQueries({ queryKey: queryKeys.events });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userCreatedEvents });
       
       // 作成したイベントの詳細ページにリダイレクト
       if (data.eventId) {
@@ -56,9 +57,10 @@ export function useEventMutations() {
       // ✅ 成功時のみtoast通知
       toast.success('イベントを更新しました');
       
-      // イベント一覧と個別イベントのキャッシュを無効化
+      // イベント一覧と個別イベント、作成履歴のキャッシュを無効化
       queryClient.invalidateQueries({ queryKey: queryKeys.events });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(variables.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userCreatedEvents });
       
       // 更新したイベントの詳細ページにリダイレクト
       navigate(`/events/${variables.id}`, { replace: true });
@@ -79,8 +81,9 @@ export function useEventMutations() {
       // ✅ 成功時のみtoast通知
       toast.success('イベントを削除しました');
       
-      // イベント一覧と個別イベントのキャッシュを無効化
+      // イベント一覧と個別イベント、作成履歴のキャッシュを無効化
       queryClient.invalidateQueries({ queryKey: queryKeys.events });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userCreatedEvents });
       queryClient.removeQueries({ queryKey: queryKeys.event(eventId) });
       
       // イベント一覧ページにリダイレクト

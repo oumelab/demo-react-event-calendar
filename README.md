@@ -330,13 +330,13 @@ sequenceDiagram
 
 ### **🔐 認証システム**
 
-Better Auth による統一認証エンドポイント
+Better Auth による統一認証エンドポイント（Email and Password）
 | エンドポイント | メソッド | 認証 | 説明 |
 | ------------------- | -------- | ---- | ------------------ |
-| `/api/auth/sign-in` | POST | - | ユーザーログイン |
-| `/api/auth/sign-up` | POST | - | ユーザー新規登録 |
+| `/api/auth/sign-in/email` | POST | - | ユーザーログイン |
+| `/api/auth/sign-up/email` | POST | - | ユーザー新規登録 |
 | `/api/auth/sign-out`| POST | ✅ | ユーザーログアウト |
-| `/api/auth/session` | GET | - | セッション情報取得 |
+| `/api/auth/get-session` | GET | - | セッション情報取得 |
 
 > Note: Better Auth の [[catchall]] ハンドラーにより、認証関連のエンドポイントは自動的に提供される。
 

@@ -144,3 +144,37 @@ export interface UpdateEventRequest {
   image_url?: string;
   capacity?: number;
 }
+
+// イベント作成履歴ページ用の型定義
+// ===============================================================
+
+// ユーザーの作成イベント履歴（フロントエンド表示用）
+export interface UserCreatedEvent {
+  id: string;
+  event: EventWithAttendees;
+  created_at: number;
+  attendee_count: number;
+  can_edit: boolean;
+  can_delete: boolean;
+}
+
+// ユーザー作成イベント履歴 API レスポンス
+export interface UserCreatedEventsResponse {
+  success?: boolean; // 他のAPIレスポンスとの統一性のため追加
+  createdEvents: UserCreatedEvent[];
+  total?: number; // 将来的なページネーション用（オプショナル）
+  message?: string;
+}
+
+// イベント作成者の状態（フロントエンド用）
+export interface EventManagementStatus {
+  canEdit: boolean;
+  canDelete: boolean;
+  attendeeCount: number;
+  reason?: string; // 編集・削除不可の理由
+}
+
+// イベント詳細 + 管理状態（フロントエンド用）
+export interface EventWithManagementStatus extends EventWithAttendees {
+  managementStatus?: EventManagementStatus;
+}

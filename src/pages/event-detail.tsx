@@ -1,14 +1,23 @@
-import {useQuery} from "@tanstack/react-query";
-import {Link, useLocation, useNavigate, useParams} from "react-router";
-import {getEventById, queryKeys} from "@/lib/api";
-import {useAuthStore} from "@/stores/auth-store";
-import {useEventDelete} from "@/hooks/useEvents";
-import {useEventRegistrationStatus} from "@/hooks/useEventRegistration";
-import {CalendarDays, Edit, MapPin, Users} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSessionQuery } from "@/hooks/useAuth";
+import { useEventRegistrationStatus } from "@/hooks/useEventRegistration";
+import { useEventDelete } from "@/hooks/useEvents";
+import { getEventById, queryKeys } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import {
+  CalendarDays,
+  CheckCircle,
+  Edit,
+  History,
+  List,
+  MapPin,
+  Trash2,
+  Users
+} from "lucide-react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
-import {useSessionQuery} from "@/hooks/useAuth";
-import {Button} from "@/components/ui/button";
 
 export default function EventDetail() {
   const {id} = useParams();
@@ -31,8 +40,12 @@ export default function EventDetail() {
   });
 
   // 申し込み状況の判定
-  const registrationStatus = useEventRegistrationStatus(id as string, event, user);
-  const { isRegistered } = registrationStatus;
+  const registrationStatus = useEventRegistrationStatus(
+    id as string,
+    event,
+    user
+  );
+  const {isRegistered} = registrationStatus;
 
   const isEventCreator = event && user ? user.id === event.creator_id : false;
 
@@ -113,21 +126,25 @@ export default function EventDetail() {
     if (isRegistered) {
       return (
         <div className="space-y-2">
-          <button
-            className="text-sky-800 bg-sky-50 border border-sky-600 py-4 w-full rounded-xl cursor-default"
+          <Button
+            className="text-white text-lg bg-emerald-500 border py-8 w-full rounded-lg disabled:opacity-100 cursor-default"
             disabled
           >
-            ✅ 申し込み済み
-          </button>
+            <CheckCircle className="size-6" />
+            申し込み済み
+          </Button>
           <p className="text-sm text-gray-600 text-center">
             申し込み履歴から管理できます
           </p>
-          <Link
-            to="/user/registrations"
-            className="block py-2 px-4 text-center text-white border bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors text-sm"
-          >
-            申し込み履歴を見る
-          </Link>
+          <Button asChild variant="outline" className="w-full border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors">
+            <Link
+              to="/user/registrations"
+              className=""
+            >
+              <History className="w-4 h-4" />
+              申し込み履歴
+            </Link>
+          </Button>
         </div>
       );
     }
@@ -192,36 +209,27 @@ export default function EventDetail() {
           )}
           {isEventCreator && (
             <>
-            <hr className="mb-5 text-blue-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                イベント管理
+              <hr className="mb-5 text-blue-300" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                管理者メニュー
               </h3>
-              <div className="flex flex-col gap-3">
-                <Link to={`/events/${event?.id}/edit`}>
-                  <Button className="w-full bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                    イベントを編集
-                  </Button>
-                </Link>
+              <div className="flex flex-col sm:flex-row gap-3 mb-3">
+                <Button
+                  asChild
+                  className="flex-1 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
+                >
+                  <Link to={`/events/${event?.id}/edit`}>
+                    <Edit className="w-4 h-4" />
+                    編集
+                  </Link>
+                </Button>
 
                 {event?.attendees === 0 ? (
                   <Button
                     variant="destructive"
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="w-full cursor-pointer"
+                    className="flex-1 cursor-pointer"
                   >
                     {isDeleting ? (
                       <>
@@ -230,20 +238,35 @@ export default function EventDetail() {
                       </>
                     ) : (
                       <>
-                        <Edit className="w-4 h-4 mr-2" />
-                        イベントを削除
+                        <Trash2 className="w-4 h-4" />
+                        削除
                       </>
                     )}
                   </Button>
                 ) : (
-                  <div className="p-2 text-center bg-zinc-300 rounded-md">
-                    <p className="text-sm">
-                      <strong>削除不可:</strong> 参加者が{event?.attendees}
-                      人います
-                    </p>
-                  </div>
+                  <Button
+                    disabled
+                    className="flex-1 gap-1 py-2 text-gray-800 disabled:opacity-100 bg-gray-300 disabled:pointer-events-auto"
+                    title={`参加者がいるため削除できません（${event?.attendees}人参加中）`}
+                  >
+                    <span className="relative">
+                      <Trash2 className="w-4 h-4 text-gray-500" />
+                      <span className="absolute w-[1px] h-5 -bottom-[3px] rotate-45 bg-gray-800 rounded-md"></span>
+                    </span>
+                    <span className="sm:text-xs">参加者あり</span>
+                  </Button>
                 )}
               </div>
+              <Button
+                asChild
+                variant="outline"
+                className="w-full text-sky-600 border-sky-600 hover:bg-sky-50 cursor-pointer"
+              >
+                <Link to="/user/created-events">
+                  <List className="w-4 h-4" />
+                  イベント作成履歴
+                </Link>
+              </Button>
             </>
           )}
         </Card>

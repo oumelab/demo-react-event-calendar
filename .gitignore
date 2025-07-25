@@ -35,6 +35,7 @@ dist-ssr
 functions/.wrangler/
 functions/**/.wrangler/
 cookies.txt
+cookies*.txt
 *.cookie
 
 # Bundle Analysis

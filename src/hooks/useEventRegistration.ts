@@ -227,13 +227,13 @@ export function useEventRegistrationStatus(
 }
 
 // ========== ユーティリティ関数 ==========
-
+// TODO: イベント作成履歴ページでも使用。別のフックに切り出すか汎用化する
 /**
  * 日本語形式の日時文字列をチェックしてイベント開始前かどうかを判定
  * @param dateTimeStr "2025年9月6日20:00" 形式の文字列
  * @returns boolean イベント開始前なら true
  */
-function isEventNotStarted(dateTimeStr: string): boolean {
+export function isEventNotStarted(dateTimeStr: string): boolean {
   try {
     // "2025年9月6日20:00" 形式をパース
     const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/);
@@ -256,8 +256,9 @@ function isEventNotStarted(dateTimeStr: string): boolean {
     eventDate.setSeconds(0);
     eventDate.setMilliseconds(0);
     
-    const now = new Date();
-    return eventDate > now;
+    // 現在日時と比較
+    // イベント開始前なら true
+    return eventDate > new Date();
   } catch (error) {
     // エラーの場合は安全側に倒して申し込み可能とする
     console.warn('Date parsing error:', error);

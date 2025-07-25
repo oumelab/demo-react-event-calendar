@@ -5,7 +5,6 @@ import EventApply from "./pages/event-apply";
 import EventConfirm from "./pages/event-confirm";
 import EventDetail from "./pages/event-detail";
 import EventList from "./pages/event-list";
-// import EventCreatePage from "./pages/EventCreatePage";
 import EventEditPage from "./pages/EventEditPage";
 import UserRegistrationsPage from "./pages/UserRegistrationsPage";
 import EventCancelCompletePage from "./pages/EventCancelCompletePage";
@@ -16,6 +15,7 @@ import {AuthSyncer} from "./components/auth/AuthSyncer";
 import AuthPage from "./pages/AuthPage";
 // 遅延読み込み
 import { lazy } from "react";
+import UserCreatedEventsPage from "./pages/UserCreatedEventsPage";
 const EventCreatePage = lazy(() => import('./pages/EventCreatePage'));
 
 function LayoutWithScrollRestoration() {
@@ -102,6 +102,14 @@ const router = createBrowserRouter([
         Component: () => (
           <ProtectedRoute>
             <UserRegistrationsPage />
+          </ProtectedRoute>
+        ),
+      },
+       {
+        path: "/user/created-events",
+        Component: () => (
+          <ProtectedRoute>
+            <UserCreatedEventsPage />
           </ProtectedRoute>
         ),
       },
