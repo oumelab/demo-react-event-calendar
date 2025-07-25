@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Card from "../components/card";
 import {useAuthStore} from "@/stores/auth-store";
+import {useSessionQuery} from "@/hooks/useAuth"; // 🔧 追加
 import {
   useUserRegistrationsSimple,
   useEventCancel,
@@ -24,6 +25,7 @@ import {Button} from "@/components/ui/button";
 
 export default function UserRegistrationsPage() {
   const user = useAuthStore((state) => state.user);
+  const { isLoading: authLoading } = useSessionQuery();
   const [showCancelDialog, setShowCancelDialog] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -50,7 +52,7 @@ export default function UserRegistrationsPage() {
   };
 
   // ローディング状態
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="max-w-4xl mx-auto py-8">
         <div className="text-center py-10">

@@ -5,7 +5,8 @@ import type {
   EventOperationResponse,
   EventApplyResponse,
   EventCancelResponse,
-  UserRegistrationsResponse
+  UserRegistrationsResponse,
+  UserCreatedEventsResponse
 } from "@shared/types";
 
 // ベースAPIクライアント設定
@@ -119,6 +120,28 @@ export async function getUserRegistrations(
   return response.json();
 }
 
+/** 
+ * ユーザーの作成イベント履歴取得
+ * @param limit 取得件数（デフォルト: 20）
+ * @param offset オフセット（デフォルト: 0）
+ * @returns ユーザーが作成したイベントの履歴
+ */
+
+export async function getUserCreatedEvents(
+  limit: number = 20, 
+  offset: number = 0
+): Promise<UserCreatedEventsResponse> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+  
+  const response = await fetchWithCredentials(
+    `${API_BASE_URL}/user/created-events?${params}`
+  );
+  return response.json();
+}
+
 // ========== TanStack Query用のキー定義 ==========
 
 export const queryKeys = {
@@ -130,7 +153,7 @@ export const queryKeys = {
   session: ['auth', 'session'] as const,
   user: ['auth', 'user'] as const,
 
-  // 新規追加：申し込み履歴関連
+  // 申し込み履歴関連
   userRegistrations: ['user-registrations'] as const,
   userRegistrationsPaginated: (limit: number, offset: number) => 
     ['user-registrations', { limit, offset }] as const,
@@ -138,4 +161,11 @@ export const queryKeys = {
   // 特定イベントの申し込み状況（キャッシュ管理用）
   eventRegistrationStatus: (eventId: string) => 
     ['event-registration-status', eventId] as const,
+
+  // イベント作成履歴
+  userCreatedEvents: ['user-created-events'] as const,
+  userCreatedEventsPaginated: (limit: number, offset: number) =>
+    ['user-created-events', { limit, offset }] as const,
+  
 } as const;
+

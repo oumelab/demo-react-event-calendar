@@ -160,7 +160,10 @@ export interface UserCreatedEvent {
 
 // ユーザー作成イベント履歴 API レスポンス
 export interface UserCreatedEventsResponse {
+  success?: boolean; // 他のAPIレスポンスとの統一性のため追加
   createdEvents: UserCreatedEvent[];
+  total?: number; // 将来的なページネーション用（オプショナル）
+  message?: string;
 }
 
 // イベント作成者の状態（フロントエンド用）
