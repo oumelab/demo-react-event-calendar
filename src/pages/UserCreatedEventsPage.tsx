@@ -189,17 +189,17 @@ export default function UserCreatedEventsPage() {
       <Card>
         <div className="flex flex-col md:flex-row gap-4">
           {/* イベント画像 */}
-          <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-full md:w-48 h-auto flex-shrink-0">
             <img
               src={event.image_url || DEFAULT_IMAGE}
               alt={event.title}
-              className="object-cover w-full h-full"
+              className="aspect-video md:aspect-auto w-full h-full object-cover rounded-lg"
             />
           </div>
 
           {/* イベント情報 */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+            <div className="flex flex-col md:items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">
                   <Link
@@ -285,9 +285,9 @@ export default function UserCreatedEventsPage() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="w-8 h-8 text-sky-600" />
-            <h1 className="text-3xl font-bold text-gray-800">作成イベント</h1>
+            <h1 className="text-3xl font-bold text-gray-800">イベント管理</h1>
           </div>
-          <div className="flex gap-3">
+          <div className="hidden sm:flex sm:gap-3">
             <Button asChild className="bg-sky-600 hover:bg-sky-700">
               <Link to="/events/create">
                 <Plus className="w-4 h-4 mr-1" />
