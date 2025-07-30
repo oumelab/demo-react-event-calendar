@@ -128,7 +128,7 @@ export async function getUserRegistrations(
  */
 
 export async function getUserCreatedEvents(
-  limit: number = 20, 
+  limit: number = 3, 
   offset: number = 0
 ): Promise<UserCreatedEventsResponse> {
   const params = new URLSearchParams({

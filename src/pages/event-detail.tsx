@@ -18,6 +18,7 @@ import {
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
+import { useEventStatus } from "@/hooks/useEventUtils"; // イベント状態を取得
 
 export default function EventDetail() {
   const {id} = useParams();
@@ -27,7 +28,7 @@ export default function EventDetail() {
   const isAuthenticated = useAuthStore((state) => !!state.user);
   const {isLoading: authLoading} = useSessionQuery();
   const {confirmAndDelete, isDeleting} = useEventDelete();
-
+  
   const {
     data: event,
     isLoading,
@@ -39,21 +40,24 @@ export default function EventDetail() {
     enabled: !!id,
   });
 
+  const eventStatus = useEventStatus(event);
+  
   // 申し込み状況の判定
   const registrationStatus = useEventRegistrationStatus(
     id as string,
     event,
     user
   );
+  // ユーザーがイベントに申し込んでいるかどうか
   const {isRegistered} = registrationStatus;
-
+  // イベントの作成者かどうか
   const isEventCreator = event && user ? user.id === event.creator_id : false;
-
+  
   // ローディング
   if (isLoading || authLoading) {
     return <div className="text-center py-10">イベント情報を読み込み中...</div>;
   }
-
+  
   if (error) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
@@ -61,8 +65,8 @@ export default function EventDetail() {
           {error instanceof Error && error.message === "Event not found"
             ? "URLのイベントが見つかりません"
             : `エラーが発生しました: ${
-                error instanceof Error ? error.message : String(error)
-              }`}
+              error instanceof Error ? error.message : String(error)
+            }`}
         </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
@@ -70,22 +74,33 @@ export default function EventDetail() {
       </div>
     );
   }
-
+  
   // 安全にdescriptionにアクセス
   const description = event?.description || "";
-
+  
   // 満員状態の確認
-  const isFull = Boolean(event?.capacity && event.attendees >= event.capacity);
-
+  // const isFull = Boolean(event?.capacity && event.attendees >= event.capacity);
+  
   // 🔧 削除処理の実装
   const handleDelete = () => {
     if (!event) return;
     confirmAndDelete(event.id, event.title);
   };
-
+  
+   
   // 申し込みボタンの表示制御
   const renderActionButton = () => {
-    if (isFull) {
+    if (eventStatus.isEnded) {
+      return (
+        <button
+          className="text-zinc-900 bg-zinc-300 cursor-not-allowed py-4 w-full rounded-xl"
+          disabled
+        >
+          イベント終了
+        </button>
+      );
+    }
+    if (!isRegistered && eventStatus.isFull) {
       return (
         <button
           className="text-zinc-900 bg-zinc-300 cursor-not-allowed py-4 w-full rounded-xl"
@@ -196,7 +211,7 @@ export default function EventDetail() {
                 </div>
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-2 text-purple-500" />
-                  <span className={isFull ? "text-red-500" : ""}>
+                  <span className={eventStatus.isFull ? "text-red-500" : ""}>
                     {event.attendees}
                     {event.capacity && `/${event.capacity}`}
                     人参加予定
