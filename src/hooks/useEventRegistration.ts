@@ -13,6 +13,7 @@ import type {
 } from '@shared/types';
 import type { UserWithAnonymous } from 'better-auth/plugins';
 import { useAuthStore } from '@/stores/auth-store';
+import { isEventNotStarted } from "@/hooks/useEventUtils";
 
 // ========== ユーザー固有クエリキー定義 ==========
 
@@ -175,7 +176,7 @@ export function useEventRegistrationStatus(
   
   // 定員チェック
   const isFull = event?.capacity 
-    ? event.attendees >= event.capacity 
+    ? event.attendees > event.capacity 
     : false;
   
   // 開催日時チェック（開始前かどうか）
@@ -226,45 +227,7 @@ export function useEventRegistrationStatus(
   };
 }
 
-// ========== ユーティリティ関数 ==========
-// TODO: イベント作成履歴ページでも使用。別のフックに切り出すか汎用化する
-/**
- * 日本語形式の日時文字列をチェックしてイベント開始前かどうかを判定
- * @param dateTimeStr "2025年9月6日20:00" 形式の文字列
- * @returns boolean イベント開始前なら true
- */
-export function isEventNotStarted(dateTimeStr: string): boolean {
-  try {
-    // "2025年9月6日20:00" 形式をパース
-    const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/);
-    
-    if (!match) {
-      // パースできない場合は安全側に倒して申し込み可能とする
-      console.warn('Date format not recognized:', dateTimeStr);
-      return true;
-    }
-    
-    const [, year, month, day, hours, minutes] = match;
-    
-    // 日本時間でDateオブジェクト作成
-    const eventDate = new Date();
-    eventDate.setFullYear(parseInt(year, 10));
-    eventDate.setMonth(parseInt(month, 10) - 1); // 月は0ベース
-    eventDate.setDate(parseInt(day, 10));
-    eventDate.setHours(parseInt(hours, 10));
-    eventDate.setMinutes(parseInt(minutes, 10));
-    eventDate.setSeconds(0);
-    eventDate.setMilliseconds(0);
-    
-    // 現在日時と比較
-    // イベント開始前なら true
-    return eventDate > new Date();
-  } catch (error) {
-    // エラーの場合は安全側に倒して申し込み可能とする
-    console.warn('Date parsing error:', error);
-    return true;
-  }
-}
+
 
 // ========== 高度な操作用フック ==========
 

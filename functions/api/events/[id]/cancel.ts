@@ -9,38 +9,8 @@ import { EventCancelSchema } from '../../../../shared/schemas';
 import { conditionalLog, conditionalError } from '../../utils/logger';
 import type { RequestContext } from '../../../../shared/cloudflare-types';
 import type { EventCancelResponse } from '../../../../shared/types';
+import { parseDateTimeString } from '../../../../shared/utils';
 
-/**
- * 日本語形式の日時文字列をDateオブジェクトに変換
- * @param dateTimeStr "2025年9月6日20:00" 形式の文字列
- * @returns Date オブジェクト
- */
-function parseDateTimeString(dateTimeStr: string): Date {
-  if (!dateTimeStr) {
-    throw new Error('Date string is empty');
-  }
-  
-  // "2025年9月6日20:00" 形式をパース
-  const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{2})/);
-  
-  if (!match) {
-    throw new Error(`Invalid date format: ${dateTimeStr}`);
-  }
-  
-  const [, year, month, day, hours, minutes] = match;
-  
-  // 日本時間でDateオブジェクト作成
-  const date = new Date();
-  date.setFullYear(parseInt(year, 10));
-  date.setMonth(parseInt(month, 10) - 1); // 月は0ベース
-  date.setDate(parseInt(day, 10));
-  date.setHours(parseInt(hours, 10));
-  date.setMinutes(parseInt(minutes, 10));
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-  
-  return date;
-}
 
 export async function onRequest(context: RequestContext) {
   if (context.request.method !== 'DELETE') {

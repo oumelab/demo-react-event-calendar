@@ -1,7 +1,7 @@
 // src/pages/UserCreatedEventsPage.tsx - 簡単修正版（既存パターン完全踏襲）
 
 import { useSessionQuery } from "@/hooks/useAuth";
-import { isEventNotStarted } from "@/hooks/useEventRegistration";
+import { isEventNotStarted } from "@/hooks/useEventUtils";
 import { useEventDelete } from "@/hooks/useEvents";
 import {
   useEventEditNavigation,
@@ -26,6 +26,7 @@ import Card from "../components/card";
 
 import { Button } from "@/components/ui/button";
 import DEFAULT_IMAGE from "/default.png";
+import EventEndedBadge from "@/components/ui/EventEndedBadge";
 
 export default function UserCreatedEventsPage() {
   const user = useAuthStore((state) => state.user);
@@ -137,9 +138,7 @@ export default function UserCreatedEventsPage() {
                   </Link>
                 </h3>
                 {isPastEvent && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                  終了
-                </span>
+                  <EventEndedBadge />
               )}
             </div>
 

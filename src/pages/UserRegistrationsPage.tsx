@@ -17,12 +17,13 @@ import {useSessionQuery} from "@/hooks/useAuth"; // 🔧 追加
 import {
   useUserRegistrationsSimple,
   useEventCancel,
-  isEventNotStarted,
 } from "@/hooks/useEventRegistration";
+import { isEventNotStarted } from "@/hooks/useEventUtils";
 import type {UserRegistration, EventWithAttendees} from "@shared/types";
 
 import DEFAULT_IMAGE from "/default.png";
 import {Button} from "@/components/ui/button";
+import EventEndedBadge from "@/components/ui/EventEndedBadge";
 
 export default function UserRegistrationsPage() {
   const user = useAuthStore((state) => state.user);
@@ -144,9 +145,7 @@ export default function UserRegistrationsPage() {
                 </Link>
               </h3>
               {isPastEvent && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                  終了
-                </span>
+                <EventEndedBadge />
               )}
             </div>
 

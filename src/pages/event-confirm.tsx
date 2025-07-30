@@ -55,7 +55,7 @@ export default function EventConfirm() {
     );
   }
 
-  if (event?.capacity && event.attendees >= event.capacity) {
+  if (event?.capacity && event.attendees > event.capacity) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
         <h3 className="text-lg font-bold text-red-600">
