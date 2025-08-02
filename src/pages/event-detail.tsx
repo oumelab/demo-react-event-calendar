@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { useSessionQuery } from "@/hooks/useAuth";
-import { useEventRegistrationStatus } from "@/hooks/useEventRegistration";
-import { useEventDelete } from "@/hooks/useEvents";
-import { getEventById, queryKeys } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth-store";
-import { useQuery } from "@tanstack/react-query";
+import {Button} from "@/components/ui/button";
+import {useSessionQuery} from "@/hooks/useAuth";
+import {useEventRegistrationStatus} from "@/hooks/useEventRegistration";
+import {useEventDelete} from "@/hooks/useEvents";
+import {getEventById, queryKeys} from "@/lib/api";
+import {useAuthStore} from "@/stores/auth-store";
+import {useQuery} from "@tanstack/react-query";
 import {
   CalendarDays,
   CheckCircle,
@@ -13,12 +13,13 @@ import {
   List,
   MapPin,
   Trash2,
-  Users
+  Users,
 } from "lucide-react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import {Link, useLocation, useNavigate, useParams} from "react-router";
 import Card from "../components/card";
 import DEFAULT_IMAGE from "/default.png";
-import { useEventStatus } from "@/hooks/useEventUtils"; // イベント状態を取得
+import {getEventImageSrc} from "@/lib/image";
+import {useEventStatus} from "@/hooks/useEventUtils"; // イベント状態を取得
 
 export default function EventDetail() {
   const {id} = useParams();
@@ -28,7 +29,7 @@ export default function EventDetail() {
   const isAuthenticated = useAuthStore((state) => !!state.user);
   const {isLoading: authLoading} = useSessionQuery();
   const {confirmAndDelete, isDeleting} = useEventDelete();
-  
+
   const {
     data: event,
     isLoading,
@@ -41,7 +42,7 @@ export default function EventDetail() {
   });
 
   const eventStatus = useEventStatus(event);
-  
+
   // 申し込み状況の判定
   const registrationStatus = useEventRegistrationStatus(
     id as string,
@@ -52,12 +53,12 @@ export default function EventDetail() {
   const {isRegistered} = registrationStatus;
   // イベントの作成者かどうか
   const isEventCreator = event && user ? user.id === event.creator_id : false;
-  
+
   // ローディング
   if (isLoading || authLoading) {
     return <div className="text-center py-10">イベント情報を読み込み中...</div>;
   }
-  
+
   if (error) {
     return (
       <div className="w-fit mx-auto py-24 space-y-8 text-center">
@@ -65,8 +66,8 @@ export default function EventDetail() {
           {error instanceof Error && error.message === "Event not found"
             ? "URLのイベントが見つかりません"
             : `エラーが発生しました: ${
-              error instanceof Error ? error.message : String(error)
-            }`}
+                error instanceof Error ? error.message : String(error)
+              }`}
         </h3>
         <Link to="/" className="underline">
           イベント一覧に戻る
@@ -74,20 +75,19 @@ export default function EventDetail() {
       </div>
     );
   }
-  
+
   // 安全にdescriptionにアクセス
   const description = event?.description || "";
-  
+
   // 満員状態の確認
   // const isFull = Boolean(event?.capacity && event.attendees >= event.capacity);
-  
+
   // 🔧 削除処理の実装
   const handleDelete = () => {
     if (!event) return;
     confirmAndDelete(event.id, event.title);
   };
-  
-   
+
   // 申し込みボタンの表示制御
   const renderActionButton = () => {
     if (eventStatus.isEnded) {
@@ -151,11 +151,12 @@ export default function EventDetail() {
           <p className="text-sm text-gray-600 text-center">
             申し込み履歴から管理できます
           </p>
-          <Button asChild variant="outline" className="w-full border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors">
-            <Link
-              to="/user/registrations"
-              className=""
-            >
+          <Button
+            asChild
+            variant="outline"
+            className="w-full border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors"
+          >
+            <Link to="/user/registrations" className="">
               <History className="w-4 h-4" />
               申し込み履歴
             </Link>
@@ -185,9 +186,12 @@ export default function EventDetail() {
             <p className="whitespace-pre-wrap">{description}</p>
             <div className="rounded-lg w-full h-auto aspect-[4/3] overflow-hidden">
               <img
-                src={event.image_url || DEFAULT_IMAGE}
+                src={getEventImageSrc(event.image_url) || DEFAULT_IMAGE}
                 alt={event.title}
                 className="object-cover w-full h-full"
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMAGE;
+                }}
               />
             </div>
           </>

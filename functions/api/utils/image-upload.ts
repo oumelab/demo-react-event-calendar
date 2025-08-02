@@ -1,6 +1,7 @@
 // functions/api/utils/image-upload.ts
 import { createId } from '@paralleldrive/cuid2';
 import type { Env } from '@shared/cloudflare-types';
+import { IMAGE_CONFIGS } from '../../../shared/image-config';
 
 /**
  * 画像アップロード設定
@@ -29,28 +30,28 @@ export interface UploadResult {
 /**
  * 画像設定定義
  */
-export const IMAGE_CONFIGS: Record<'avatar' | 'event', ImageUploadConfig> = {
-  avatar: {
-    type: 'avatar',
-    maxSize: 2 * 1024 * 1024, // 2MB
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    resize: {
-      width: 256,
-      height: 256,
-      quality: 85
-    }
-  },
-  event: {
-    type: 'event',
-    maxSize: 5 * 1024 * 1024, // 5MB
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    resize: {
-      width: 800,
-      height: 600,
-      quality: 80
-    }
-  }
-};
+// export const IMAGE_CONFIGS: Record<'avatar' | 'event', ImageUploadConfig> = {
+//   avatar: {
+//     type: 'avatar',
+//     maxSize: 2 * 1024 * 1024, // 2MB
+//     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+//     resize: {
+//       width: 256,
+//       height: 256,
+//       quality: 85
+//     }
+//   },
+//   event: {
+//     type: 'event',
+//     maxSize: 5 * 1024 * 1024, // 5MB
+//     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+//     resize: {
+//       width: 800,
+//       height: 600,
+//       quality: 80
+//     }
+//   }
+// };
 
 /**
  * ファイルバリデーション
@@ -223,10 +224,9 @@ function generatePublicUrl(key: string, env: Env): string {
     return `${env.R2_PUBLIC_URL}/${key}`;
   }
   
-  // 開発段階：プレースホルダーURLを返す
-  // フロントエンド統合時に実際のドメインを設定予定
-  console.log('🔧 Development mode: using placeholder URL for key:', key);
-  return `https://dev-images.placeholder.dev/${key}`;
+  // 開発段階：keyのみを返す（フロントエンドでblob URLを使用）
+  console.log('🔧 Development mode: returning key for frontend blob URL usage');
+  return key; // URLではなくkeyを返す
 }
 
 /**

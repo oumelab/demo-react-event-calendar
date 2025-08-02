@@ -18,10 +18,11 @@ import {
   useUserRegistrationsSimple,
   useEventCancel,
 } from "@/hooks/useEventRegistration";
-import { isEventNotStarted } from "@/hooks/useEventUtils";
+import {isEventNotStarted} from "@/hooks/useEventUtils";
 import type {UserRegistration, EventWithAttendees} from "@shared/types";
 
 import DEFAULT_IMAGE from "/default.png";
+import {getEventImageSrc} from "@/lib/image";
 import {Button} from "@/components/ui/button";
 import EventEndedBadge from "@/components/ui/EventEndedBadge";
 
@@ -127,9 +128,12 @@ export default function UserRegistrationsPage() {
           {/* イベント画像 */}
           <div className="w-full md:w-48 h-auto flex-shrink-0">
             <img
-              src={event.image_url || DEFAULT_IMAGE}
+              src={getEventImageSrc(event.image_url) || DEFAULT_IMAGE}
               alt={event.title}
               className="aspect-video md:aspect-auto w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_IMAGE;
+              }}
             />
           </div>
 
@@ -144,9 +148,7 @@ export default function UserRegistrationsPage() {
                   {event.title}
                 </Link>
               </h3>
-              {isPastEvent && (
-                <EventEndedBadge />
-              )}
+              {isPastEvent && <EventEndedBadge />}
             </div>
 
             {/* イベント詳細 */}

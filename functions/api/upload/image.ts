@@ -1,7 +1,8 @@
 // functions/api/upload/image.ts
 import { getCurrentUser } from '../utils/auth';
 import { errorResponse, successResponse } from '../utils/response';
-import { uploadImageToR2, IMAGE_CONFIGS } from '../utils/image-upload';
+import { IMAGE_CONFIGS } from '../../../shared/image-config';
+import { uploadImageToR2 } from '../utils/image-upload';
 import type { RequestContext } from '@shared/cloudflare-types';
 
 /**
