@@ -4,9 +4,6 @@ pages_build_output_dir = "dist"
 compatibility_date = "2025-07-26"
 compatibility_flags = ["nodejs_compat"]
 
-# 🔑 重要: ダッシュボードの環境変数を保護
-keep_vars = true
-
 # R2 Bucket Bindings for Image Upload
 # Phase 1: プレビュー環境でテスト用
 [[r2_buckets]]
