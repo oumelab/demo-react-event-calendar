@@ -16,7 +16,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import type {Event} from "@shared/types";
-import { ImageUpload } from "../ImageUpload";
+import {ImageUpload} from "../ImageUpload";
 
 interface EventFormProps {
   mode: "create";
@@ -279,7 +279,7 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="image_url"
-          render={({field}) => (
+          render={({field, fieldState}) => (
             // <FormItem>
             //   <FormLabel>画像URL</FormLabel>
             //   <FormControl>
@@ -297,14 +297,15 @@ export function EventForm(props: EventFormAllProps) {
             //   </p>
             // </FormItem>
             <FormItem>
-              <FormLabel>イベント画像</FormLabel>
+              {/* <FormLabel>イベント画像</FormLabel> */}
               <FormControl>
                 <ImageUpload
                   type="event"
                   currentUrl={field.value}
                   onUploadComplete={(url) => field.onChange(url)}
                   showUrlInput={true}
-                  showLabel={false}
+                  showLabel // フォーム側でラベル管理
+                  error={fieldState.error?.message} // エラー状態を渡す
                 />
               </FormControl>
               <FormMessage />

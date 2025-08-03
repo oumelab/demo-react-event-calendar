@@ -15,7 +15,8 @@ interface ImageUploadProps {
   aspectRatio?: number;
   disabled?: boolean;
   showUrlInput?: boolean;
-  showLabel?: boolean; // ラベル表示制御を追加
+  showLabel?: boolean; // ラベル表示制御
+  error?: string; // React Hook Form からのエラー状態
 }
 
 interface UploadProgress {
@@ -34,6 +35,7 @@ export function ImageUpload({
   disabled = false,
   showUrlInput = true,
   showLabel = true, // デフォルトでラベル表示
+  error, // React Hook Form からのエラー
 }: ImageUploadProps) {
   // Zustandストアから認証状態を取得
   const isAuthenticated = useAuthStore((state) => !!state.user);
@@ -111,6 +113,10 @@ export function ImageUpload({
     return null;
   }, [config.allowedTypes, actualMaxSize]);
 
+  // バリデーションエラーの統合管理
+  const hasError = !!(uploadProgress.error || error);
+  const errorMessage = uploadProgress.error || error;
+
   // 画像プレビュー生成（セキュリティ対策付き）
   const generatePreview = useCallback((file: File) => {
     // 既存のプレビューURLをクリーンアップ
@@ -139,6 +145,11 @@ export function ImageUpload({
         ...prev,
         error: validationError,
       }));
+      // バリデーションエラーの場合、アップロードを中止し、プレビューもクリア
+      setPreviewUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -212,8 +223,8 @@ export function ImageUpload({
           setPreviewUrl(uploadedUrlOrKey);
           onUploadComplete(uploadedUrlOrKey);
         } else {
-          // 開発環境：keyが返されるのでblob URLをプレビューに使用
-          console.log('Development mode: using blob URL for preview, special format for form');
+          // 開発・プレビュー環境：keyが返されるのでblob URLをプレビューに使用
+          console.log('Development/Preview mode: using blob URL for preview, special format for form');
           const blobUrl = URL.createObjectURL(file);
           setPreviewUrl(blobUrl);
           // フォームには特別な形式で設定（バリデーション回避）
@@ -232,6 +243,12 @@ export function ImageUpload({
       }, 3000);
 
     } catch (error) {
+      // アップロードエラー時もプレビューをクリア
+      setPreviewUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
       console.log('Upload error caught:', error);
       console.log('Error type:', typeof error);
       console.log('Is Axios Error:', axios.isAxiosError(error));
@@ -335,6 +352,13 @@ export function ImageUpload({
       fileInputRef.current.value = '';
     }
     
+    // エラー状態もクリア
+    setUploadProgress(prev => ({
+      ...prev,
+      error: null,
+      success: null,
+    }));
+    
     console.log('Preview removed, calling onUploadComplete with empty string');
   }, [previewUrl, onUploadComplete]); // previewUrlは必要（URL.revokeObjectURLで使用）
 
@@ -346,7 +370,7 @@ export function ImageUpload({
     }));
   }, []);
 
-  // エラーメッセージの自動消去
+  // アップロードエラーの自動消去（React Hook Formエラーは自動消去しない）
   React.useEffect(() => {
     if (uploadProgress.error) {
       const timer = setTimeout(() => {
@@ -370,10 +394,10 @@ export function ImageUpload({
     <div className="space-y-4">
       {/* ラベル（オプショナル） */}
       {showLabel && (
-        <Label className="text-sm font-medium">
+        <div className={`text-sm font-medium ${hasError ? 'text-red-500' : 'text-gray-700'}`}>
           {display.description}
           {type === 'avatar' && <span className="text-red-500 ml-1">*</span>}
-        </Label>
+        </div>
       )}
 
       {/* プレビューエリア */}
@@ -489,21 +513,23 @@ export function ImageUpload({
       )}
 
       {/* エラー表示 */}
-      {uploadProgress.error && (
+      {hasError && (
         <div className="p-3 rounded-md border bg-red-50 border-red-200">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-600" />
-              <span className="text-red-700">{uploadProgress.error}</span>
+              <span className="text-red-700">{errorMessage}</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearError}
-              className="h-auto p-1"
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            {uploadProgress.error && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearError}
+                className="h-auto p-1"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         </div>
       )}
