@@ -200,7 +200,8 @@ export function ImageUpload({
         },
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            // 🐛 修正: 計算順序を正しく修正
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
             setUploadProgress(prev => ({ ...prev, progress }));
           }
         },
@@ -224,37 +225,47 @@ export function ImageUpload({
         setUploadedFileName(fileName);
         setUrlInput(''); // アップロード画像の場合はURL入力欄を空にする
         
-        if (isUrl) {
-          // プレビュー・本番環境：実際のURLが返される場合
-          setPreviewUrl(uploadedUrlOrKey);
-          // ⚠️ 修正: 実際のURLが返されてもアップロード画像として扱う
-          onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
-        } else {
-          // ローカル環境：keyが返される場合
-          if (!r2Available) {
-            // ローカル環境では Blob URL をプレビューに使用
-            const blobUrl = URL.createObjectURL(file);
-            setPreviewUrl(blobUrl);
-            console.log('ローカル R2 キー:', uploadedUrlOrKey);
+        // 🎨 改善: プレビュー設定を少し遅延させてスムーズに
+        setTimeout(() => {
+          if (isUrl) {
+            // プレビュー・本番環境：実際のURLが返される場合
+            setPreviewUrl(uploadedUrlOrKey);
+            // ⚠️ 修正: 実際のURLが返されてもアップロード画像として扱う
+            onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
           } else {
-            // この分岐は通常発生しないが、念のため
-            const fullUrl = `${import.meta.env.VITE_R2_PUBLIC_URL}/${uploadedUrlOrKey}`;
-            setPreviewUrl(fullUrl);
+            // ローカル環境：keyが返される場合
+            if (!r2Available) {
+              // ローカル環境では Blob URL をプレビューに使用
+              const blobUrl = URL.createObjectURL(file);
+              setPreviewUrl(blobUrl);
+              console.log('ローカル R2 キー:', uploadedUrlOrKey);
+            } else {
+              // この分岐は通常発生しないが、念のため
+              const fullUrl = `${import.meta.env.VITE_R2_PUBLIC_URL}/${uploadedUrlOrKey}`;
+              setPreviewUrl(fullUrl);
+            }
+            // フォームには特別な形式で設定（バリデーション回避）
+            onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
           }
-          // フォームには特別な形式で設定（バリデーション回避）
-          onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
-        }
+        }, 300); // 300ms遅延でスムーズな遷移
       } else {
         throw new Error('アップロードされた画像の情報が取得できませんでした');
       }
 
-      // 成功メッセージを3秒後に消去
+      // 🎨 改善: 成功メッセージとプログレスバーを段階的に消去
+      setTimeout(() => {
+        setUploadProgress(prev => ({
+          ...prev,
+          progress: 0, // プログレスをリセット
+        }));
+      }, 1000); // 1秒後にプログレスをリセット
+
       setTimeout(() => {
         setUploadProgress(prev => ({
           ...prev,
           success: null,
         }));
-      }, 3000);
+      }, 3000); // 3秒後に成功メッセージを消去
 
     } catch (error) {
       // アップロードエラー時もプレビューをクリア
@@ -365,7 +376,7 @@ export function ImageUpload({
       {/* ラベル */}
       {showLabel && (
         <Label className={hasError ? 'text-red-600' : 'text-gray-700'}>
-          {type === 'event' ? 'イベント画像' : 'アバター画像'}
+          {type === 'event' ? '画像をアップロード' : 'アバター画像'}
         </Label>
       )}
 
@@ -404,7 +415,7 @@ export function ImageUpload({
             <div className="w-full">
               <Progress 
                 value={uploadProgress.progress} 
-                className="w-full h-2 bg-gray-200"
+                className="w-full h-3 bg-gray-200 transition-all duration-300 ease-out"
               />
             </div>
             <p className="text-xs text-gray-500">{uploadProgress.progress}%</p>
