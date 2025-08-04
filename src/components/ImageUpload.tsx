@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
+// import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle, Upload, X, Trash2, Camera, Link as LinkIcon } from 'lucide-react';
 import { IMAGE_CONFIGS } from '@shared/image-config';
 import { useAuthStore } from '@/stores/auth-store';
@@ -193,7 +193,7 @@ export function ImageUpload({
       success: null,
     });
 
-    console.log('✅ アップロード開始: isUploading = true'); // 追加
+    console.log('🚀 アップロード開始:', { isUploading: true, progress: 0 });
 
     try {
       const response = await axios.post('/api/upload/image', formData, {
@@ -204,12 +204,11 @@ export function ImageUpload({
           if (progressEvent.total) {
             // 🐛 修正: 計算順序を正しく修正
             const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-            console.log(`🔄 アップロード進捗: ${progress}%`); // 進捗ログ
+            console.log('📊 アップロード進捗:', progress + '%');
             setUploadProgress(prev => ({ ...prev, progress }));
           }
         },
       });
-      console.log('✅ アップロード成功');
 
       setUploadProgress({
         isUploading: false,
@@ -272,7 +271,6 @@ export function ImageUpload({
       }, 3000); // 3秒後に成功メッセージを消去
 
     } catch (error) {
-      console.error('❌ アップロードエラー:', error);
       // アップロードエラー時もプレビューをクリア
       setPreviewUrl(null);
       setImageSource('none');
@@ -381,7 +379,7 @@ export function ImageUpload({
       {/* ラベル */}
       {showLabel && (
         <Label className={hasError ? 'text-red-600' : 'text-gray-700'}>
-          {type === 'event' ? '画像をアップロード' : 'アバター画像'}
+          {type === 'event' ? 'イベント画像' : 'アバター画像'}
         </Label>
       )}
 
@@ -417,13 +415,15 @@ export function ImageUpload({
           <div className="space-y-3">
             <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
             <p className="text-sm text-gray-600">アップロード中...</p>
-            <div className="w-full">
-              <Progress 
-                value={uploadProgress.progress} 
-                className="w-[100%]"
-              />
+            <div className="w-full space-y-2">
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-sky-500 h-full rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress.progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 text-center">{uploadProgress.progress}%</p>
             </div>
-            <p className="text-xs text-gray-500">{uploadProgress.progress}%</p>
           </div>
         )}
 
