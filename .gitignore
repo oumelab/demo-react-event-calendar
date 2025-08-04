@@ -38,6 +38,9 @@ cookies.txt
 cookies*.txt
 *.cookie
 
+# Wrangler configuration (local development only)
+wrangler.toml
+
 # Bundle Analysis
 bundle-analysis/
 stats.html

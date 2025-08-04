@@ -58,23 +58,6 @@ export async function onRequest(context: RequestContext) {
       ]
     });
 
-    // return jsonResponse({ 
-    //   message: 'イベントが作成されました',
-    //   eventId,
-    //   event: {
-    //     id: eventId,
-    //     title,
-    //     date,
-    //     location,
-    //     description: description || '',
-    //     image_url: image_url || undefined,
-    //     capacity: capacity || undefined,
-    //     creator_id: user.id,
-    //     attendees: 0,
-    //     created_at: Math.floor(Date.now() / 1000)
-    //   }
-    // }, 201);
-
     // 🆕 作成されたイベントを取得
     const createdEventResult = await client.execute({
       sql: "SELECT * FROM events WHERE id = ?",

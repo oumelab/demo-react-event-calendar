@@ -1,10 +1,10 @@
 // src/components/events/EventForm.tsx
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateEventSchema, UpdateEventSchema } from '@shared/schemas';
-import type { CreateEventRequest, UpdateEventRequest } from '@shared/types';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {CreateEventSchema, UpdateEventSchema} from "@shared/schemas";
+import type {CreateEventRequest, UpdateEventRequest} from "@shared/types";
+import {Button} from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,20 +12,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import type { Event } from '@shared/types';
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
+import type {Event} from "@shared/types";
+import {ImageUpload} from "../ImageUpload";
 
 interface EventFormProps {
-  mode: 'create';
+  mode: "create";
   initialData?: never;
   onSubmit: (data: CreateEventRequest) => Promise<void>;
   isSubmitting?: boolean;
 }
 
 interface EventEditFormProps {
-  mode: 'edit';
+  mode: "edit";
   initialData: Event;
   onSubmit: (data: UpdateEventRequest) => Promise<void>;
   isSubmitting?: boolean;
@@ -35,16 +36,16 @@ type EventFormAllProps = EventFormProps | EventEditFormProps;
 
 // 🔄 日付変換ユーティリティ（フォーム内部のみで使用）
 const formatDateTime = (datetimeLocal: string): string => {
-  if (!datetimeLocal) return '';
-  
+  if (!datetimeLocal) return "";
+
   try {
     const dateObj = new Date(datetimeLocal);
     const year = dateObj.getFullYear();
     const month = dateObj.getMonth() + 1;
     const day = dateObj.getDate();
-    const hours = String(dateObj.getHours()).padStart(2, '0');
-    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-    
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+
     return `${year}年${month}月${day}日${hours}:${minutes}`;
   } catch {
     return datetimeLocal;
@@ -52,71 +53,81 @@ const formatDateTime = (datetimeLocal: string): string => {
 };
 
 const parseDateTimeString = (dateTimeStr: string): string => {
-  if (!dateTimeStr) return '';
-  
-  const match = dateTimeStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(\d{2}:\d{2})?/);
-  
+  if (!dateTimeStr) return "";
+
+  const match = dateTimeStr.match(
+    /(\d{4})年(\d{1,2})月(\d{1,2})日(\d{2}:\d{2})?/
+  );
+
   if (match) {
     const [, year, month, day, time] = match;
-    const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    const formattedTime = time || '00:00';
+    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+      2,
+      "0"
+    )}`;
+    const formattedTime = time || "00:00";
     return `${formattedDate}T${formattedTime}`;
   }
-  
-  return '';
+
+  return "";
 };
 
 const getTodayDateTime = (): string => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 export function EventForm(props: EventFormAllProps) {
-  const { mode, onSubmit, isSubmitting = false } = props;
-  const initialData = props.mode === 'edit' ? props.initialData : undefined;
-  const isEdit = mode === 'edit';
-  
+  const {mode, onSubmit, isSubmitting = false} = props;
+  const initialData = props.mode === "edit" ? props.initialData : undefined;
+  const isEdit = mode === "edit";
+
   // 🔧 既存のスキーマをそのまま使用（型を増やさない）
   const schema = isEdit ? UpdateEventSchema : CreateEventSchema;
-  
+
   const form = useForm<CreateEventRequest | UpdateEventRequest>({
     resolver: zodResolver(schema),
-    defaultValues: isEdit && initialData ? {
-      title: initialData.title,
-      date: initialData.date,
-      location: initialData.location,
-      description: initialData.description || '',
-      image_url: initialData.image_url || '',
-      capacity: initialData.capacity || undefined,
-    } : {
-      title: '',
-      date: '',
-      location: '',
-      description: '',
-      image_url: '',
-      capacity: undefined,
-    },
+    defaultValues:
+      isEdit && initialData
+        ? {
+            title: initialData.title,
+            date: initialData.date,
+            location: initialData.location,
+            description: initialData.description || "",
+            image_url: initialData.image_url || "",
+            capacity: initialData.capacity || undefined,
+          }
+        : {
+            title: "",
+            date: "",
+            location: "",
+            description: "",
+            image_url: "",
+            capacity: undefined,
+          },
   });
 
   // 🔧 フォーム内部でdatetime-local値を管理
   const [localDateTime, setLocalDateTime] = React.useState(() => {
-    return isEdit && initialData?.date 
+    return isEdit && initialData?.date
       ? parseDateTimeString(initialData.date)
-      : '';
+      : "";
   });
 
   // datetime-localの値が変更されたら、フォームのdateフィールドを更新
   React.useEffect(() => {
     const formattedDate = formatDateTime(localDateTime);
-    form.setValue('date', formattedDate);
+    form.setValue("date", formattedDate);
   }, [localDateTime, form]);
 
-  const handleSubmit = async (data: CreateEventRequest | UpdateEventRequest) => {
+  const handleSubmit = async (
+    data: CreateEventRequest | UpdateEventRequest
+  ) => {
     try {
       // 🔧 送信データは既存の型のまま（追加の型定義不要）
       const submitData = {
@@ -124,16 +135,23 @@ export function EventForm(props: EventFormAllProps) {
         description: data.description?.trim() || undefined,
         image_url: data.image_url?.trim() || undefined,
       };
-      
+
       // 型に応じて適切な関数を呼び出し
       if (isEdit) {
-        await (onSubmit as (data: UpdateEventRequest) => Promise<void>)(submitData as UpdateEventRequest);
+        await (onSubmit as (data: UpdateEventRequest) => Promise<void>)(
+          submitData as UpdateEventRequest
+        );
       } else {
-        await (onSubmit as (data: CreateEventRequest) => Promise<void>)(submitData as CreateEventRequest);
+        await (onSubmit as (data: CreateEventRequest) => Promise<void>)(
+          submitData as CreateEventRequest
+        );
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : `イベントの${isEdit ? '更新' : '作成'}に失敗しました`;
-      form.setError('root', { type: 'manual', message });
+      const message =
+        error instanceof Error
+          ? error.message
+          : `イベントの${isEdit ? "更新" : "作成"}に失敗しました`;
+      form.setError("root", {type: "manual", message});
     }
   };
 
@@ -142,7 +160,9 @@ export function EventForm(props: EventFormAllProps) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {form.formState.errors.root && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{form.formState.errors.root.message}</p>
+            <p className="text-red-800 text-sm">
+              {form.formState.errors.root.message}
+            </p>
           </div>
         )}
 
@@ -150,11 +170,11 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="title"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>
                 イベントタイトル
-                {!isEdit && <span className="text-red-500 ml-1">*</span>}
+                {!isEdit && <span className="text-red-500">*</span>}
               </FormLabel>
               <FormControl>
                 <Input
@@ -170,22 +190,22 @@ export function EventForm(props: EventFormAllProps) {
           )}
         />
 
-        {/* 🔧 開催日時 - datetime-localを使うが、フォームフィールドは既存のまま */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
+        {/* 🔧 開催日時 - datetime-localを使うが、フォームフィールドは既存のまま ※ shadcn のフォームコンポーネントは使用しない*/}
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-sm font-medium">
             開催日時
-            {!isEdit && <span className="text-red-500 ml-1">*</span>}
+            {!isEdit && <span className="text-red-500">*</span>}
           </label>
-          
+
           <Input
             type="datetime-local"
-            className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
+            className="mb-2 bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
             disabled={form.formState.isSubmitting}
             value={localDateTime}
             onChange={(e) => setLocalDateTime(e.target.value)}
             min={getTodayDateTime()}
           />
-          
+
           {/* 隠しフィールドとしてバリデーション */}
           <FormField
             control={form.control}
@@ -199,11 +219,11 @@ export function EventForm(props: EventFormAllProps) {
               </FormItem>
             )}
           />
-          
+
           {!localDateTime && form.formState.isSubmitted && (
             <p className="text-red-500 text-sm">開催日時は必須です</p>
           )}
-          
+
           <p className="text-xs text-gray-500">
             開催日時を選択してください。保存時に「2025年7月25日14:00」の形式で統一されます
           </p>
@@ -213,11 +233,11 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="location"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>
                 開催場所
-                {!isEdit && <span className="text-red-500 ml-1">*</span>}
+                {!isEdit && <span className="text-red-500">*</span>}
               </FormLabel>
               <FormControl>
                 <Input
@@ -237,7 +257,7 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="description"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>イベント説明</FormLabel>
               <FormControl>
@@ -250,9 +270,7 @@ export function EventForm(props: EventFormAllProps) {
                 />
               </FormControl>
               <FormMessage />
-              <p className="text-xs text-gray-500 mt-1">
-                1000文字以内（任意）
-              </p>
+              <p className="text-xs text-gray-500 mt-1">1000文字以内（任意）</p>
             </FormItem>
           )}
         />
@@ -261,22 +279,36 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="image_url"
-          render={({ field }) => (
+          render={({field, fieldState}) => (
+            // <FormItem>
+            //   <FormLabel>画像URL</FormLabel>
+            //   <FormControl>
+            //     <Input
+            //       type="url"
+            //       className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
+            //       placeholder="https://example.com/image.jpg"
+            //       disabled={form.formState.isSubmitting}
+            //       {...field}
+            //     />
+            //   </FormControl>
+            //   <FormMessage />
+            //   <p className="text-xs text-gray-500 mt-1">
+            //     イベントのサムネイル画像のURLを入力してください（任意）
+            //   </p>
+            // </FormItem>
             <FormItem>
-              <FormLabel>画像URL</FormLabel>
+              {/* <FormLabel>イベント画像</FormLabel> */}
               <FormControl>
-                <Input
-                  type="url"
-                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
-                  placeholder="https://example.com/image.jpg"
-                  disabled={form.formState.isSubmitting}
-                  {...field}
+                <ImageUpload
+                  type="event"
+                  currentUrl={field.value}
+                  onUploadComplete={(url) => field.onChange(url)}
+                  // showUrlInput={true}
+                  showLabel // フォーム側でラベル管理
+                  error={fieldState.error?.message} // エラー状態を渡す
                 />
               </FormControl>
               <FormMessage />
-              <p className="text-xs text-gray-500 mt-1">
-                イベントのサムネイル画像のURLを入力してください（任意）
-              </p>
             </FormItem>
           )}
         />
@@ -285,7 +317,7 @@ export function EventForm(props: EventFormAllProps) {
         <FormField
           control={form.control}
           name="capacity"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>定員</FormLabel>
               <FormControl>
@@ -298,9 +330,11 @@ export function EventForm(props: EventFormAllProps) {
                   {...field}
                   onChange={(e) => {
                     const value = e.target.value;
-                    field.onChange(value === '' ? undefined : parseInt(value, 10));
+                    field.onChange(
+                      value === "" ? undefined : parseInt(value, 10)
+                    );
                   }}
-                  value={field.value || ''}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
@@ -316,15 +350,21 @@ export function EventForm(props: EventFormAllProps) {
           <Button
             type="submit"
             className="flex-1 h-10 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
-            disabled={form.formState.isSubmitting || isSubmitting || (!localDateTime && !isEdit)}
+            disabled={
+              form.formState.isSubmitting ||
+              isSubmitting ||
+              (!localDateTime && !isEdit)
+            }
           >
             {form.formState.isSubmitting || isSubmitting ? (
               <>
                 <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                {isEdit ? '更新中...' : '作成中...'}
+                {isEdit ? "更新中..." : "作成中..."}
               </>
+            ) : isEdit ? (
+              "イベントを更新"
             ) : (
-              isEdit ? 'イベントを更新' : 'イベントを作成'
+              "イベントを作成"
             )}
           </Button>
         </div>

@@ -26,6 +26,7 @@ import Card from "../components/card";
 
 import { Button } from "@/components/ui/button";
 import DEFAULT_IMAGE from "/default.png";
+import {getEventImageSrc} from "@/lib/image";
 import EventEndedBadge from "@/components/ui/EventEndedBadge";
 
 export default function UserCreatedEventsPage() {
@@ -120,9 +121,12 @@ export default function UserCreatedEventsPage() {
           {/* イベント画像 */}
           <div className="w-full md:w-48 h-auto flex-shrink-0">
             <img
-              src={event.image_url || DEFAULT_IMAGE}
+              src={getEventImageSrc(event.image_url) || DEFAULT_IMAGE}
               alt={event.title}
               className="aspect-video md:aspect-auto w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_IMAGE;
+              }}
             />
           </div>
 

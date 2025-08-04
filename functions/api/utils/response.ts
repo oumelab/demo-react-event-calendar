@@ -13,3 +13,8 @@ export function jsonResponse(data: unknown, status = 200) {
 export function errorResponse(message: string, status = 500) {
   return jsonResponse({ error: message }, status);
 }
+
+// 成功レスポンス用ヘルパー関数
+export function successResponse(data: unknown, status = 200) {
+  return jsonResponse(data, status);
+}
