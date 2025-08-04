@@ -391,7 +391,7 @@ export function ImageUpload({
   }, [previewUrl]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* ラベル（オプショナル） */}
       {showLabel && (
         <div className={`text-sm font-medium ${hasError ? 'text-red-500' : 'text-gray-700'}`}>
@@ -487,7 +487,7 @@ export function ImageUpload({
 
       {/* URL入力（オプション） */}
       {showUrlInput && (
-        <div className="space-y-2">
+        <div className="pt-2 space-y-2">
           <Label className="text-sm text-gray-600">
             または画像URLを入力
           </Label>
@@ -498,13 +498,13 @@ export function ImageUpload({
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               disabled={disabled || uploadProgress.isUploading}
-              className="flex-1"
+              className="flex-1 bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
             />
             <Button
               type="button"
-              variant="outline"
               onClick={handleUrlSubmit}
               disabled={disabled || uploadProgress.isUploading || !urlInput.trim()}
+              className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
             >
               設定
             </Button>

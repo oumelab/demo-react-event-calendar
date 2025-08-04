@@ -174,7 +174,7 @@ export function EventForm(props: EventFormAllProps) {
             <FormItem>
               <FormLabel>
                 イベントタイトル
-                {!isEdit && <span className="text-red-500 ml-1">*</span>}
+                {!isEdit && <span className="text-red-500">*</span>}
               </FormLabel>
               <FormControl>
                 <Input
@@ -190,16 +190,16 @@ export function EventForm(props: EventFormAllProps) {
           )}
         />
 
-        {/* 🔧 開催日時 - datetime-localを使うが、フォームフィールドは既存のまま */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
+        {/* 🔧 開催日時 - datetime-localを使うが、フォームフィールドは既存のまま ※ shadcn のフォームコンポーネントは使用しない*/}
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-sm font-medium">
             開催日時
-            {!isEdit && <span className="text-red-500 ml-1">*</span>}
+            {!isEdit && <span className="text-red-500">*</span>}
           </label>
 
           <Input
             type="datetime-local"
-            className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
+            className="mb-2 bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
             disabled={form.formState.isSubmitting}
             value={localDateTime}
             onChange={(e) => setLocalDateTime(e.target.value)}
@@ -237,7 +237,7 @@ export function EventForm(props: EventFormAllProps) {
             <FormItem>
               <FormLabel>
                 開催場所
-                {!isEdit && <span className="text-red-500 ml-1">*</span>}
+                {!isEdit && <span className="text-red-500">*</span>}
               </FormLabel>
               <FormControl>
                 <Input
