@@ -193,6 +193,8 @@ export function ImageUpload({
       success: null,
     });
 
+    console.log('✅ アップロード開始: isUploading = true'); // 追加
+
     try {
       const response = await axios.post('/api/upload/image', formData, {
         headers: {
@@ -202,10 +204,12 @@ export function ImageUpload({
           if (progressEvent.total) {
             // 🐛 修正: 計算順序を正しく修正
             const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            console.log(`🔄 アップロード進捗: ${progress}%`); // 進捗ログ
             setUploadProgress(prev => ({ ...prev, progress }));
           }
         },
       });
+      console.log('✅ アップロード成功');
 
       setUploadProgress({
         isUploading: false,
@@ -268,6 +272,7 @@ export function ImageUpload({
       }, 3000); // 3秒後に成功メッセージを消去
 
     } catch (error) {
+      console.error('❌ アップロードエラー:', error);
       // アップロードエラー時もプレビューをクリア
       setPreviewUrl(null);
       setImageSource('none');
@@ -415,7 +420,7 @@ export function ImageUpload({
             <div className="w-full">
               <Progress 
                 value={uploadProgress.progress} 
-                className="w-full h-3 bg-gray-200 transition-all duration-300 ease-out"
+                className="w-[100%]"
               />
             </div>
             <p className="text-xs text-gray-500">{uploadProgress.progress}%</p>
