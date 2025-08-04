@@ -122,9 +122,14 @@ export function ImageUpload({
   // 🆕 アップロード画像かどうかを判定
   const isUploadedImage = useCallback((url?: string) => {
     if (!url) return false;
+
+    const publicR2Url = import.meta.env.VITE_R2_PUBLIC_URL ?? '';
+    if (publicR2Url && url.startsWith(publicR2Url)) {
+      return true; // R2の公開URLで始まる場合はアップロード画像
+    }
     return url.startsWith('uploaded:') || 
-           url.includes('.r2.dev/') || 
-           url.includes('images.') || // カスタムドメイン想定
+          //  url.includes('.r2.dev/') || 
+          //  url.includes('images.') || // カスタムドメイン想定
            url.match(/^[^/]+\/[^/]+\/\d+-[a-z0-9]+\.(jpg|jpeg|png|webp)$/i); // key形式
   }, []);
 
