@@ -129,7 +129,8 @@ export function EventForm(props: EventFormAllProps) {
     data: CreateEventRequest | UpdateEventRequest
   ) => {
     try {
-      // 🔧 送信データは既存の型のまま（追加の型定義不要）
+      // 🎯 Zod バリデーションで uploaded: 形式は既に許可されている
+      // 送信データは既存の型のまま（追加の型定義不要）
       const submitData = {
         ...data,
         description: data.description?.trim() || undefined,
@@ -275,7 +276,7 @@ export function EventForm(props: EventFormAllProps) {
           )}
         />
 
-        {/* 画像URL */}
+        {/* 画像アップロード */}
         <FormField
           control={form.control}
           name="image_url"
@@ -297,13 +298,11 @@ export function EventForm(props: EventFormAllProps) {
             //   </p>
             // </FormItem>
             <FormItem>
-              {/* <FormLabel>イベント画像</FormLabel> */}
               <FormControl>
                 <ImageUpload
                   type="event"
                   currentUrl={field.value}
                   onUploadComplete={(url) => field.onChange(url)}
-                  // showUrlInput={true}
                   showLabel // フォーム側でラベル管理
                   error={fieldState.error?.message} // エラー状態を渡す
                 />
