@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle, Upload, X, Trash2, Camera, Link as LinkIcon } from 'lucide-react';
 import { IMAGE_CONFIGS } from '@shared/image-config';
 import { useAuthStore } from '@/stores/auth-store';
@@ -210,12 +210,14 @@ export function ImageUpload({
         },
       });
 
+       console.log('✅ アップロード成功:', response.data);        
       setUploadProgress({
         isUploading: false,
         progress: 100,
         error: null,
         success: 'アップロードが完了しました',
       });
+
 
       const data = response.data?.data;
       const uploadedUrlOrKey = data?.url || data?.key;
@@ -415,7 +417,7 @@ export function ImageUpload({
           <div className="space-y-3">
             <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
             <p className="text-sm text-gray-600">アップロード中...</p>
-            <div className="w-full space-y-2">
+            {/* <div className="w-full space-y-2">
               <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                 <div 
                   className="bg-sky-500 h-full rounded-full transition-all duration-300 ease-out"
@@ -423,7 +425,8 @@ export function ImageUpload({
                 />
               </div>
               <p className="text-xs text-gray-500 text-center">{uploadProgress.progress}%</p>
-            </div>
+            </div> */}
+            <Progress value={uploadProgress.progress} className={`w-[${uploadProgress.progress}%] bg-sky-500 duration-300 ease-out`} />
           </div>
         )}
 
