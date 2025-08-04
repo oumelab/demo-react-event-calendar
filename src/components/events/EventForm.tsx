@@ -303,7 +303,7 @@ export function EventForm(props: EventFormAllProps) {
                   type="event"
                   currentUrl={field.value}
                   onUploadComplete={(url) => field.onChange(url)}
-                  showUrlInput={true}
+                  // showUrlInput={true}
                   showLabel // フォーム側でラベル管理
                   error={fieldState.error?.message} // エラー状態を渡す
                 />

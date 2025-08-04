@@ -17,6 +17,7 @@ interface ImageUploadProps {
   showUrlInput?: boolean;
   showLabel?: boolean; // ラベル表示制御
   error?: string; // React Hook Form からのエラー状態
+  hideUrlForUploaded?: boolean; // アップロード画像のURL表示制御
 }
 
 interface UploadProgress {
@@ -36,6 +37,7 @@ export function ImageUpload({
   showUrlInput = true,
   showLabel = true, // デフォルトでラベル表示
   error, // React Hook Form からのエラー
+  hideUrlForUploaded = true, // デフォルトでアップロード画像のURL非表示
 }: ImageUploadProps) {
   // Zustandストアから認証状態を取得
   const isAuthenticated = useAuthStore((state) => !!state.user);
@@ -116,6 +118,38 @@ export function ImageUpload({
   // バリデーションエラーの統合管理
   const hasError = !!(uploadProgress.error || error);
   const errorMessage = uploadProgress.error || error;
+
+  // 🆕 アップロード画像かどうかを判定
+  const isUploadedImage = useCallback((url?: string) => {
+    if (!url) return false;
+    return url.startsWith('uploaded:') || 
+           url.includes('.r2.dev/') || 
+           url.includes('images.') || // カスタムドメイン想定
+           url.match(/^[^/]+\/[^/]+\/\d+-[a-z0-9]+\.(jpg|jpeg|png|webp)$/i); // key形式
+  }, []);
+
+  // URL入力欄での表示値を決定
+  const getDisplayUrl = useCallback((url?: string) => {
+    if (!url) return '';
+    
+    // アップロード画像の場合、ユーザーフレンドリーな表示
+    if (hideUrlForUploaded && isUploadedImage(url)) {
+      if (url.startsWith('uploaded:')) {
+        return ''; // アップロード画像は空表示
+      }
+      // R2 URLの場合はファイル名のみ表示
+      const match = url.match(/([^/]+\.(jpg|jpeg|png|webp))$/i);
+      return match ? `📷 ${match[1]}` : '📷 アップロード済み画像';
+    }
+    
+    return url;
+  }, [hideUrlForUploaded, isUploadedImage]);
+
+  // currentUrlの変更に対応
+  React.useEffect(() => {
+    setPreviewUrl(currentUrl || null);
+    setUrlInput(getDisplayUrl(currentUrl));
+  }, [currentUrl, getDisplayUrl]);
 
   // 画像プレビュー生成（セキュリティ対策付き）
   const generatePreview = useCallback((file: File) => {
@@ -307,6 +341,11 @@ export function ImageUpload({
 
   // URL入力ハンドラー
   const handleUrlSubmit = useCallback(() => {
+    // アップロード画像の表示名の場合は何もしない
+    if (urlInput.startsWith('📷')) {
+      return;
+    }
+
     const validation = validateAndSanitizeUrl(urlInput);
     
     if (!validation.isValid) {
