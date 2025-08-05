@@ -261,20 +261,14 @@ export function ImageUpload({
         throw new Error('アップロードされた画像の情報が取得できませんでした');
       }
 
-      // 🎨 改善: 成功メッセージとプログレスバーを段階的に消去
+      // 🎨 改善: 成功メッセージとプログレスバーを短縮して即座にプレビュー優先
       setTimeout(() => {
         setUploadProgress(prev => ({
           ...prev,
           progress: 0, // プログレスをリセット
+          success: null, // 🎨 成功メッセージも早めに消去
         }));
-      }, 1000); // 1秒後にプログレスをリセット
-
-      setTimeout(() => {
-        setUploadProgress(prev => ({
-          ...prev,
-          success: null,
-        }));
-      }, 3000); // 3秒後に成功メッセージを消去
+      }, 800); // 🎨 1秒 → 800ms に短縮
 
     } catch (error) {
       // アップロードエラー時もプレビューをクリア
@@ -375,6 +369,7 @@ export function ImageUpload({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    // 🐛 修正: 画像削除時は null ではなく空文字列を送信（Zodスキーマに合わせる）
     onUploadComplete('');
     setUploadProgress(prev => ({
       ...prev,
@@ -420,24 +415,9 @@ export function ImageUpload({
           disabled={disabled || uploadProgress.isUploading}
         />
 
-        {/* アップロード中の進捗 */}
-        {uploadProgress.isUploading && (
-          <div className="space-y-3">
-            <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-sm text-gray-600">アップロード中...</p>
-            <div className="w-full space-y-2">
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                <div 
-                  className="bg-sky-500 h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress.progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 text-center">{uploadProgress.progress}%</p>
-            </div>
-          </div>
-        )}
-
-        {/* プレビュー表示 */}
+        {/* 🎨 条件分岐の優先順位調整: プレビューを最優先表示 */}
+        
+        {/* プレビュー表示 - 成功メッセージより優先 */}
         {!uploadProgress.isUploading && previewUrl && (
           <div className="space-y-3">
             <div className="relative inline-block">
@@ -489,6 +469,16 @@ export function ImageUpload({
               )}
             </div>
             
+            {/* 🎨 成功メッセージをプレビューエリア内に統合表示 */}
+            {uploadProgress.success && (
+              <div className="p-2 rounded-md border bg-green-50 border-green-200">
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-green-700">{uploadProgress.success}</span>
+                </div>
+              </div>
+            )}
+            
             {/* 画像の種類を示すバッジ */}
             <div className="flex items-center justify-center gap-2 text-sm">
               {imageSource === 'uploaded' ? (
@@ -506,6 +496,23 @@ export function ImageUpload({
             </div>
             
             <p className="text-sm text-green-600">クリックで別の画像を選択</p>
+          </div>
+        )}
+
+        {/* アップロード中の進捗 */}
+        {uploadProgress.isUploading && (
+          <div className="space-y-3">
+            <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
+            <p className="text-sm text-gray-600">アップロード中...</p>
+            <div className="w-full space-y-2">
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-sky-500 h-full rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress.progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 text-center">{uploadProgress.progress}%</p>
+            </div>
           </div>
         )}
 
@@ -629,16 +636,6 @@ export function ImageUpload({
                 <X className="h-3 w-3" />
               </Button>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* 成功表示 */}
-      {uploadProgress.success && (
-        <div className="p-3 rounded-md border bg-green-50 border-green-200">
-          <div className="flex items-center gap-2 text-sm">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-green-700">{uploadProgress.success}</span>
           </div>
         </div>
       )}
