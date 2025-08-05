@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/auth-store';
 import { IMAGE_CONFIGS } from '@shared/image-config';
-import axios from 'axios';
+import axios, { AxiosProgressEvent } from 'axios';
 import { AlertCircle, Camera, Link as LinkIcon, Upload, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -186,8 +186,15 @@ export function ImageUpload({
 
     const validation = validateFile(file);
     if (!validation.isValid) {
+      // バリデーションエラー時はプレビューをクリア
+      if (tempBlobUrl) {
+        URL.revokeObjectURL(tempBlobUrl);
+        setTempBlobUrl(null);
+      }
       setPreviewUrl(null);
-      setTempBlobUrl(null);
+      setImageSource('none');
+      setUploadedFileName('');
+      setShowDeleteButton(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -198,14 +205,7 @@ export function ImageUpload({
       return;
     }
 
-    // 🚀 アップロード開始前に即座にプレビューを表示
-    const blobUrl = URL.createObjectURL(file);
-    setTempBlobUrl(blobUrl);
-    setPreviewUrl(blobUrl);
-    setImageSource('uploaded');
-    setUploadedFileName(file.name);
-    setShowDeleteButton(false); // アップロード完了まで削除ボタンは非表示
-
+    // 🚀 プレビューは既に表示済みなので、ここではアップロード処理のみ
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
@@ -224,12 +224,11 @@ export function ImageUpload({
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-            console.log('📊 アップロード進捗:', progress + '%');
-            setUploadProgress(prev => ({ ...prev, progress }));
-          }
+        onUploadProgress: (e: AxiosProgressEvent) => {
+          if (!e.total) return; // totalが0の場合は進捗を更新しない
+          const progress = Math.round((e.loaded * 100) / e.total);
+          console.log('📊 アップロード進捗:', progress + '%');
+          setUploadProgress(prev => ({ ...prev, progress }));
         },
       });
 
@@ -332,7 +331,17 @@ export function ImageUpload({
 
     const files = e.dataTransfer.files;
     if (files && files[0]) {
-      uploadFile(files[0]);
+      // 🚀 ドロップ時も即座にプレビューを表示
+      const file = files[0];
+      const blobUrl = URL.createObjectURL(file);
+      setTempBlobUrl(blobUrl);
+      setPreviewUrl(blobUrl);
+      setImageSource('uploaded');
+      setUploadedFileName(file.name);
+      setShowDeleteButton(true); // 即座に削除ボタンも表示
+      
+      // その後でアップロード処理を実行
+      uploadFile(file);
     }
   }, [disabled, uploadProgress.isUploading, uploadFile]);
 
@@ -340,7 +349,17 @@ export function ImageUpload({
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files[0]) {
-      uploadFile(files[0]);
+      // 🚀 即座にプレビューを表示（バリデーション前）
+      const file = files[0];
+      const blobUrl = URL.createObjectURL(file);
+      setTempBlobUrl(blobUrl);
+      setPreviewUrl(blobUrl);
+      setImageSource('uploaded');
+      setUploadedFileName(file.name);
+      setShowDeleteButton(true); // 即座に削除ボタンも表示
+      
+      // その後でアップロード処理を実行
+      uploadFile(file);
     }
   }, [uploadFile]);
 
