@@ -158,7 +158,7 @@ export function EventForm(props: EventFormAllProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 mt-2 mb-4">
         {form.formState.errors.root && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-800 text-sm">
@@ -336,40 +336,6 @@ export function EventForm(props: EventFormAllProps) {
           )}
         />
         </div>
-
-       
-
-        {/* 定員 */}
-        {/* <FormField
-          control={form.control}
-          name="capacity"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>定員</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min="1"
-                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
-                  placeholder="例: 30"
-                  disabled={form.formState.isSubmitting}
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(
-                      value === "" ? undefined : parseInt(value, 10)
-                    );
-                  }}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-              <p className="text-xs text-gray-500 mt-1">
-                参加可能人数を設定してください（任意・1人以上）
-              </p>
-            </FormItem>
-          )}
-        /> */}
 
         {/* 送信ボタン */}
         <div className="flex gap-4 pt-4">
