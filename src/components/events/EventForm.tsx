@@ -129,7 +129,8 @@ export function EventForm(props: EventFormAllProps) {
     data: CreateEventRequest | UpdateEventRequest
   ) => {
     try {
-      // 🔧 送信データは既存の型のまま（追加の型定義不要）
+      // 🎯 Zod バリデーションで uploaded: 形式は既に許可されている
+      // 送信データは既存の型のまま（追加の型定義不要）
       const submitData = {
         ...data,
         description: data.description?.trim() || undefined,
@@ -157,7 +158,7 @@ export function EventForm(props: EventFormAllProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 mt-2 mb-4">
         {form.formState.errors.root && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-800 text-sm">
@@ -165,6 +166,10 @@ export function EventForm(props: EventFormAllProps) {
             </p>
           </div>
         )}
+
+        <div className="space-y-8">
+          <h3 className="text-xl font-semibold">イベント情報</h3>
+        
 
         {/* タイトル */}
         <FormField
@@ -253,67 +258,7 @@ export function EventForm(props: EventFormAllProps) {
           )}
         />
 
-        {/* 説明 */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>イベント説明</FormLabel>
-              <FormControl>
-                <Textarea
-                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500 min-h-[120px]"
-                  placeholder="イベントの詳細、対象者、持ち物、注意事項などを記載してください"
-                  maxLength={1000}
-                  disabled={form.formState.isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-              <p className="text-xs text-gray-500 mt-1">1000文字以内（任意）</p>
-            </FormItem>
-          )}
-        />
-
-        {/* 画像URL */}
-        <FormField
-          control={form.control}
-          name="image_url"
-          render={({field, fieldState}) => (
-            // <FormItem>
-            //   <FormLabel>画像URL</FormLabel>
-            //   <FormControl>
-            //     <Input
-            //       type="url"
-            //       className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
-            //       placeholder="https://example.com/image.jpg"
-            //       disabled={form.formState.isSubmitting}
-            //       {...field}
-            //     />
-            //   </FormControl>
-            //   <FormMessage />
-            //   <p className="text-xs text-gray-500 mt-1">
-            //     イベントのサムネイル画像のURLを入力してください（任意）
-            //   </p>
-            // </FormItem>
-            <FormItem>
-              {/* <FormLabel>イベント画像</FormLabel> */}
-              <FormControl>
-                <ImageUpload
-                  type="event"
-                  currentUrl={field.value}
-                  onUploadComplete={(url) => field.onChange(url)}
-                  // showUrlInput={true}
-                  showLabel // フォーム側でラベル管理
-                  error={fieldState.error?.message} // エラー状態を渡す
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 定員 */}
+         {/* 定員 */}
         <FormField
           control={form.control}
           name="capacity"
@@ -344,6 +289,53 @@ export function EventForm(props: EventFormAllProps) {
             </FormItem>
           )}
         />
+
+        {/* 説明 */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({field}) => (
+            <FormItem>
+              <FormLabel>イベント説明</FormLabel>
+              <FormControl>
+                <Textarea
+                  className="bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500 min-h-[120px]"
+                  placeholder="イベントの詳細、対象者、持ち物、注意事項などを記載してください"
+                  maxLength={1000}
+                  disabled={form.formState.isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+              <p className="text-xs text-gray-500 mt-1">1000文字以内（任意）</p>
+            </FormItem>
+          )}
+        />
+        </div>
+
+        <div className="border-t border-blue-200 mt-10 pt-8 space-y-8">
+           <h3 className="text-xl font-semibold">イベント画像</h3>
+
+        {/* 画像アップロード */}
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({field, fieldState}) => (
+            <FormItem>
+              <FormControl>
+                <ImageUpload
+                  type="event"
+                  currentUrl={field.value}
+                  onUploadComplete={(url) => field.onChange(url)}
+                  showLabel // フォーム側でラベル管理
+                  error={fieldState.error?.message} // エラー状態を渡す
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        </div>
 
         {/* 送信ボタン */}
         <div className="flex gap-4 pt-4">
