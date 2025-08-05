@@ -1,11 +1,11 @@
-// src/components/ImageUpload.tsx - シンプルな環境変数判定版
+// src/components/ImageUpload.tsx - プレビュー高速化版
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/auth-store';
 import { IMAGE_CONFIGS } from '@shared/image-config';
 import axios from 'axios';
-import { AlertCircle, Camera, CheckCircle, Link as LinkIcon, Upload, X } from 'lucide-react';
+import { AlertCircle, Camera, Link as LinkIcon, Upload, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 type ImageType = 'avatar' | 'event';
@@ -47,7 +47,8 @@ export function ImageUpload({
   const [dragActive, setDragActive] = useState(false);
   const [imageSource, setImageSource] = useState<'none' | 'uploaded' | 'url'>('none');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [showDeleteButton, setShowDeleteButton] = useState(false); // 🎨 削除ボタン表示制御
+  const [showDeleteButton, setShowDeleteButton] = useState(false);
+  const [tempBlobUrl, setTempBlobUrl] = useState<string | null>(null); // 🚀 一時的なBlob URLを保持
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
     isUploading: false,
     progress: 0,
@@ -63,6 +64,15 @@ export function ImageUpload({
 
   const config = IMAGE_CONFIGS[type];
   const actualMaxSize = config.maxSize;
+
+  // 🚀 Blob URLのクリーンアップ
+  useEffect(() => {
+    return () => {
+      if (tempBlobUrl) {
+        URL.revokeObjectURL(tempBlobUrl);
+      }
+    };
+  }, [tempBlobUrl]);
 
   // 初期化時に既存の画像を設定
   useEffect(() => {
@@ -177,6 +187,7 @@ export function ImageUpload({
     const validation = validateFile(file);
     if (!validation.isValid) {
       setPreviewUrl(null);
+      setTempBlobUrl(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -186,6 +197,14 @@ export function ImageUpload({
       }));
       return;
     }
+
+    // 🚀 アップロード開始前に即座にプレビューを表示
+    const blobUrl = URL.createObjectURL(file);
+    setTempBlobUrl(blobUrl);
+    setPreviewUrl(blobUrl);
+    setImageSource('uploaded');
+    setUploadedFileName(file.name);
+    setShowDeleteButton(false); // アップロード完了まで削除ボタンは非表示
 
     const formData = new FormData();
     formData.append('file', file);
@@ -207,7 +226,6 @@ export function ImageUpload({
         },
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
-            // 🐛 修正: 計算順序を正しく修正
             const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
             console.log('📊 アップロード進捗:', progress + '%');
             setUploadProgress(prev => ({ ...prev, progress }));
@@ -219,7 +237,7 @@ export function ImageUpload({
         isUploading: false,
         progress: 100,
         error: null,
-        success: 'アップロードが完了しました',
+        success: null,
       });
 
       const data = response.data?.data;
@@ -229,30 +247,37 @@ export function ImageUpload({
       if (uploadedUrlOrKey) {
         const isUrl = uploadedUrlOrKey.startsWith('http');
         
-        setImageSource('uploaded');
         setUploadedFileName(fileName);
         setUrlInput(''); // アップロード画像の場合はURL入力欄を空にする
         
-        // 🎨 即座にプレビュー設定（遅延を削除）
+        // 🚀 アップロード完了後の処理をシンプル化
         if (isUrl) {
           // プレビュー・本番環境：実際のURLが返される場合
+          // Blob URLから実際のURLに切り替え
+          if (tempBlobUrl) {
+            URL.revokeObjectURL(tempBlobUrl);
+            setTempBlobUrl(null);
+          }
           setPreviewUrl(uploadedUrlOrKey);
-          setShowDeleteButton(false); // 画像読み込み完了まで削除ボタンは非表示
+          setShowDeleteButton(true);
+          
           // ⚠️ 修正: 実際のURLが返されてもアップロード画像として扱う
           onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
         } else {
           // ローカル環境：keyが返される場合
           if (!r2Available) {
-            // ローカル環境では Blob URL をプレビューに使用
-            const blobUrl = URL.createObjectURL(file);
-            setPreviewUrl(blobUrl);
-            setShowDeleteButton(false); // 画像読み込み完了まで削除ボタンは非表示
+            // ローカル環境では Blob URL をそのまま使用
             console.log('ローカル R2 キー:', uploadedUrlOrKey);
+            setShowDeleteButton(true);
           } else {
             // この分岐は通常発生しないが、念のため
             const fullUrl = `${import.meta.env.VITE_R2_PUBLIC_URL}/${uploadedUrlOrKey}`;
+            if (tempBlobUrl) {
+              URL.revokeObjectURL(tempBlobUrl);
+              setTempBlobUrl(null);
+            }
             setPreviewUrl(fullUrl);
-            setShowDeleteButton(false); // 画像読み込み完了まで削除ボタンは非表示
+            setShowDeleteButton(true);
           }
           // フォームには特別な形式で設定（バリデーション回避）
           onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
@@ -261,21 +286,16 @@ export function ImageUpload({
         throw new Error('アップロードされた画像の情報が取得できませんでした');
       }
 
-      // 🎨 改善: 成功メッセージとプログレスバーを短縮して即座にプレビュー優先
-      setTimeout(() => {
-        setUploadProgress(prev => ({
-          ...prev,
-          progress: 0, // プログレスをリセット
-          success: null, // 🎨 成功メッセージも早めに消去
-        }));
-      }, 800); // 🎨 1秒 → 800ms に短縮
-
     } catch (error) {
-      // アップロードエラー時もプレビューをクリア
+      // アップロードエラー時はプレビューをクリア
+      if (tempBlobUrl) {
+        URL.revokeObjectURL(tempBlobUrl);
+        setTempBlobUrl(null);
+      }
       setPreviewUrl(null);
       setImageSource('none');
       setUploadedFileName('');
-      setShowDeleteButton(false); // 🎨 エラー時は削除ボタンも非表示
+      setShowDeleteButton(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -290,7 +310,7 @@ export function ImageUpload({
       });
       console.error('Upload error:', error);
     }
-  }, [isAuthenticated, validateFile, type, onUploadComplete, r2Available]);
+  }, [isAuthenticated, validateFile, type, onUploadComplete, r2Available, tempBlobUrl]);
 
   // ドラッグ&ドロップハンドラー
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -341,31 +361,28 @@ export function ImageUpload({
     setUrlInput(sanitizedUrl);
     setImageSource('url');
     setUploadedFileName('');
-    setShowDeleteButton(true); // 🎨 URL画像にも削除ボタンを表示
+    setShowDeleteButton(true); // 🚀 URL画像は即座に削除ボタンを表示
     onUploadComplete(sanitizedUrl);
     
     setUploadProgress(prev => ({
       ...prev,
       error: null,
-      success: 'URLが設定されました',
     }));
-
-    // 成功メッセージを3秒後に消去
-    setTimeout(() => {
-      setUploadProgress(prev => ({
-        ...prev,
-        success: null,
-      }));
-    }, 3000);
   }, [urlInput, validateAndSanitizeUrl, onUploadComplete]);
 
   // プレビュー削除
   const handleClearPreview = useCallback(() => {
+    // 🚀 Blob URLのクリーンアップ
+    if (tempBlobUrl) {
+      URL.revokeObjectURL(tempBlobUrl);
+      setTempBlobUrl(null);
+    }
+    
     setPreviewUrl(null);
     setUrlInput('');
     setImageSource('none');
     setUploadedFileName('');
-    setShowDeleteButton(false); // 🎨 削除ボタンも非表示
+    setShowDeleteButton(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -376,7 +393,7 @@ export function ImageUpload({
       error: null,
       success: null,
     }));
-  }, [onUploadComplete]);
+  }, [onUploadComplete, tempBlobUrl]);
 
   return (
     <div className="space-y-4">
@@ -415,50 +432,34 @@ export function ImageUpload({
           disabled={disabled || uploadProgress.isUploading}
         />
 
-        {/* 🎨 条件分岐の優先順位調整: プレビューを最優先表示 */}
-        
-        {/* プレビュー表示 - 成功メッセージより優先 */}
+        {/* 🚀 プレビュー表示（シンプル版） */}
         {!uploadProgress.isUploading && previewUrl && (
           <div className="space-y-3">
             <div className="relative inline-block">
-              {/* 🎨 ローディング表示（画像読み込み中） */}
-              {!showDeleteButton && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-md">
-                  <div className="animate-spin w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full" />
-                </div>
-              )}
-              
               <img
                 src={previewUrl}
                 alt="プレビュー"
                 className={`
-                  object-cover rounded-md shadow-sm transition-opacity duration-300
-                  ${showDeleteButton ? 'opacity-100' : 'opacity-0'}
+                  object-cover rounded-md shadow-sm
                   ${type === 'avatar' 
                     ? 'w-24 h-24 rounded-full' 
-                    : 'w-48 h-32 aspect-[3/2]' // 🎨 固定サイズ（3:2比率）
+                    : 'w-48 h-32 aspect-[3/2]'
                   }
                 `}
-                onLoad={() => {
-                  // 🎨 画像読み込み完了後に削除ボタンを表示
-                  console.log('画像読み込み完了');
-                  setShowDeleteButton(true);
-                }}
                 onError={(e) => {
                   console.error('プレビュー画像の読み込みに失敗:', previewUrl);
-                  setShowDeleteButton(true); // エラー時も削除ボタンを表示
                   // エラー時は画像を非表示にする（無限ループ防止）
                   e.currentTarget.style.display = 'none';
                 }}
               />
               
-              {/* 🎨 削除ボタンを画像読み込み後に表示 */}
+              {/* 削除ボタン */}
               {showDeleteButton && (
                 <Button
                   type="button"
                   size="sm"
                   variant="destructive"
-                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 animate-in fade-in duration-300"
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleClearPreview();
@@ -468,16 +469,6 @@ export function ImageUpload({
                 </Button>
               )}
             </div>
-            
-            {/* 🎨 成功メッセージをプレビューエリア内に統合表示 */}
-            {uploadProgress.success && (
-              <div className="p-2 rounded-md border bg-green-50 border-green-200">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-green-700">{uploadProgress.success}</span>
-                </div>
-              </div>
-            )}
             
             {/* 画像の種類を示すバッジ */}
             <div className="flex items-center justify-center gap-2 text-sm">
@@ -520,12 +511,10 @@ export function ImageUpload({
         {!uploadProgress.isUploading && !previewUrl && imageSource === 'uploaded' && uploadedFileName && (
           <div className="space-y-3">
             <div className="relative inline-block">
-              {/* 🎨 ローカル環境でもプレビュー環境と同じサイズのプレースホルダー */}
               <div className="w-48 h-32 bg-gray-100 rounded-md flex items-center justify-center aspect-[3/2]">
                 <Camera className="w-8 h-8 text-gray-400" />
               </div>
               
-              {/* 🎨 ローカル環境でも削除ボタンを同じ位置に表示 */}
               <Button
                 type="button"
                 size="sm"
