@@ -49,28 +49,7 @@ export const CreateEventSchema = z.object({
     .optional(),
   image_url: z
     .string()
-    .optional()
-    .refine(
-      (value) => {
-        if (!value || value === "") return true;
-
-        // アップロードされた画像の特別な形式
-        if (value.startsWith("uploaded:")) return true;
-
-        // 通常のURL形式
-        try {
-          new URL(value);
-          return value.startsWith("https://");
-        } catch {
-          return false;
-        }
-      },
-      {
-        message:
-          "有効なHTTPS URLを入力するか、画像ファイルをアップロードしてください",
-      }
-    )
-    .or(z.literal("")),
+    .optional(),
   capacity: z
     .number({
       required_error: "定員は数値で入力してください",
@@ -81,7 +60,12 @@ export const CreateEventSchema = z.object({
     .optional(),
 });
 
-export const UpdateEventSchema = CreateEventSchema.partial();
+export const UpdateEventSchema = CreateEventSchema.partial().extend({
+  image_url: z
+    .string()
+    .optional()
+    .nullable(),
+});
 
 // イベント申し込み・キャンセル機能用のスキーマ
 // ==============================================================

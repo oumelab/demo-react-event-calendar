@@ -18,7 +18,7 @@ export function useEventMutations() {
 
   // イベント作成
   const createEventMutation = useMutation({
-    mutationFn: (eventData: CreateEventRequest) => createEvent(eventData),
+    mutationFn: (eventData: CreateEventRequest | FormData) => createEvent(eventData),
     onSuccess: (data) => {
       if (!data.success) {
         // サーバーエラーはthrowしてフォーム側でキャッチ
@@ -47,7 +47,7 @@ export function useEventMutations() {
 
   // イベント更新
   const updateEventMutation = useMutation({
-    mutationFn: ({ id, eventData }: { id: string; eventData: UpdateEventRequest }) => 
+    mutationFn: ({ id, eventData }: { id: string; eventData: UpdateEventRequest | FormData }) => 
       updateEvent(id, eventData),
     onSuccess: (data, variables) => {
       if (!data.success) {

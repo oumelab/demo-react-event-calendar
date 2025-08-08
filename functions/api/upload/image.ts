@@ -1,17 +1,21 @@
 // functions/api/upload/image.ts
 import { getCurrentUser } from '../utils/auth';
 import { errorResponse, successResponse } from '../utils/response';
-import { IMAGE_CONFIGS } from '../../../shared/image-config';
-import { uploadImageToR2 } from '../utils/image-upload';
+import { uploadImageToR2, deleteImageFromR2 } from '../utils/image-upload';
 import type { RequestContext } from '@shared/cloudflare-types';
 
 /**
- * 汎用画像アップロードAPI
+ * 統合画像アップロードAPI
  * POST /api/upload/image
  * 
  * Body: FormData
- * - file: File (必須)
- * - type: 'avatar' | 'event' (必須)
+ * - file: File (必須) - アップロードする画像ファイル
+ * - type: 'avatar' | 'event' (必須) - 画像タイプ
+ * 
+ * 機能:
+ * - ファイルバリデーション (utils/image-upload.ts)
+ * - R2ストレージへのアップロード
+ * - メタデータ付与と公開URL生成
  */
 export async function onRequestPost(context: RequestContext): Promise<Response> {
   try {
@@ -33,7 +37,7 @@ export async function onRequestPost(context: RequestContext): Promise<Response> 
       formData = await context.request.formData();
     } catch (error) {
       console.error('FormData parsing error:', error);
-      return errorResponse('リクエストデータの解析に失敗しました。', 400);
+      return errorResponse('リクエストデータの解析に失敗しました。ファイルサイズが大きすぎる可能性があります。', 400);
     }
 
     // ファイルの取得と検証
@@ -53,22 +57,12 @@ export async function onRequestPost(context: RequestContext): Promise<Response> 
     // タイプの取得と検証
     const type = formData.get('type') as string;
     if (!type || !['avatar', 'event'].includes(type)) {
-      return errorResponse('画像タイプ（avatar または event）を指定してください。', 400);
+      return errorResponse('画像タイプを指定してください。"avatar"（アバター）または"event"（イベント）を送信してください。', 400);
     }
 
     const imageType = type as 'avatar' | 'event';
 
-    // ファイルサイズの事前チェック（ブラウザでのエラー表示用）
-    const config = IMAGE_CONFIGS[imageType];
-    if (file.size > config.maxSize) {
-      const maxSizeMB = Math.round(config.maxSize / (1024 * 1024));
-      return errorResponse(
-        `ファイルサイズが制限を超えています。最大${maxSizeMB}MBまで対応しています。`,
-        400
-      );
-    }
-
-    // R2にアップロード
+    // R2にアップロード（バリデーションは uploadImageToR2 内で実行）
     const uploadResult = await uploadImageToR2(
       file,
       imageType,
@@ -82,20 +76,24 @@ export async function onRequestPost(context: RequestContext): Promise<Response> 
 
     // 成功レスポンス
     return successResponse({
-      message: '画像がアップロードされました。',
+      message: `${imageType === 'avatar' ? 'アバター' : 'イベント'}画像が正常にアップロードされました。`,
       data: {
         url: uploadResult.url,
         key: uploadResult.key,
         type: imageType,
         fileName: file.name,
         fileSize: file.size,
-        userId: user.id
+        userId: user.id,
+        uploadedAt: new Date().toISOString()
       }
     });
 
   } catch (error) {
     console.error('Image upload API error:', error);
-    return errorResponse('サーバーエラーが発生しました。', 500);
+    return errorResponse(
+      'アップロード中にサーバーエラーが発生しました。しばらく時間をおいて再度お試しください。', 
+      500
+    );
   }
 }
 
@@ -120,7 +118,7 @@ export async function onRequestDelete(context: RequestContext): Promise<Response
       requestBody = await context.request.json();
     } catch (error) {
       console.error('JSON parsing error:', error);
-      return errorResponse('無効なJSONリクエストです。', 400);
+      return errorResponse('無効なJSONリクエストです。正しいJSON形式で送信してください。', 400);
     }
 
     // キーの取得と検証
@@ -131,15 +129,14 @@ export async function onRequestDelete(context: RequestContext): Promise<Response
 
     // キーの所有者チェック（セキュリティ対策）
     if (!key.includes(`/${user.id}/`)) {
-      return errorResponse('この画像を削除する権限がありません。', 403);
+      return errorResponse('この画像を削除する権限がありません。自分がアップロードした画像のみ削除できます。', 403);
     }
 
-    // R2から削除
-    try {
-      await context.env.IMAGES_BUCKET.delete(key);
-    } catch (error) {
-      console.error('R2 deletion error:', error);
-      return errorResponse('画像の削除に失敗しました。', 500);
+    // R2から削除（共通関数を使用）
+    const deleteResult = await deleteImageFromR2(key, context.env);
+    if (!deleteResult.success) {
+      console.error('R2 deletion error:', deleteResult.error);
+      return errorResponse(deleteResult.error || '画像の削除に失敗しました。', 500);
     }
 
     // 成功レスポンス
@@ -153,7 +150,10 @@ export async function onRequestDelete(context: RequestContext): Promise<Response
 
   } catch (error) {
     console.error('Image deletion API error:', error);
-    return errorResponse('サーバーエラーが発生しました。', 500);
+    return errorResponse(
+      '画像削除中にサーバーエラーが発生しました。しばらく時間をおいて再度お試しください。', 
+      500
+    );
   }
 }
 
@@ -174,13 +174,14 @@ export async function onRequestGet(context: RequestContext): Promise<Response> {
     const type = url.searchParams.get('type') as 'avatar' | 'event' | null;
     const limit = parseInt(url.searchParams.get('limit') || '10');
 
-    // ユーザー専用フォルダのプレフィックス作成
+    // ユーザー専用フォルダのプレフィックス作成（セキュリティ強化）
     let prefix = '';
     if (type) {
       prefix = `${type}s/${user.id}/`; // avatars/{userId}/ または events/{userId}/
     } else {
-      // 全タイプの画像を取得する場合は、ユーザーIDでフィルタリング
-      prefix = '';
+      // セキュリティ強化: typeが指定されていない場合でも必ずユーザーIDを含める
+      // ユーザーが所有するすべての画像を取得する場合
+      prefix = `${user.id}/`; // フォルダ構造に依存しないユーザーIDフィルタリング
     }
 
     // R2から画像一覧を取得
@@ -189,10 +190,20 @@ export async function onRequestGet(context: RequestContext): Promise<Response> {
       limit: Math.min(limit, 100) // 最大100件
     });
 
-    // ユーザーの画像のみフィルタリング（セキュリティ対策）
-    const userImages = listResult.objects.filter(obj => 
-      obj.key.includes(`/${user.id}/`)
-    );
+    // ユーザーの画像のみフィルタリング（セキュリティ対策強化）
+    const userImages = listResult.objects.filter(obj => {
+      // ユーザーIDが含まれていることを厳密にチェック
+      const keyParts = obj.key.split('/');
+      
+      // フォルダ構造: type/{userId}/filename の場合
+      if (keyParts.length >= 3) {
+        const userIdInKey = keyParts[1];
+        return userIdInKey === user.id;
+      }
+      
+      // レガシー構造や異なる構造の場合の安全なフォールバック
+      return obj.key.includes(`/${user.id}/`) && obj.key.split('/').includes(user.id);
+    });
 
     // レスポンス用データの整形
     const images = userImages.map(obj => ({
@@ -216,6 +227,9 @@ export async function onRequestGet(context: RequestContext): Promise<Response> {
 
   } catch (error) {
     console.error('Image list API error:', error);
-    return errorResponse('画像一覧の取得に失敗しました。', 500);
+    return errorResponse(
+      '画像一覧の取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。', 
+      500
+    );
   }
 }
