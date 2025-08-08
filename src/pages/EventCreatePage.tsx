@@ -14,12 +14,12 @@ export default function EventCreatePage() {
   const user = useAuthStore((state) => state.user);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
-  const handleSubmit = async (data: CreateEventRequest) => {
+  const handleSubmit = async (data: CreateEventRequest | FormData) => {
     // データはそのまま送信（型変換不要）
     await createEvent(data);
   };
 
-  // 🆕 アカウント移行成功後の処理
+  // アカウント移行成功後の処理
   const handleUpgradeSuccess = () => {
     setShowUpgradeDialog(false);
     // 移行完了後、そのままイベント作成可能になる
