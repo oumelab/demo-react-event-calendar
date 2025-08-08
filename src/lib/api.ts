@@ -18,7 +18,8 @@ const fetchWithCredentials = async (url: string, options: RequestInit = {}) => {
     ...options,
     credentials: 'include', // 認証クッキーを含める
     headers: {
-      'Content-Type': 'application/json',
+      // FormDataの場合はContent-Typeを自動設定させる
+      ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
   });
@@ -46,19 +47,19 @@ export async function getEventById(id: string): Promise<EventWithAttendees> {
 }
 
 // イベント作成
-export async function createEvent(eventData: CreateEventRequest): Promise<EventOperationResponse> {
+export async function createEvent(eventData: CreateEventRequest | FormData): Promise<EventOperationResponse> {
   const response = await fetchWithCredentials(`${API_BASE_URL}/events/create`, {
     method: 'POST',
-    body: JSON.stringify(eventData),
+    body: eventData instanceof FormData ? eventData : JSON.stringify(eventData),
   });
   return response.json();
 }
 
 // イベント更新
-export async function updateEvent(id: string, eventData: UpdateEventRequest): Promise<EventOperationResponse> {
+export async function updateEvent(id: string, eventData: UpdateEventRequest | FormData): Promise<EventOperationResponse> {
   const response = await fetchWithCredentials(`${API_BASE_URL}/events/${id}/update`, {
     method: 'PUT',
-    body: JSON.stringify(eventData),
+    body: eventData instanceof FormData ? eventData : JSON.stringify(eventData),
   });
   return response.json();
 }

@@ -141,7 +141,7 @@ export interface UpdateEventRequest {
   date?: string;
   location?: string;
   description?: string;
-  image_url?: string;
+  image_url?: string | null; // 画像削除対応のためnullを許可
   capacity?: number;
 }
 

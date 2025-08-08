@@ -11,30 +11,17 @@ export const getEventImageSrc = (imageUrl?: string): string => {
     return DEFAULT_EVENT_IMG;
   }
   
-  // アップロードされた画像の場合（uploaded:プレフィックス）
-  if (imageUrl.startsWith('uploaded:')) {
-    const actualUrl = imageUrl.replace('uploaded:', '');
-    
-    // 実際のHTTPS URLの場合はそれを使用
-    if (actualUrl.startsWith('https://')) {
-      return actualUrl;
-    }
-    
-    // R2が利用可能な環境では、環境変数を使用してURLを構築
-    if (import.meta.env.VITE_R2_PUBLIC_URL) {
-      return `${import.meta.env.VITE_R2_PUBLIC_URL}/${actualUrl}`;
-    }
-    
-    // R2が利用できない環境（ローカル開発）ではデフォルト画像を使用
-    return DEFAULT_EVENT_IMG;
-  }
-  
-  // 通常のHTTPS URLの場合
+  // HTTPS URLの場合はそのまま使用
   if (imageUrl.startsWith('https://')) {
     return imageUrl;
   }
   
-  // その他の場合はデフォルト画像を返す
+  // R2キーの場合、環境変数でURL構築
+  if (import.meta.env.VITE_R2_PUBLIC_URL) {
+    return `${import.meta.env.VITE_R2_PUBLIC_URL}/${imageUrl}`;
+  }
+  
+  // R2が利用できない環境（ローカル開発）ではデフォルト画像を使用
   return DEFAULT_EVENT_IMG;
 };
 
@@ -48,29 +35,16 @@ export const getAvatarImageSrc = (imageUrl?: string): string | undefined => {
     return undefined; // AvatarFallback にフォールバック
   }
   
-  // アップロードされた画像の場合（uploaded:プレフィックス）
-  if (imageUrl.startsWith('uploaded:')) {
-    const actualUrl = imageUrl.replace('uploaded:', '');
-    
-    // 実際のHTTPS URLの場合はそれを使用
-    if (actualUrl.startsWith('https://')) {
-      return actualUrl;
-    }
-    
-    // R2が利用可能な環境では、環境変数を使用してURLを構築
-    if (import.meta.env.VITE_R2_PUBLIC_URL) {
-      return `${import.meta.env.VITE_R2_PUBLIC_URL}/${actualUrl}`;
-    }
-    
-    // R2が利用できない場合は undefined を返してフォールバックに任せる
-    return undefined;
-  }
-  
-  // 通常のHTTPS URLの場合
+  // HTTPS URLの場合はそのまま使用
   if (imageUrl.startsWith('https://')) {
     return imageUrl;
   }
   
-  // その他の場合は undefined を返してフォールバックに任せる
+  // R2キーの場合、環境変数でURL構築
+  if (import.meta.env.VITE_R2_PUBLIC_URL) {
+    return `${import.meta.env.VITE_R2_PUBLIC_URL}/${imageUrl}`;
+  }
+  
+  // R2が利用できない場合は undefined を返してフォールバックに任せる
   return undefined;
 };

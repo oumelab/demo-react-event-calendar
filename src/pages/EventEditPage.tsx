@@ -77,7 +77,7 @@ export default function EventEditPage() {
     );
   }
 
-  const handleSubmit = async (data: UpdateEventRequest) => {
+  const handleSubmit = async (data: UpdateEventRequest | FormData) => {
     await updateEvent({id: id as string, eventData: data});
   };
 

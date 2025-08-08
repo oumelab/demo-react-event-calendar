@@ -1,11 +1,9 @@
 // src/components/ImageUpload.tsx - プレビュー高速化版
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/auth-store';
 import { IMAGE_CONFIGS } from '@shared/image-config';
-import axios, { AxiosProgressEvent } from 'axios';
-import { AlertCircle, Camera, Link as LinkIcon, Upload, X } from 'lucide-react';
+import { AlertCircle, Camera, Upload, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 type ImageType = 'avatar' | 'event';
@@ -13,47 +11,38 @@ type ImageType = 'avatar' | 'event';
 interface ImageUploadProps {
   type: ImageType;
   currentUrl?: string;
-  onUploadComplete: (url: string) => void;
-  showUrlInput?: boolean;
+  onImageChange: (data: { type: 'none' | 'file'; file?: File }) => void;
   showLabel?: boolean;
   disabled?: boolean;
   error?: string;
 }
 
-interface UploadProgress {
-  isUploading: boolean;
+interface PreviewProgress {
+  isCreating: boolean;
   progress: number;
   error: string | null;
-  success: string | null;
 }
 
-interface ValidationResult {
-  isValid: boolean;
-  error?: string;
-  sanitizedUrl?: string;
-}
 
 export function ImageUpload({
   type,
   currentUrl,
-  onUploadComplete,
-  showUrlInput = true,
+  onImageChange,
   showLabel = true,
   disabled = false,
   error,
 }: ImageUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [urlInput, setUrlInput] = useState('');
   const [dragActive, setDragActive] = useState(false);
-  const [imageSource, setImageSource] = useState<'none' | 'uploaded' | 'url'>('none');
+  const [imageSource, setImageSource] = useState<'none' | 'uploaded'>('none');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [showDeleteButton, setShowDeleteButton] = useState(false);
   const [tempBlobUrl, setTempBlobUrl] = useState<string | null>(null); // 🚀 一時的なBlob URLを保持
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
-    isUploading: false,
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [previewProgress, setPreviewProgress] = useState<PreviewProgress>({
+    isCreating: false,
     progress: 0,
     error: null,
-    success: null,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,68 +63,58 @@ export function ImageUpload({
     };
   }, [tempBlobUrl]);
 
-  // 初期化時に既存の画像を設定
+  // 初期化時に既存の画像を設定（編集時のアップロード済み画像表示用）
   useEffect(() => {
     if (currentUrl) {
-      if (currentUrl.startsWith('uploaded:')) {
-        // アップロード済み画像の場合
-        const actualUrl = currentUrl.replace('uploaded:', '');
-        setImageSource('uploaded');
-        setUrlInput(''); // URL入力欄は空のまま
-        
-        if (actualUrl.startsWith('https://')) {
-          // 実際のHTTPS URLの場合
-          setPreviewUrl(actualUrl);
-          setUploadedFileName('uploaded-image'); // ファイル名を推定
-          setShowDeleteButton(true); // 🎨 既存画像には削除ボタンを即表示
-        } else {
-          // キーのみの場合
-          setUploadedFileName(actualUrl);
-          
-          // R2が利用できない環境（ローカル開発）ではプレビューなし
-          if (!r2Available) {
-            setPreviewUrl(null);
-            setShowDeleteButton(false);
-          } else {
-            // プレビュー・本番環境では環境変数を使用してURL構築
-            setPreviewUrl(`${import.meta.env.VITE_R2_PUBLIC_URL}/${actualUrl}`);
-            setShowDeleteButton(true); // 🎨 既存画像には削除ボタンを即表示
-          }
-        }
-      } else if (currentUrl.startsWith('https://')) {
-        // 通常のURL画像の場合
-        setImageSource('url');
-        setUrlInput(currentUrl);
+      // アップロード済み画像の表示
+      setImageSource('uploaded');
+      
+      if (currentUrl.startsWith('https://')) {
+        // 実際のHTTPS URLの場合（本番環境）
         setPreviewUrl(currentUrl);
-        setUploadedFileName('');
-        setShowDeleteButton(true); // 🎨 既存画像には削除ボタンを即表示
+        setUploadedFileName('uploaded-image');
+        setShowDeleteButton(true);
+      } else {
+        // R2キーの場合（ローカル開発または本番のキー）
+        setUploadedFileName(currentUrl);
+        
+        if (!r2Available) {
+          // ローカル開発：プレビューなし
+          setPreviewUrl(null);
+          setShowDeleteButton(true); // 削除は可能
+        } else {
+          // 本番環境：URL構築してプレビュー
+          setPreviewUrl(`${import.meta.env.VITE_R2_PUBLIC_URL}/${currentUrl}`);
+          setShowDeleteButton(true);
+        }
       }
     } else {
+      // 画像なし
       setImageSource('none');
-      setUrlInput('');
       setPreviewUrl(null);
       setUploadedFileName('');
-      setShowDeleteButton(false); // 🎨 初期状態では削除ボタンなし
+      setShowDeleteButton(false);
     }
   }, [currentUrl, r2Available]);
 
   // エラーメッセージの表示制御
-  const hasError = !!error || !!uploadProgress.error;
-  const errorMessage = error || uploadProgress.error;
+  const hasError = !!error || !!validationError || !!previewProgress.error;
+  const errorMessage = error || validationError || previewProgress.error;
 
-  // エラーの自動消去（アップロードエラーのみ）
+  // エラーの自動消去（プレビューエラーのみ）
   useEffect(() => {
-    if (uploadProgress.error) {
+    if (previewProgress.error) {
       const timer = setTimeout(() => {
-        setUploadProgress(prev => ({ ...prev, error: null }));
+        setPreviewProgress(prev => ({ ...prev, error: null }));
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [uploadProgress.error]);
+  }, [previewProgress.error]);
 
   // エラークリア関数
   const clearError = useCallback(() => {
-    setUploadProgress(prev => ({ ...prev, error: null }));
+    setValidationError(null);
+    setPreviewProgress(prev => ({ ...prev, error: null }));
   }, []);
 
   // ファイルバリデーション
@@ -157,33 +136,9 @@ export function ImageUpload({
     return { isValid: true };
   }, [config, actualMaxSize]);
 
-  // URLバリデーション
-  const validateAndSanitizeUrl = useCallback((url: string): ValidationResult => {
-    if (!url.trim()) {
-      return { isValid: false, error: 'URLを入力してください' };
-    }
 
-    try {
-      const urlObj = new URL(url.trim());
-      if (urlObj.protocol !== 'https:') {
-        return { isValid: false, error: 'HTTPS URLのみ対応しています' };
-      }
-      return { isValid: true, sanitizedUrl: urlObj.toString() };
-    } catch {
-      return { isValid: false, error: '有効なURLを入力してください' };
-    }
-  }, []);
-
-  // ファイルアップロード処理
-  const uploadFile = useCallback(async (file: File) => {
-    if (!isAuthenticated) {
-      setUploadProgress(prev => ({
-        ...prev,
-        error: 'ログインが必要です',
-      }));
-      return;
-    }
-
+  // ファイル処理（プレビュー専用）
+  const processFile = useCallback((file: File) => {
     const validation = validateFile(file);
     if (!validation.isValid) {
       // バリデーションエラー時はプレビューをクリア
@@ -198,118 +153,47 @@ export function ImageUpload({
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      setUploadProgress(prev => ({
-        ...prev,
-        error: validation.error || 'ファイルが無効です',
-      }));
+      setValidationError(validation.error || 'ファイルが無効です');
+      onImageChange({ type: 'none' });
       return;
     }
 
-    // 🚀 プレビューは既に表示済みなので、ここではアップロード処理のみ
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
+    // プレビュー作成進捗を開始
+    setPreviewProgress({ isCreating: true, progress: 0, error: null });
+    setValidationError(null);
 
-    setUploadProgress({
-      isUploading: true,
-      progress: 0,
-      error: null,
-      success: null,
-    });
-
-    console.log('🚀 アップロード開始:', { isUploading: true, progress: 0 });
-
-    try {
-      const response = await axios.post('/api/upload/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (e: AxiosProgressEvent) => {
-          if (!e.total) return; // totalが0の場合は進捗を更新しない
-          const progress = Math.round((e.loaded * 100) / e.total);
-          console.log('📊 アップロード進捗:', progress + '%');
-          setUploadProgress(prev => ({ ...prev, progress }));
-        },
-      });
-
-      setUploadProgress({
-        isUploading: false,
-        progress: 100,
-        error: null,
-        success: null,
-      });
-
-      const data = response.data?.data;
-      const uploadedUrlOrKey = data?.url || data?.key;
-      const fileName = data?.fileName || file.name;
+    // FileReaderでプログレス付きでファイルを読み込み
+    const reader = new FileReader();
+    
+    reader.onprogress = (e: ProgressEvent<FileReader>) => {
+      if (e.lengthComputable) {
+        const progress = Math.round((e.loaded / e.total) * 100);
+        setPreviewProgress(prev => ({ ...prev, progress }));
+      }
+    };
+    
+    reader.onload = () => {
+      // プレビュー表示とファイル保存
+      const blobUrl = URL.createObjectURL(file);
+      setTempBlobUrl(blobUrl);
+      setPreviewUrl(blobUrl);
+      setImageSource('uploaded');
+      setUploadedFileName(file.name);
+      setShowDeleteButton(true);
+      setPreviewProgress({ isCreating: false, progress: 100, error: null });
       
-      if (uploadedUrlOrKey) {
-        const isUrl = uploadedUrlOrKey.startsWith('http');
-        
-        setUploadedFileName(fileName);
-        setUrlInput(''); // アップロード画像の場合はURL入力欄を空にする
-        
-        // 🚀 アップロード完了後の処理をシンプル化
-        if (isUrl) {
-          // プレビュー・本番環境：実際のURLが返される場合
-          // Blob URLから実際のURLに切り替え
-          if (tempBlobUrl) {
-            URL.revokeObjectURL(tempBlobUrl);
-            setTempBlobUrl(null);
-          }
-          setPreviewUrl(uploadedUrlOrKey);
-          setShowDeleteButton(true);
-          
-          // ⚠️ 修正: 実際のURLが返されてもアップロード画像として扱う
-          onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
-        } else {
-          // ローカル環境：keyが返される場合
-          if (!r2Available) {
-            // ローカル環境では Blob URL をそのまま使用
-            console.log('ローカル R2 キー:', uploadedUrlOrKey);
-            setShowDeleteButton(true);
-          } else {
-            // この分岐は通常発生しないが、念のため
-            const fullUrl = `${import.meta.env.VITE_R2_PUBLIC_URL}/${uploadedUrlOrKey}`;
-            if (tempBlobUrl) {
-              URL.revokeObjectURL(tempBlobUrl);
-              setTempBlobUrl(null);
-            }
-            setPreviewUrl(fullUrl);
-            setShowDeleteButton(true);
-          }
-          // フォームには特別な形式で設定（バリデーション回避）
-          onUploadComplete(`uploaded:${uploadedUrlOrKey}`);
-        }
-      } else {
-        throw new Error('アップロードされた画像の情報が取得できませんでした');
-      }
-
-    } catch (error) {
-      // アップロードエラー時はプレビューをクリア
-      if (tempBlobUrl) {
-        URL.revokeObjectURL(tempBlobUrl);
-        setTempBlobUrl(null);
-      }
-      setPreviewUrl(null);
-      setImageSource('none');
-      setUploadedFileName('');
-      setShowDeleteButton(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      
-      setUploadProgress({
-        isUploading: false,
-        progress: 0,
-        error: axios.isAxiosError(error) 
-          ? error.response?.data?.error || error.message || 'アップロードに失敗しました'
-          : error instanceof Error ? error.message : 'アップロードに失敗しました',
-        success: null,
-      });
-      console.error('Upload error:', error);
-    }
-  }, [isAuthenticated, validateFile, type, onUploadComplete, r2Available, tempBlobUrl]);
+      // 親コンポーネントに通知
+      onImageChange({ type: 'file', file });
+      console.log('📁 プレビュー作成完了:', { name: file.name, size: file.size, type: file.type });
+    };
+    
+    reader.onerror = () => {
+      setPreviewProgress({ isCreating: false, progress: 0, error: 'ファイルの読み込みに失敗しました' });
+    };
+    
+    // ファイル読み込み開始
+    reader.readAsArrayBuffer(file);
+  }, [validateFile, onImageChange, tempBlobUrl]);
 
   // ドラッグ&ドロップハンドラー
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -327,67 +211,24 @@ export function ImageUpload({
     e.stopPropagation();
     setDragActive(false);
 
-    if (disabled || uploadProgress.isUploading) return;
+    if (disabled || previewProgress.isCreating) return;
 
     const files = e.dataTransfer.files;
     if (files && files[0]) {
-      // 🚀 ドロップ時も即座にプレビューを表示
-      const file = files[0];
-      const blobUrl = URL.createObjectURL(file);
-      setTempBlobUrl(blobUrl);
-      setPreviewUrl(blobUrl);
-      setImageSource('uploaded');
-      setUploadedFileName(file.name);
-      setShowDeleteButton(true); // 即座に削除ボタンも表示
-      
-      // その後でアップロード処理を実行
-      uploadFile(file);
+      // 🚀 ドロップ時はprocessFileを使用してプレビュー進捗表示
+      processFile(files[0]);
     }
-  }, [disabled, uploadProgress.isUploading, uploadFile]);
+  }, [disabled, previewProgress.isCreating, processFile]);
 
   // ファイル選択ハンドラー
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files[0]) {
-      // 🚀 即座にプレビューを表示（バリデーション前）
-      const file = files[0];
-      const blobUrl = URL.createObjectURL(file);
-      setTempBlobUrl(blobUrl);
-      setPreviewUrl(blobUrl);
-      setImageSource('uploaded');
-      setUploadedFileName(file.name);
-      setShowDeleteButton(true); // 即座に削除ボタンも表示
-      
-      // その後でアップロード処理を実行
-      uploadFile(file);
+      // 🚀 ファイル選択時はprocessFileを使用してプレビュー進捗表示
+      processFile(files[0]);
     }
-  }, [uploadFile]);
+  }, [processFile]);
 
-  // URL入力ハンドラー
-  const handleUrlSubmit = useCallback(() => {
-    const validation = validateAndSanitizeUrl(urlInput);
-    
-    if (!validation.isValid) {
-      setUploadProgress(prev => ({
-        ...prev,
-        error: validation.error || '無効なURLです',
-      }));
-      return;
-    }
-
-    const sanitizedUrl = validation.sanitizedUrl!;
-    setPreviewUrl(sanitizedUrl);
-    setUrlInput(sanitizedUrl);
-    setImageSource('url');
-    setUploadedFileName('');
-    setShowDeleteButton(true); // 🚀 URL画像は即座に削除ボタンを表示
-    onUploadComplete(sanitizedUrl);
-    
-    setUploadProgress(prev => ({
-      ...prev,
-      error: null,
-    }));
-  }, [urlInput, validateAndSanitizeUrl, onUploadComplete]);
 
   // プレビュー削除
   const handleClearPreview = useCallback(() => {
@@ -398,21 +239,18 @@ export function ImageUpload({
     }
     
     setPreviewUrl(null);
-    setUrlInput('');
     setImageSource('none');
     setUploadedFileName('');
     setShowDeleteButton(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    // 🐛 修正: 画像削除時は null ではなく空文字列を送信（Zodスキーマに合わせる）
-    onUploadComplete('');
-    setUploadProgress(prev => ({
+    onImageChange({ type: 'none' });
+    setPreviewProgress(prev => ({
       ...prev,
       error: null,
-      success: null,
     }));
-  }, [onUploadComplete, tempBlobUrl]);
+  }, [onImageChange, tempBlobUrl]);
 
   return (
     <div className="space-y-4">
@@ -434,13 +272,13 @@ export function ImageUpload({
             ? 'border-red-300 bg-red-50'
             : 'border-gray-300 hover:border-sky-400 hover:bg-sky-50'
           }
-          ${disabled || uploadProgress.isUploading ? 'cursor-not-allowed opacity-50' : ''}
+          ${disabled || previewProgress.isCreating ? 'cursor-not-allowed opacity-50' : ''}
         `}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={() => !disabled && !uploadProgress.isUploading && fileInputRef.current?.click()}
+        onClick={() => !disabled && !previewProgress.isCreating && fileInputRef.current?.click()}
       >
         <input
           ref={fileInputRef}
@@ -448,11 +286,11 @@ export function ImageUpload({
           className="sr-only"
           accept={config.allowedTypes.join(',')}
           onChange={handleFileChange}
-          disabled={disabled || uploadProgress.isUploading}
+          disabled={disabled}
         />
 
         {/* 🚀 プレビュー表示（シンプル版） */}
-        {!uploadProgress.isUploading && previewUrl && (
+        {!previewProgress.isCreating && previewUrl && (
           <div className="space-y-3">
             <div className="relative inline-block">
               <img
@@ -489,45 +327,30 @@ export function ImageUpload({
               )}
             </div>
             
-            {/* 画像の種類を示すバッジ */}
-            <div className="flex items-center justify-center gap-2 text-sm">
-              {imageSource === 'uploaded' ? (
-                <div className="flex items-center gap-1 text-green-600">
-                  <Camera className="h-4 w-4" />
-                  <span>アップロード済み</span>
-                  {!r2Available && <span className="text-xs text-gray-500">（ローカル環境）</span>}
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 text-blue-600">
-                  <LinkIcon className="h-4 w-4" />
-                  <span>外部URL画像</span>
-                </div>
-              )}
-            </div>
-            
+           
             <p className="text-sm text-green-600">クリックで別の画像を選択</p>
           </div>
         )}
 
-        {/* アップロード中の進捗 */}
-        {uploadProgress.isUploading && (
+        {/* プレビュー作成中の進捗 */}
+        {previewProgress.isCreating && (
           <div className="space-y-3">
             <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-sm text-gray-600">アップロード中...</p>
+            <p className="text-sm text-gray-600">プレビュー作成中...</p>
             <div className="w-full space-y-2">
               <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                 <div 
                   className="bg-sky-500 h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress.progress}%` }}
+                  style={{ width: `${previewProgress.progress}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500 text-center">{uploadProgress.progress}%</p>
+              <p className="text-xs text-gray-500 text-center">{previewProgress.progress}%</p>
             </div>
           </div>
         )}
 
         {/* アップロード済み画像（プレビューなし）の表示 - ローカル環境専用 */}
-        {!uploadProgress.isUploading && !previewUrl && imageSource === 'uploaded' && uploadedFileName && (
+        {!previewProgress.isCreating && !previewUrl && imageSource === 'uploaded' && uploadedFileName && (
           <div className="space-y-3">
             <div className="relative inline-block">
               <div className="w-48 h-32 bg-gray-100 rounded-md flex items-center justify-center aspect-[3/2]">
@@ -563,7 +386,7 @@ export function ImageUpload({
         )}
 
         {/* 通常のアップロードエリア */}
-        {!uploadProgress.isUploading && !previewUrl && imageSource === 'none' && (
+        {!previewProgress.isCreating && !previewUrl && imageSource === 'none' && (
           <div className="space-y-2">
             <Upload className="w-8 h-8 text-gray-400 mx-auto" />
             <div className="space-y-1">
@@ -579,52 +402,16 @@ export function ImageUpload({
                   ローカル環境では画像プレビューが制限されます
                 </p>
               )}
+              {!isAuthenticated && (
+                <p className="text-xs text-orange-600">
+                  ⚠️ 画像をアップロードするにはログインが必要です
+                </p>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* URL入力（オプション）- アップロード画像の場合は非表示 */}
-      {showUrlInput && imageSource !== 'uploaded' && (
-        <div className="pt-2 space-y-2">
-          <Label className="text-sm text-gray-600">
-            または画像URLを入力
-          </Label>
-          <div className="flex gap-2">
-            <Input
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              disabled={disabled || uploadProgress.isUploading}
-              className="flex-1 bg-white/70 border border-zinc-400 focus:ring-sky-500 focus:border-sky-500"
-            />
-            <Button
-              type="button"
-              onClick={handleUrlSubmit}
-              disabled={disabled || uploadProgress.isUploading || !urlInput.trim()}
-              className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
-            >
-              設定
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* アップロード画像の場合のメッセージ */}
-      {imageSource === 'uploaded' && showUrlInput && (
-        <div className="p-3 rounded-md border bg-blue-50 border-blue-200">
-          <div className="flex gap-2 text-sm">
-            <Camera className="size-5 text-gray-500" />
-            <span className="flex-1 text-gray-700">
-              {!r2Available 
-                ? 'アップロード済み画像を使用中です（ローカル環境のため画像プレビューは制限されます）。URLを使用したい場合は、上記の画像を削除してからURL入力してください。' 
-                : 'アップロード済み画像を使用中です。URLを使用したい場合は、上記の画像を削除してからURL入力してください。'
-              }
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* エラー表示 */}
       {hasError && (
@@ -634,7 +421,7 @@ export function ImageUpload({
               <AlertCircle className="h-4 w-4 text-red-600" />
               <span className="text-red-700">{errorMessage}</span>
             </div>
-            {uploadProgress.error && (
+            {(previewProgress.error || validationError) && (
               <Button
                 variant="ghost"
                 size="sm"

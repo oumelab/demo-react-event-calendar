@@ -1,9 +1,10 @@
-// src/components/events/EventForm.tsx
+// src/components/events/EventForm.tsx - Issue #56 対応版
 import React from "react";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {CreateEventSchema, UpdateEventSchema} from "@shared/schemas";
 import type {CreateEventRequest, UpdateEventRequest} from "@shared/types";
+import type {z} from "zod";
 import {Button} from "@/components/ui/button";
 import {
   Form,
@@ -21,14 +22,14 @@ import {ImageUpload} from "../ImageUpload";
 interface EventFormProps {
   mode: "create";
   initialData?: never;
-  onSubmit: (data: CreateEventRequest) => Promise<void>;
+  onSubmit: (data: CreateEventRequest | FormData) => Promise<void>;
   isSubmitting?: boolean;
 }
 
 interface EventEditFormProps {
   mode: "edit";
   initialData: Event;
-  onSubmit: (data: UpdateEventRequest) => Promise<void>;
+  onSubmit: (data: UpdateEventRequest | FormData) => Promise<void>;
   isSubmitting?: boolean;
 }
 
@@ -87,10 +88,17 @@ export function EventForm(props: EventFormAllProps) {
   const initialData = props.mode === "edit" ? props.initialData : undefined;
   const isEdit = mode === "edit";
 
+  // 🆕 画像ファイル状態管理（Issue #56対応）- デバイスアップロードのみ
+  const [selectedImageFile, setSelectedImageFile] = React.useState<File | null>(null);
+  const [isImageDeleted, setIsImageDeleted] = React.useState(false);
+
   // 🔧 既存のスキーマをそのまま使用（型を増やさない）
   const schema = isEdit ? UpdateEventSchema : CreateEventSchema;
+  
+  // スキーマから型を動的に生成
+  type EventFormData = z.infer<typeof schema>;
 
-  const form = useForm<CreateEventRequest | UpdateEventRequest>({
+  const form = useForm<EventFormData>({
     resolver: zodResolver(schema),
     defaultValues:
       isEdit && initialData
@@ -125,28 +133,77 @@ export function EventForm(props: EventFormAllProps) {
     form.setValue("date", formattedDate);
   }, [localDateTime, form]);
 
-  const handleSubmit = async (
-    data: CreateEventRequest | UpdateEventRequest
-  ) => {
-    try {
-      // 🎯 Zod バリデーションで uploaded: 形式は既に許可されている
-      // 送信データは既存の型のまま（追加の型定義不要）
-      const submitData = {
-        ...data,
-        description: data.description?.trim() || undefined,
-        image_url: data.image_url?.trim() || undefined,
-      };
+  // 🆕 画像変更ハンドラー（Issue #56対応）- デバイスアップロードのみ
+  const handleImageChange = React.useCallback(
+    (data: { type: 'none' | 'file'; file?: File }) => {
+      if (data.type === 'file' && data.file) {
+        setSelectedImageFile(data.file);
+        setIsImageDeleted(false);
+        form.setValue('image_url', ''); // URLフィールドはクリア
+      } else {
+        // 画像削除の場合
+        setSelectedImageFile(null);
+        if (isEdit && initialData?.image_url) {
+          // 編集時かつ既存画像がある場合は削除フラグを設定
+          setIsImageDeleted(true);
+        }
+        form.setValue('image_url', '');
+      }
+    },
+    [form, isEdit, initialData?.image_url]
+  );
 
-      // 型に応じて適切な関数を呼び出し
+  const handleSubmit = async (data: EventFormData) => {
+    try {
+      // 🆕 FormData または JSON 形式で送信（Issue #56対応）
+      let submitData: CreateEventRequest | UpdateEventRequest | FormData;
+      
+      if (selectedImageFile) {
+        // FormData形式で送信（画像ファイルあり）
+        const formData = new FormData();
+        
+        // イベントデータをJSONとして追加
+        const eventData = {
+          ...data,
+          description: data.description?.trim() || undefined,
+          image_url: undefined, // ファイルアップロード時はimage_urlは不要
+        };
+        
+        formData.append('eventData', JSON.stringify(eventData));
+        formData.append('imageFile', selectedImageFile);
+        
+        submitData = formData;
+        console.log('📤 FormData送信:', { 
+          eventTitle: eventData.title,
+          fileName: selectedImageFile.name,
+          fileSize: selectedImageFile.size 
+        });
+        
+      } else {
+        // JSON形式で送信（画像削除または画像なし）
+        submitData = {
+          ...data,
+          description: data.description?.trim() || undefined,
+          image_url: isImageDeleted ? null : undefined,
+        };
+        
+        console.log('📤 JSON送信:', { 
+          eventTitle: data.title,
+          imageAction: isImageDeleted ? '削除' : '変更なし'
+        });
+      }
+
+      // 型に応じて適切な関数を呼び出し（mode別に型安全にキャスト）
       if (isEdit) {
-        await (onSubmit as (data: UpdateEventRequest) => Promise<void>)(
-          submitData as UpdateEventRequest
+        await (onSubmit as (data: UpdateEventRequest | FormData) => Promise<void>)(
+          submitData as UpdateEventRequest | FormData
         );
       } else {
-        await (onSubmit as (data: CreateEventRequest) => Promise<void>)(
-          submitData as CreateEventRequest
+        await (onSubmit as (data: CreateEventRequest | FormData) => Promise<void>)(
+          submitData as CreateEventRequest | FormData
         );
       }
+      
     } catch (error) {
       const message =
         error instanceof Error
@@ -164,6 +221,16 @@ export function EventForm(props: EventFormAllProps) {
             <p className="text-red-800 text-sm">
               {form.formState.errors.root.message}
             </p>
+          </div>
+        )}
+
+        {/* デバッグ用：バリデーションエラーの詳細表示 */}
+        {process.env.NODE_ENV === 'development' && Object.keys(form.formState.errors).length > 0 && (
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-yellow-800 text-sm font-semibold">バリデーションエラー (開発環境のみ):</p>
+            <pre className="text-xs text-yellow-700 mt-1">
+              {JSON.stringify(form.formState.errors, null, 2)}
+            </pre>
           </div>
         )}
 
@@ -316,7 +383,7 @@ export function EventForm(props: EventFormAllProps) {
         <div className="border-t border-blue-200 mt-10 pt-8 space-y-8">
            <h3 className="text-xl font-semibold">イベント画像</h3>
 
-        {/* 画像アップロード */}
+        {/* 画像アップロード - Issue #56対応 */}
         <FormField
           control={form.control}
           name="image_url"
@@ -325,13 +392,24 @@ export function EventForm(props: EventFormAllProps) {
               <FormControl>
                 <ImageUpload
                   type="event"
-                  currentUrl={field.value}
-                  onUploadComplete={(url) => field.onChange(url)}
-                  showLabel // フォーム側でラベル管理
-                  error={fieldState.error?.message} // エラー状態を渡す
+                  currentUrl={field.value ?? undefined}
+                  onImageChange={handleImageChange}
+                  showLabel
+                  error={fieldState.error?.message}
                 />
               </FormControl>
               <FormMessage />
+              
+              {/* デバッグ情報（開発時のみ表示） */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-2 text-xs text-gray-500">
+                  状態: {selectedImageFile ? 'ファイル選択済み' : '画像なし'}
+                  {selectedImageFile && (
+                    <span> | ファイル: {selectedImageFile.name} ({Math.round(selectedImageFile.size / 1024)}KB)</span>
+                  )}
+                  {isImageDeleted && <span> | 削除予定</span>}
+                </div>
+              )}
             </FormItem>
           )}
         />
@@ -352,6 +430,7 @@ export function EventForm(props: EventFormAllProps) {
               <>
                 <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
                 {isEdit ? "更新中..." : "作成中..."}
+                {selectedImageFile && <span className="text-xs">（画像アップロード含む）</span>}
               </>
             ) : isEdit ? (
               "イベントを更新"
