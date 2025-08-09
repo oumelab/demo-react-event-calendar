@@ -109,10 +109,10 @@ React の実践型学習プラットフォーム [React Road](https://react-road
 - [x] **Anonymous 認証** - 登録なしでゲストとしてイベント申し込みが可能、本アカウントへデータ移行も可能 [#43](https://github.com/oumelab/demo-react-event-calendar/issues/43)
 - [x] **バンドルサイズ分析・最適化** - `rollup -plugin-visualizer`導入、チャンク分割・動的インポートによるバンドルサイズ削減・最適化 [#45](https://github.com/oumelab/demo-react-event-calendar/issues/45)
 - [x] **イベント作成履歴** - イベント作成履歴の表示 [#40](https://github.com/oumelab/demo-react-event-calendar/issues/40)
+- [x] **画像アップロード** - イベント画像のアップロード機能 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 
 ### 実装予定機能
 
-- [ ] **画像アップロード** - イベント画像のアップロード機能 [#19](https://github.com/oumelab/demo-react-event-calendar/issues/19)
 - [ ] **ユーザー情報編集機能** - ユーザープロフィールページ・ユーザー情報の編集機能実装 [#18](https://github.com/oumelab/demo-react-event-calendar/issues/18)
 - [ ] **イベント終了日時** - イベントの終了日時を設定 [#42](https://github.com/oumelab/demo-react-event-calendar/issues/42)
 - [ ] **Google カレンダーに追加** - イベントを Google カレンダーに追加
@@ -340,6 +340,14 @@ Better Auth による統一認証エンドポイント（Email and Password）
 | `/api/auth/get-session` | GET | - | セッション情報取得 |
 
 > Note: Better Auth の [[catchall]] ハンドラーにより、認証関連のエンドポイントは自動的に提供される。
+
+### **📷 画像アップロード**
+
+| エンドポイント      | メソッド | 認証 | 説明                           |
+| ------------------- | -------- | ---- | ------------------------------ |
+| `/api/upload/image` | POST     | ✅   | 汎用画像アップロード           |
+| `/api/upload/image` | DELETE   | ✅   | 画像削除                       |
+| `/api/upload/image` | GET      | ✅   | ユーザー画像一覧取得           |
 
 ## 🚀 Anonymous 認証の特徴
 
